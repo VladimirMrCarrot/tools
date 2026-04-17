@@ -1,1 +1,1 @@
-Online example of connections types at https://vladimirmrcarrot.github.io/conection_types/
+Online example of connections types at https://tools.mrcarrot13666.me/conection_types/
