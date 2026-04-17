@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>UML Tree Ecosystem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --tree-dark: #1b5e20;
+            --oak-bg: #f9fbe7;
+            --accent: #1976d2;
+            --tooltip-def: #2c3e50;
+            --tooltip-ex: #f8f9fa;
+            --line-color: #34495e;
+        }
+
+        body {
+            font-family: 'Ubuntu', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--tree-dark);
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            z-index: 10;
+        }
+
+        /* --- DESKTOP --- */
+        .diagram-container {
+            position: relative;
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            width: 1000px;
+            height: 650px;
+        }
+
+        .entity {
+            position: absolute;
+            width: 140px;
+            height: 100px;
+            background: #fff;
+            border: 2px solid var(--line-color);
+            border-radius: 12px;
+            padding: 10px;
+            box-sizing: border-box;
+            text-align: center;
+            cursor: pointer;
+            z-index: 20;
+            transition: all 0.3s ease;
+				overflow: hidden;
+        }
+        .entity:hover { transform: translateY(-5px); border-color: var(--accent); z-index: 500; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .entity img { width: 100%; height: 45px; object-fit: cover; border-radius: 6px; margin-bottom: 5px; }
+        .entity b { display: block; font-size: 0.9rem; margin-bottom: 2px; }
+        .entity i { font-size: 0.6rem; color: #666; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* Дерево тепер у центрі (було p-oak), Дуб вгорі (було p-tree) */
+        .p-tree { top: 275px; left: 430px; background: var(--oak-bg); border-color: var(--tree-dark); }
+        .p-oak  { top: 65px;  left: 430px; border-color: var(--tree-dark); }
+        .p-bark { top: 275px; left: 100px; }
+        .p-nest { top: 275px; left: 760px; }
+        .p-mushroom { top: 500px; left: 230px; }
+        .p-sun { top: 500px; left: 630px; }
+
+        .static-line { position: absolute; background: var(--line-color); z-index: 5; pointer-events: none; }
+        .l-inheritance { top: 165px; left: 499px; width: 2px; height: 110px; }
+        .l-composition { top: 324px; left: 240px; width: 190px; height: 2px; }
+        .l-aggregation  { top: 324px; left: 570px; width: 190px; height: 2px; }
+        .l-association  { top: 550px; left: 300px; width: 301px; height: 2px; transform-origin: left top; transform: rotate(-48.36deg); }
+
+        .sym { position: absolute; z-index: 150; cursor: pointer; pointer-events: auto; }
+        .sym:hover { z-index: 500; }
+        .sym::after { content: ''; position: absolute; top: -20px; left: -20px; right: -20px; bottom: -20px; background: transparent; }
+        .sym-arrow { width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-bottom: 30px solid var(--line-color); }
+        .sym-diamond-f { width: 28px; height: 28px; background: var(--line-color); transform: rotate(45deg); }
+        .sym-diamond-e { width: 28px; height: 28px; border: 5px solid var(--line-color); background: #fff; transform: rotate(45deg); box-sizing: border-box; }
+        .line-badge { width: 60px; height: 60px; background: #fff; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 32px; color: var(--line-color); border: 2px solid #eee; }
+
+        .t-inheritance { top: 165px; left: 482px; }
+        .t-composition { top: 311px; left: 396px; }
+        .t-aggregation { top: 311px; left: 576px; }
+        .t-association { top: 407px; left: 370px; }
+        .t-dependency  { top: 407px; left: 570px; }
+
+        .desktop-hint {
+            position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%) translateY(10px);
+            width: 300px; background: #fff; border-radius: 12px; opacity: 0; visibility: hidden;
+            transition: 0.3s; z-index: 200; pointer-events: none;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #ddd;
+        }
+        .hint-def { background: var(--tooltip-def); color: #fff; padding: 12px 15px; font-size: 0.85rem; line-height: 1.4; }
+        .hint-def b { color: #f1c40f; font-size: 0.95rem; }
+        .hint-ex { background: var(--tooltip-ex); color: #333; padding: 12px 15px; font-size: 0.85rem; line-height: 1.4; border-top: 1px solid #eee; }
+        .desktop-hint::after {
+            content: ''; position: absolute; top: 100%; left: 50%; margin-left: -8px;
+            border-width: 8px; border-style: solid; border-color: var(--tooltip-ex) transparent transparent transparent;
+        }
+        .entity:hover .desktop-hint, .sym:hover .desktop-hint { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+
+        /* --- MOBILE --- */
+        .mobile-trigger { display: none; }
+
+        @media (max-width: 900px) {
+            body { padding: 0; justify-content: flex-start; }
+            h1 { font-size: 1.4rem; margin-top: 30px; padding: 0 15px; }
+
+            .diagram-container {
+                width: 100%; height: 450px;
+                background: transparent; box-shadow: none; border-radius: 0;
+                position: relative; display: block; margin-top: 20px;
+            }
+
+            .hide-on-mobile, .static-line, .sym { display: none !important; }
+
+            /* На мобільному центральний елемент — Дерево */
+            .p-tree { top: 50%; left: 50%; margin-top: -50px; margin-left: -70px; transform: scale(1.1); z-index: 100; }
+            .p-tree:hover { transform: scale(1.1); }
+
+            .mobile-trigger {
+                display: flex; position: absolute;
+                top: 50%; left: 50%; margin-top: -30px; margin-left: -30px;
+                width: 60px; height: 60px; background: #fff; border-radius: 50%;
+                justify-content: center; align-items: center;
+                box-shadow: 0 6px 15px rgba(0,0,0,0.15); z-index: 200;
+                border: 2px solid var(--line-color); cursor: pointer;
+                -webkit-tap-highlight-color: transparent; transition: opacity 0.2s;
+            }
+            .mobile-trigger:active { opacity: 0.5; }
+
+            .mobile-trigger .sym-arrow { border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 18px solid var(--line-color); }
+            .mobile-trigger .sym-diamond-f { width: 18px; height: 18px; }
+            .mobile-trigger .sym-diamond-e { width: 18px; height: 18px; border-width: 3px; }
+
+            .mt-1 { transform: translateY(-135px); }
+            .mt-2 { transform: translateX(-135px); }
+            .mt-3 { transform: translateX(135px); }
+            .mt-4 { transform: translate(-80px, 120px); }
+            .mt-5 { transform: translate(80px, 120px); }
+        }
+
+        /* OVERLAY */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; z-index: 2000; display: none; flex-direction: column;
+            padding: 25px; box-sizing: border-box; animation: slideUp 0.3s cubic-bezier(0, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .ov-close { align-self: flex-end; font-size: 2.5rem; color: #999; padding: 10px; cursor: pointer; margin-bottom: -10px; }
+        .ov-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f2f5; }
+        .ov-sym-icon { width: 50px; height: 50px; background: #f0f2f5; border-radius: 12px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+        .ov-img { width: 100%; height: 220px; object-fit: cover; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); background: #eee; }
+        #ovEx { font-size: 1.15rem; line-height: 1.5; color: #222; margin: 0 0 15px 0; font-weight: 500; }
+        .def-wrapper {
+            background: #f8f9fa; border-radius: 12px; padding: 15px;
+            border-left: 4px solid #adb5bd; margin-top: 0;
+        }
+        .def-wrapper strong { display: block; color: #495057; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+        #ovDef { font-size: 0.95rem; color: #6c757d; line-height: 1.5; margin: 0; }
+    </style>
+</head>
+<body>
+
+    <h1>Архітектурні зв'язки: Екосистема Дерева</h1>
+
+    <div class="diagram-container">
+
+        <!-- Дуб вгорі — батьківський абстрактний клас -->
+        <div class="entity hide-on-mobile p-oak" onclick="handleInteraction('oak')">
+            <img src="./oak.jpg" alt=""><b>Дуб</b><i>The Object</i>
+            <div class="desktop-hint">
+                <div class="hint-def"><b>Дуб (Oak)</b><br>Центральна конкретна сутність.</div>
+                <div class="hint-ex">Це живий екземпляр, який наслідує Дерево і є центром усіх зв'язків.</div>
+            </div>
+        </div>
+
+        <!-- Дерево в центрі — конкретний об'єкт -->
+        <div class="entity p-tree" onclick="handleInteraction('tree')">
+            <img src="./tree.png" alt=""><b>Дерево</b><i>Abstract Class</i>
+            <div class="desktop-hint">
+                <div class="hint-def"><b>Дерево (Tree)</b><br>Абстрактний базовий клас екосистеми.</div>
+                <div class="hint-ex">Визначає загальну поведінку та атрибути, спільні для всіх дерев.</div>
+            </div>
+        </div>
+
+        <div class="entity hide-on-mobile p-bark" onclick="handleInteraction('bark')">
+            <img src="./bark.jpg" alt=""><b>Кора</b><i>Component</i>
+            <div class="desktop-hint">
+                <div class="hint-def"><b>Кора (Bark)</b><br>Внутрішній компонент об'єкта.</div>
+                <div class="hint-ex">Складова частина Дерева з жорстким життєвим циклом.</div>
+            </div>
+        </div>
+
+        <div class="entity hide-on-mobile p-nest" onclick="handleInteraction('nest')">
+            <img src="./nest.jpg" alt=""><b>Гніздо</b><i>Aggregate</i>
+            <div class="desktop-hint">
+                <div class="hint-def"><b>Гніздо (Nest)</b><br>Зовнішня сутність-контейнер.</div>
+                <div class="hint-ex">Знімний об'єкт, який агрегується деревом.</div>
+            </div>
+        </div>
+
+        <div class="entity hide-on-mobile p-mushroom" onclick="handleInteraction('mushroom')">
+            <img src="./mushroom.jpg" alt=""><b>Гриб</b><i>Associate</i>
+            <div class="desktop-hint">
+                <div class="hint-def"><b>Гриб (Mushroom)</b><br>Сусідній елемент системи.</div>
+                <div class="hint-ex">Незалежний об'єкт, що взаємодіє з деревом.</div>
+            </div>
+        </div>
+
+        <div class="entity hide-on-mobile p-sun" onclick="handleInteraction('sun')">
+            <img src="./sun.jpg" alt=""><b>Сонце</b><i>Dependency</i>
+            <div class="desktop-hint">
+                <div class="hint-def"><b>Сонце (Sun)</b><br>Зовнішній ресурс.</div>
+                <div class="hint-ex">Ресурс, необхідний для роботи внутрішніх методів дерева.</div>
+            </div>
+        </div>
+
+        <!-- Лінії -->
+        <div class="static-line l-inheritance"></div>
+        <div class="static-line l-composition"></div>
+        <div class="static-line l-aggregation"></div>
+        <div class="static-line l-association"></div>
+
+        <!-- SVG пунктир Dependency: від центру Дерева (500,325) до центру Сонця (700,550) -->
+        <svg class="static-line" style="position:absolute; top:325px; left:500px; z-index:5; pointer-events:none; overflow:visible; background:none;">
+            <line x1="0" y1="0" x2="200" y2="225" stroke="#34495e" stroke-width="2" stroke-dasharray="6,4"/>
+        </svg>
+
+        <!-- Символи зв'язків -->
+        <div class="sym t-inheritance">
+            <div class="sym-arrow"></div>
+            <div class="desktop-hint">
+                <div class="hint-def"><b>Наслідування (Inheritance)</b><br>Зв'язок типу 'IS-A'. Клас успадковує властивості предка.</div>
+                <div class="hint-ex"><b>Приклад:</b> Дуб отримує коріння та здібність до фотосинтезу від абстрактного класу Дерево.</div>
+            </div>
+        </div>
+
+        <div class="sym t-composition">
+            <div class="sym-diamond-f"></div>
+            <div class="desktop-hint">
+                <div class="hint-def"><b>Композиція (Composition)</b><br>Жорстка залежність ('PART-OF'). Частина не існує без цілого.</div>
+                <div class="hint-ex"><b>Приклад:</b> Кора є частиною Дерева. Якщо дерево знищується, Кора зникає разом з ним.</div>
+            </div>
+        </div>
+
+        <div class="sym t-aggregation">
+            <div class="sym-diamond-e"></div>
+            <div class="desktop-hint">
+                <div class="hint-def"><b>Агрегація (Aggregation)</b><br>Слабкий зв'язок ('HAS-A'). Частини можуть існувати окремо.</div>
+                <div class="hint-ex"><b>Приклад:</b> Дерево містить Гніздо, але гніздо може бути переміщене на інше дерево.</div>
+            </div>
+        </div>
+
+        <div class="sym line-badge t-association">
+            /
+            <div class="desktop-hint">
+                <div class="hint-def"><b>Асоціація (Association)</b><br>Структурний зв'язок між незалежними об'єктами екосистеми.</div>
+                <div class="hint-ex"><b>Приклад:</b> Взаємодія Дерева та Гриба (обмін речовинами через ґрунт).</div>
+            </div>
+        </div>
+
+        <div class="sym line-badge t-dependency">
+            <svg width="30" height="30" viewBox="0 0 30 30">
+                <line x1="0" y1="30" x2="30" y2="0" stroke="#34495e" stroke-width="3" stroke-dasharray="5,3"/>
+            </svg>
+            <div class="desktop-hint">
+                <div class="hint-def"><b>Залежність (Dependency)</b><br>Тимчасовий зв'язок ('USES'). Об'єкт потрібен для методу.</div>
+                <div class="hint-ex"><b>Приклад:</b> Дерево тимчасово використовує Сонце для процесу фотосинтезу.</div>
+            </div>
+        </div>
+
+        <!-- Mobile triggers -->
+        <div class="mobile-trigger mt-1" onclick="handleInteraction('inheritance')"><div class="sym-arrow"></div></div>
+        <div class="mobile-trigger mt-2" onclick="handleInteraction('composition')"><div class="sym-diamond-f"></div></div>
+        <div class="mobile-trigger mt-3" onclick="handleInteraction('aggregation')"><div class="sym-diamond-e"></div></div>
+        <div class="mobile-trigger mt-4" onclick="handleInteraction('association')"><div style="font-size:24px; font-weight:bold; color:var(--line-color);">/</div></div>
+        <div class="mobile-trigger mt-5" onclick="handleInteraction('dependency')">
+            <svg width="28" height="28" viewBox="0 0 28 28">
+                <line x1="0" y1="28" x2="28" y2="0" stroke="#34495e" stroke-width="3" stroke-dasharray="5,3"/>
+            </svg>
+        </div>
+
+    </div>
+
+    <div id="mOverlay" class="overlay">
+        <div class="ov-close" onclick="closeOverlay()">×</div>
+        <div class="ov-header">
+            <div class="ov-sym-icon" id="ovSym"></div>
+            <h2 id="ovTitle" style="margin:0; font-size:1.4rem; color:var(--tree-dark);"></h2>
+        </div>
+        <img id="ovImg" class="ov-img" src="" alt="Photo">
+        <p id="ovEx"></p>
+        <div class="def-wrapper">
+            <strong>Тип зв'язку: теорія</strong>
+            <p id="ovDef"></p>
+        </div>
+    </div>
+
+    <script>
+        const data = {
+            tree: {
+                sym: '🌳', title: "Дерево (Tree Class)",
+                ex: "Визначає загальну поведінку та атрибути, спільні для всіх дерев.",
+                def: "Абстрактний опис. Базовий клас екосистеми.", img: "./tree.png"
+            },
+            oak: {
+                sym: '🌰', title: "Дуб (Oak Object)",
+                ex: "Це живий екземпляр, який наслідує Дерево і є центром усіх зв'язків.",
+                def: "Центральна конкретна сутність у нашій системі.", img: "./oak.jpg"
+            },
+            inheritance: {
+                sym: '<div class="sym-arrow" style="border-left:10px solid transparent; border-right:10px solid transparent; border-bottom:18px solid #34495e;"></div>',
+                title: "Наслідування (Inheritance)",
+                ex: "Приклад: Дуб отримує коріння та здібність до фотосинтезу від абстрактного класу Дерево.",
+                def: "Зв'язок типу 'IS-A' (Є одним із). Клас успадковує базові властивості та методи свого предка.", img: "./oak.jpg"
+            },
+            composition: {
+                sym: '<div class="sym-diamond-f" style="width:18px; height:18px;"></div>',
+                title: "Композиція (Composition)",
+                ex: "Приклад: Кора є частиною Дерева. Якщо дерево знищується, Кора зникає разом з ним.",
+                def: "Жорстка залежність 'PART-OF'. Частина не може існувати без цілого.", img: "./bark.jpg"
+            },
+            aggregation: {
+                sym: '<div class="sym-diamond-e" style="width:18px; height:18px; border-width:3px;"></div>',
+                title: "Агрегація (Aggregation)",
+                ex: "Приклад: Дерево містить Гніздо, але гніздо може бути переміщене на інше дерево.",
+                def: "Слабкий зв'язок 'HAS-A'. Агреговані частини можуть існувати окремо від цілого.", img: "./nest.jpg"
+            },
+            association: {
+                sym: '<div style="font-size:28px; font-weight:bold; color:#34495e;">/</div>',
+                title: "Асоціація (Association)",
+                ex: "Приклад: Взаємодія Дерева та Гриба (наприклад, обмін речовинами через ґрунт).",
+                def: "Структурний зв'язок між незалежними об'єктами. Вони знають один про одного, але не володіють одне одним.", img: "./mushroom.jpg"
+            },
+            dependency: {
+                sym: '<svg width="28" height="28" viewBox="0 0 28 28"><line x1="0" y1="28" x2="28" y2="0" stroke="#34495e" stroke-width="3" stroke-dasharray="5,3"/></svg>',
+                title: "Залежність (Dependency)",
+                ex: "Приклад: Дерево тимчасово використовує Сонце для процесу фотосинтезу.",
+                def: "Тимчасовий зв'язок 'USES'. Об'єкт потрібен лише як інструмент або параметр для виконання конкретного методу.", img: "./sun.jpg"
+            }
+        };
+
+        function handleInteraction(key) {
+            if (window.matchMedia("(max-width: 900px)").matches) {
+                const item = data[key];
+                if (item) {
+                    document.getElementById('ovSym').innerHTML = item.sym;
+                    document.getElementById('ovTitle').innerText = item.title;
+                    document.getElementById('ovEx').innerText = item.ex;
+                    document.getElementById('ovDef').innerText = item.def;
+                    document.getElementById('ovImg').src = item.img;
+                    document.getElementById('mOverlay').style.display = 'flex';
+                }
+            }
+        }
+
+        function closeOverlay() {
+            document.getElementById('mOverlay').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

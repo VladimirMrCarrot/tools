@@ -1,0 +1,70 @@
+' This is a central theme file for PlantUML diagrams
+
+' == Autonumbering Start Command ==
+autonumber 1 "<b>[0]"
+
+' == General Appearance ==
+skinparam SequenceArrowThickness 1
+skinparam SequenceMessageAlignment center
+skinparam maxMessageSize 200
+skinparam NoteBackgroundColor #F2B666
+skinparam NoteTextAlignment left
+skinparam defaultFontName Roboto
+skinparam SequenceReferenceBackgroundColor #F2B666
+skinparam roundcorner 5
+skinparam ParticipantPadding 10
+
+' == Autonumbering Rules (Documentation) ==
+'
+' For blocks like opt, par, use the following approach
+' to keep the main sequence numbering consistent:
+'
+' autonumber stop
+'
+' par Success
+'   ...
+' else Failure
+'   ...
+' end
+'
+' autonumber resume
+'
+' For the specific case where each branch of an 'alt' block
+' needs to start from the same number, the implementation
+' must be done manually inside the main file, as it requires
+' knowing the specific number to start from.
+' Example:
+'
+' autonumber stop
+' alt Success
+'   autonumber 4 "<b>[0]"
+'   ...
+' else Failure
+'   autonumber 4 "<b>[0]"
+'   ...
+' end
+' autonumber resume
+
+' =================================
+'        Reusable Procedures
+' =================================
+
+' Stops the main autonumbering sequence.
+' Use before blocks like opt, par, or alt.
+!procedure StopNumbering()
+  autonumber stop
+!endprocedure
+
+' Resumes the main autonumbering sequence.
+' Use after blocks where numbering was stopped.
+!procedure ResumeNumbering()
+  autonumber resume
+!endprocedure
+
+' Restarts numbering from a specific number.
+' Use inside each branch of an 'alt' block.
+' $num - The number to start from.
+!procedure RestartNumberingFrom($num)
+  autonumber $num "<b>[0]"
+!endprocedure
+
