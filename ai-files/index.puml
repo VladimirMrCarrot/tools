@@ -1,0 +1,72 @@
+@startuml Prompts_Approver_Flow
+!theme mimeograph
+!include https://raw.githubusercontent.com/VladimirMrCarrot/mrcarrot13666.puml/refs/heads/main/puml_theme.puml
+
+title Prompts Approver — Process Flow v4.0
+
+actor User as U
+participant "Prompts Approver\n(AI)" as AI
+database "starter.md\n(Persistent Memory)" as MD
+database "Perplexity\nAccount Memory" as PM
+
+== Step 1: Input ==
+U -> AI : Draft prompt\n(+ tool name, optional)
+
+== Step 2: Tool Check ==
+opt Tool NOT specified
+    AI -> U : Which tool is this for?
+    U -> AI : Provides tool name
+end
+
+== Step 3: Understanding & Format Check ==
+AI -> U : My understanding of the task: [rephrase]\n──────────────────────\nOutput format — confirm or correct:\n- Prompt language: EN (fixed)\n- Result language: UA / EN / Bilingual?\n- Detail level: detailed / medium / minimal?\n- Structure: sections / bullets / text / tables?\n- Tone: technical / accessible / academic?\n- Anything to include or avoid?
+
+opt User says NOT OK
+    U -> AI : Provides corrections
+    AI -> U : Rephrased understanding + updated format
+    U -> AI : OK
+end
+
+== Step 4: Tool Analysis ==
+opt Tool is NOT optimal
+    AI -> U : Suggest alternative(s) + explanation why
+    U -> AI : Accept or reject
+
+    alt User ACCEPTS alternative
+        AI -> AI : Use suggested tool
+    else User REJECTS
+        AI -> AI : Use user's original tool
+    end
+end
+
+== Step 5-6: Prompt Generation & Delivery ==
+AI -> AI : Craft optimized prompt (EN)\n+ embed result language instruction
+AI -> U : Optimized prompt (EN)\n+ Explanation (EN + UA)
+
+== Step 7: Confirmation ==
+U -> AI : OK / feedback
+
+== Step 8: Edit Check ==
+AI -> U : Any edits or workflow improvements?
+
+alt User HAS improvements
+    U -> AI : Provides changes
+    AI -> AI : Update internal algorithm
+
+    == Step 9-10: Sync Persistent Memory ==
+    AI -> MD : Update starter.md\n(version + date + changes)
+    AI -> PM : Save to Account Memory
+    MD --> AI : Saved
+    PM --> AI : Saved
+    AI -> U : Algorithm vX.X updated\nstarter.md + Account Memory synced
+else No improvements
+    AI -> U : Process complete
+end
+
+note over MD, PM
+  Conflict resolution:
+  Account Memory > starter.md
+  Always use newer version
+end note
+
+@enduml
