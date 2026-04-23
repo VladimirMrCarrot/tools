@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perplexity AI Workflow | MrCarrot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Теми та змінні */
+        :root[data-theme="light"] {
+            --bg-color: #f4f4f5;
+            --card-bg: #ffffff;
+            --text-main: #2d2d2d;
+            --text-muted: #666666;
+            --border-color: #e5e7eb;
+            --accent: #F2B666;
+            --accent-glow: rgba(242, 182, 102, 0.2);
+            --node-bg: #f9fafb;
+        }
+
+        :root[data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #e4e4e7;
+            --text-muted: #a1a1aa;
+            --border-color: #333333;
+            --accent: #F2B666;
+            --accent-glow: rgba(242, 182, 102, 0.15);
+            --node-bg: #27272a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Хедер */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        h1 { font-size: 1.8rem; font-weight: 700; }
+        h1 span { color: var(--accent); }
+
+        .theme-toggle {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .theme-toggle:hover {
+            background: var(--accent);
+            color: #121212;
+        }
+
+        /* Візуалізація Workflow */
+        .workflow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .box.core {
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .box-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Внутрішні елементи (Ноди) */
+        .nodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .node {
+            background-color: var(--node-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .node span.icon {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Стрілки */
+        .arrow {
+            color: var(--accent);
+            font-size: 2rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        /* Цикл (Loop) */
+        .loop-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            border-left: 3px dashed var(--accent);
+            padding-left: 1.5rem;
+            margin-left: 1rem;
+        }
+
+        .loop-step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background-color: var(--node-bg);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .loop-number {
+            background-color: var(--accent);
+            color: #121212;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 600px) {
+            header { flex-direction: column; gap: 1rem; }
+            .box { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 
+    ORIGINAL QUOTE BY VOLODYMYR MR. CARROT:
+    "ну у мене робочий кейс це до прикладу perplexity як tool, в ній є змога декомпозувати верхньорівнекво контексти поділивши workplace на spaces для кожного space можна надати:
+    - instruction(system promt)
+    - надати якщо є потреба контексті артефакти
+    - надати веб ресурси котрі мають бути використані в пріоритетному порядку
+
+    далі формуєш контекст таргету на певну проблематику, через спеціальний промт мейкер максимально доводиш стартову точку входу в проблематику і робиш master.md в якому є матер промт для цього таргету і проблематики, а також план по овновленню і реюзабельності цього артефакту котрий не вимагає від тебе нічого окрім валідації і апруву дії
+
+    робиш тред в цьому space і в нього кидаєш master.md вуаля, коли ресурс треду буде вичерпано даєш команду перебрати master md і додати в нього всі важіливі аспекти валідуєш і апруваєшг оновлення і потім далі в новий свіжий тред продовжуєш
+
+    так у тебе реалізовано main налаштування через space і target налаштування в рамках самого треда... я таку тему юзаю, а всі артефакти просто пушиш в гіт і не мучаєш собі голову..."
+    -->
+
+    <div class="container">
+        <header>
+            <h1>Workflow: <span>Perplexity AI</span></h1>
+            <button id="theme-toggle" class="theme-toggle">☀️ Змінити тему</button>
+        </header>
+
+        <div class="workflow">
+            
+            <!-- STEP 1: SPACE -->
+            <div class="box">
+                <div class="box-title">1. SPACE (Global Context)</div>
+                <div class="nodes-grid">
+                    <div class="node">
+                        <span class="icon">⚙️</span>
+                        System Prompt <br><small>(Instructions)</small>
+                    </div>
+                    <div class="node">
+                        <span class="icon">📁</span>
+                        Context <br><small>(Artifacts)</small>
+                    </div>
+                    <div class="node">
+                        <span class="icon">🌐</span>
+                        Priority Web <br><small>(Resources)</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <!-- STEP 2: MASTER.MD -->
+            <div class="box core">
+                <div class="box-title">2. Target: master.md</div>
+                <div class="nodes-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="node">
+                        <span class="icon">🎯</span>
+                        Master Prompt <br><small>(Problem formulation)</small>
+                    </div>
+                    <div class="node">
+                        <span class="icon">🔄</span>
+                        Reuse Plan <br><small>(Update rules)</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <!-- STEP 3: THE LOOP -->
+            <div class="box">
+                <div class="box-title">3. Thread Execution Loop</div>
+                <div class="loop-container">
+                    <div class="loop-step">
+                        <div class="loop-number">1</div>
+                        <div>Запуск нового треду з подачею <b>master.md</b></div>
+                    </div>
+                    <div class="loop-step">
+                        <div class="loop-number">2</div>
+                        <div>Робота ШІ до вичерпання ресурсу треду</div>
+                    </div>
+                    <div class="loop-step">
+                        <div class="loop-number">3</div>
+                        <div>Команда: зібрати інсайти та оновити <b>master.md</b></div>
+                    </div>
+                    <div class="loop-step" style="border-color: var(--accent);">
+                        <div class="loop-number" style="background: transparent; border: 2px solid var(--accent); color: var(--accent);">👀</div>
+                        <div>Human Approval (Валідація оновленого файлу)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <!-- STEP 4: DEPLOY -->
+            <div class="box">
+                <div class="box-title">4. Deploy & Storage</div>
+                <div class="node" style="display: flex; align-items: center; justify-content: center; gap: 1rem; font-size: 1.1rem;">
+                    <span class="icon" style="margin:0;">🐙</span> <b>Git Push</b> (Scripts / CI)
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const toggleBtn = document.getElementById('theme-toggle');
+        const htmlEl = document.documentElement;
+
+        toggleBtn.addEventListener('click', () => {
+            if (htmlEl.getAttribute('data-theme') === 'dark') {
+                htmlEl.setAttribute('data-theme', 'light');
+                toggleBtn.textContent = '🌙 Змінити тему';
+            } else {
+                htmlEl.setAttribute('data-theme', 'dark');
+                toggleBtn.textContent = '☀️ Змінити тему';
+            }
+        });
+    </script>
+</body>
+</html>
