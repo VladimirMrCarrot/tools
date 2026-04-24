@@ -5,15 +5,15 @@ It collects small interactive pages, technical notes, and supporting material fo
 
 ## Live domain
 
-- https://tools.mrcarrot13666.me
+- [tools.mrcarrot13666.me](https://tools.mrcarrot13666.me)
 
 ## What is inside
 
-- `index.html` - main landing page.
-- `student-pack/index.html` - GitHub Student Pack guide.
-- `conection_types/index.html` - connection types page.
-- `ai-files/perplexity/index.html` - Perplexity helper page.
-- `issues/rozetka-issue/index.html` - long image viewer demo for the Rozetka issue screenshot.
+- [index.html](index.html) - main landing page.
+- [student-pack/index.html](student-pack/index.html) - GitHub Student Pack guide.
+- [conection_types/index.html](conection_types/index.html) - connection types page.
+- [ai-files/perplexity/index.html](ai-files/perplexity/index.html) - Perplexity helper page.
+- [issues/rozetka-issue/index.html](issues/rozetka-issue/index.html) - long image viewer demo for the Rozetka issue screenshot.
 
 ## Repository structure
 
