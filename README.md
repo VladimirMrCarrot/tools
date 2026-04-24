@@ -8,7 +8,7 @@
 
 - ╨С╨░╨╖╨░ ╤А╨╛╨╖╨│╨╛╤А╤В╨░╤Ф╤В╤М╤Б╤П ╤З╨╡╤А╨╡╨╖ GitHub Pages + CNAME.
 - ╨Ю╤Б╨╜╨╛╨▓╨╜╨░ ╤А╨╛╨╗╤М ╤А╨╡╨┐╨╛╨╖╨╕╤В╨╛╤А╤Ц╤О: ╤Ж╨╡╨╜╤В╤А╨░╨╗╤Ц╨╖╨╛╨▓╨░╨╜╤Ц ╤Б╤В╨╛╤А╤Ц╨╜╨║╨╕ ╨╖ ╨┐╤А╨░╨║╤В╨╕╤З╨╜╨╕╨╝╨╕ ╤Ц╨╜╤Б╤В╤А╤Г╨║╤Ж╤Ц╤П╨╝╨╕ ╤Ц ╤Г╤В╨╕╨╗╤Ц╤В╨░╤А╨╜╨╕╨╝╨╕ ╨┤╨╛╨▓╤Ц╨┤╨╜╨╕╨║╨░╨╝╨╕.
-- ╨Я╨╛╤В╨╛╤З╨╜╨╕╨╣ ╤Д╨╛╨║╤Г╤Б ╨║╨╛╨╜╤В╨╡╨╜╤В╤Г: GitHub Student Pack, connection types, Perplexity helper page.
+- ╨Я╨╛╤В╨╛╤З╨╜╨╕╨╣ ╤Д╨╛╨║╤Г╤Б ╨║╨╛╨╜╤В╨╡╨╜╤В╤Г: GitHub Student Pack, connection types, Perplexity helper page, issue demos.
 
 ## Live ╨┤╨╛╨╝╨╡╨╜
 
@@ -37,6 +37,11 @@
 
 - Live: https://tools.mrcarrot13666.me/ai-files/perplexity/
 - File: [ai-files/perplexity/index.html](ai-files/perplexity/index.html)
+
+5. Long Image Viewer (dual mode)
+
+- Live: https://tools.mrcarrot13666.me/issues/rozetka-issue/
+- File: [issues/rozetka-issue/index.html](issues/rozetka-issue/index.html)
 
 ## ╨б╤В╤А╤Г╨║╤В╤Г╤А╨░ (high level)
 
