@@ -21,6 +21,11 @@
 
     * { box-sizing: border-box; }
 
+    html,
+    body {
+      overflow-x: clip;
+    }
+
     body {
       margin: 0;
       font-family: Ubuntu, sans-serif;
@@ -38,10 +43,16 @@
     .tool-meta {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin: 0 0 18px;
+      gap: 8px;
+      margin: 0 0 14px;
       color: var(--muted);
       font-size: 0.9rem;
+      line-height: 1.25;
+    }
+
+    .tool-meta > span:first-child {
+      flex: 1 1 auto;
+      min-width: 0;
     }
 
     .tip-wrap {
@@ -49,6 +60,8 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      flex: 0 0 auto;
+      margin-top: 1px;
     }
 
     .tip-btn {
@@ -91,9 +104,10 @@
     .tip {
       position: absolute;
       top: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
-      width: min(360px, calc(100vw - 40px));
+      right: 0;
+      left: auto;
+      transform: none;
+      width: min(360px, calc(100vw - 24px));
       padding: 12px 14px;
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -120,6 +134,25 @@
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
+    }
+
+    @media (max-width: 700px) {
+      .tool-meta {
+        flex-wrap: nowrap;
+      }
+
+      .tool-meta > span:first-child {
+        flex: 1 1 auto;
+      }
+
+      .tip-wrap {
+        margin-left: auto;
+        margin-top: 0;
+      }
+
+      .tip {
+        width: min(320px, calc(100vw - 24px));
+      }
     }
 
     .brief {
@@ -190,6 +223,64 @@
       background: var(--surface-2);
       color: var(--muted);
       font-size: 0.88rem;
+    }
+
+    .auto-head {
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .auto-toolbar {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+      margin-left: 0;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .auto-toolbar .ctrl-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      border-radius: 999px;
+      padding: 0 12px;
+      background: #0f1513;
+      font-size: 0.78rem;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .auto-toolbar .ctrl-icon {
+      font-size: 0.9rem;
+      line-height: 1;
+      width: 1em;
+      text-align: center;
+    }
+
+    .auto-toolbar .speed-wrap {
+      flex: 1 1 220px;
+      min-width: 140px;
+      margin-left: auto;
+      height: 36px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: #0f1513;
+      font-size: 0.78rem;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .auto-toolbar .speed-wrap input[type="range"] {
+      width: 100%;
+      min-width: 60px;
+    }
+
+    .auto-status {
+      display: none;
     }
 
     .slider-frame {
@@ -293,16 +384,6 @@
       display: block;
     }
 
-    .auto-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      padding: 12px 14px;
-      border-top: 1px solid var(--border);
-      background: var(--surface-2);
-    }
-
     .ctrl-btn {
       border: 1px solid var(--border);
       background: #0f1513;
@@ -333,6 +414,26 @@
       accent-color: var(--accent);
     }
 
+    @media (max-width: 700px) {
+      .auto-toolbar {
+        gap: 4px;
+      }
+
+      .auto-toolbar .ctrl-btn {
+        padding: 0 10px;
+      }
+
+      .auto-toolbar .speed-wrap {
+        margin-left: auto;
+        padding: 0 8px;
+        min-width: 0;
+      }
+
+      .auto-toolbar .speed-wrap input[type="range"] {
+        width: 100%;
+      }
+    }
+
     .note {
       margin-top: 10px;
       color: var(--muted);
@@ -342,7 +443,7 @@
 </head>
 <body>
   <div class="wrap">
-    <p class="brief"><b>Кейс:</b> довгий скрін переписки по Rozetka issue. Задача цього екрану - швидко читати великий вертикальний контент у різних сценаріях: по фрагментах, суцільним полотном або в режимі авто-програвання.</p>
+    <p class="brief"><b>Кейс:</b> у цьому міні вебзастосунку наведено деталі прикрого досвіду взаємодії з підтримкою ROZETKA. Мета цього інструменту — допомогти ескалювати поганий UX відповідним спеціалістам компанії, щоб усі інші користувачі на платній підписці не стикалися з такими труднощами 🥕</p>
     <div class="tool-meta">
       <span>Гнучка тулза для швидкого ознайомлення з деталями</span>
       <span class="tip-wrap" id="metaTipWrap">
@@ -367,7 +468,6 @@
 
     <section class="panel active" id="panelSliced" role="tabpanel">
       <div class="viewer-head">
-        <span id="sliceMeta">Готуємо нарізку...</span>
         <span id="sliceCounter">-- / --</span>
       </div>
       <div class="slider-frame" id="sliderFrame">
@@ -391,21 +491,24 @@
     </section>
 
     <section class="panel" id="panelAuto" role="tabpanel">
-      <div class="viewer-head">
-        <span>Режим автопрокрутки</span>
-        <span id="autoStatus">Paused</span>
+      <div class="viewer-head auto-head">
+        <div class="auto-toolbar" aria-label="Керування автопрокруткою">
+          <button class="ctrl-btn" id="autoStart" type="button" aria-label="Start auto scroll">
+            <span class="ctrl-icon" aria-hidden="true">▶</span>
+            <span>Start</span>
+          </button>
+          <button class="ctrl-btn" id="autoPause" type="button" aria-label="Pause auto scroll" disabled>
+            <span class="ctrl-icon" aria-hidden="true">❚❚</span>
+            <span>Pause</span>
+          </button>
+          <label class="speed-wrap">Speed
+            <input id="autoSpeed" type="range" min="20" max="220" value="70" step="10">
+          </label>
+        </div>
+        <span id="autoStatus" class="auto-status">Paused</span>
       </div>
       <div class="auto-wrap" id="autoWrap">
         <img id="autoImage" src="./source.png" loading="lazy" alt="Long image auto scroll">
-      </div>
-      <div class="auto-controls">
-        <button class="ctrl-btn" id="autoStart">Start</button>
-        <button class="ctrl-btn" id="autoPause" disabled>Pause</button>
-        <button class="ctrl-btn" id="autoReset">Reset</button>
-        <label class="speed-wrap">Speed
-          <input id="autoSpeed" type="range" min="20" max="220" value="70" step="10">
-          <span id="autoSpeedValue">70</span>
-        </label>
       </div>
     </section>
 
@@ -434,9 +537,7 @@
     const autoStatus = document.getElementById('autoStatus');
     const autoStart = document.getElementById('autoStart');
     const autoPause = document.getElementById('autoPause');
-    const autoReset = document.getElementById('autoReset');
     const autoSpeed = document.getElementById('autoSpeed');
-    const autoSpeedValue = document.getElementById('autoSpeedValue');
     const metaTipWrap = document.getElementById('metaTipWrap');
     const metaTipBtn = document.getElementById('metaTipBtn');
 
@@ -504,7 +605,6 @@
       autoStatus.textContent = autoRunning ? 'Running' : 'Paused';
       autoStart.disabled = autoRunning;
       autoPause.disabled = !autoRunning;
-      autoSpeedValue.textContent = autoSpeed.value;
     }
 
     function autoStep(ts) {
@@ -541,14 +641,8 @@
       updateAutoUI();
     }
 
-    function resetAuto() {
-      pauseAuto();
-      autoWrap.scrollTop = 0;
-    }
-
     autoStart.addEventListener('click', startAuto);
     autoPause.addEventListener('click', pauseAuto);
-    autoReset.addEventListener('click', resetAuto);
     autoSpeed.addEventListener('input', updateAutoUI);
 
     metaTipBtn.addEventListener('click', () => {
@@ -578,7 +672,6 @@
       const ctx = canvas.getContext('2d');
 
       canvas.width = img.width;
-      sliceMeta.textContent = `Вхід: ${img.width}x${img.height}px, фрагмент: ${SLICE_HEIGHT}px`;
 
       for (let i = 0; i < sliceCount; i++) {
         const sy = i * SLICE_HEIGHT;
@@ -600,7 +693,7 @@
     }
 
     buildSlices().catch((e) => {
-      sliceMeta.textContent = 'Не вдалося нарізати зображення';
+      sliceCounter.textContent = 'Не вдалося нарізати зображення';
       console.error(e);
     });
 
