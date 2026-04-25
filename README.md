@@ -13,7 +13,6 @@ It collects small interactive pages, technical notes, and supporting material fo
 - [tools.mrcarrot13666.me/student-pack](https://tools.mrcarrot13666.me/student-pack/) - GitHub Student Pack guide.
 - [tools.mrcarrot13666.me/conection_types](https://tools.mrcarrot13666.me/conection_types/) - connection types page.
 - [tools.mrcarrot13666.me/ai-files/perplexity](https://tools.mrcarrot13666.me/ai-files/perplexity/) - Perplexity helper page.
-- [tools.mrcarrot13666.me/issues/rozetka-issue](https://tools.mrcarrot13666.me/issues/rozetka-issue/) - long image viewer demo for the Rozetka issue screenshot.
 - [tools.mrcarrot13666.me/issues/100-achievements](https://tools.mrcarrot13666.me/issues/100-achievements/) - personal achievements showcase page.
 
 ## Repository structure
@@ -32,9 +31,6 @@ tools/
 │   └── perplexity/
 │       └── index.html
 ├── issues/
-│   └── rozetka-issue/
-│       ├── index.html
-│       └── source.png
 │   └── 100-achievements/
 │       └── index.html
 └── puml/
