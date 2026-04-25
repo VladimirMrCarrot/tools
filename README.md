@@ -9,12 +9,12 @@ It collects small interactive pages, technical notes, and supporting material fo
 
 ## What is inside
 
-- [index.html](index.html) - main landing page.
-- [student-pack/index.html](student-pack/index.html) - GitHub Student Pack guide.
-- [conection_types/index.html](conection_types/index.html) - connection types page.
-- [ai-files/perplexity/index.html](ai-files/perplexity/index.html) - Perplexity helper page.
-- [issues/rozetka-issue/index.html](issues/rozetka-issue/index.html) - long image viewer demo for the Rozetka issue screenshot.
-- [issues/100-achievements/index.html](issues/100-achievements/index.html) - personal achievements showcase page.
+- [tools.mrcarrot13666.me](https://tools.mrcarrot13666.me) - main landing page.
+- [tools.mrcarrot13666.me/student-pack](https://tools.mrcarrot13666.me/student-pack/) - GitHub Student Pack guide.
+- [tools.mrcarrot13666.me/conection_types](https://tools.mrcarrot13666.me/conection_types/) - connection types page.
+- [tools.mrcarrot13666.me/ai-files/perplexity](https://tools.mrcarrot13666.me/ai-files/perplexity/) - Perplexity helper page.
+- [tools.mrcarrot13666.me/issues/rozetka-issue](https://tools.mrcarrot13666.me/issues/rozetka-issue/) - long image viewer demo for the Rozetka issue screenshot.
+- [tools.mrcarrot13666.me/issues/100-achievements](https://tools.mrcarrot13666.me/issues/100-achievements/) - personal achievements showcase page.
 
 ## Repository structure
 
