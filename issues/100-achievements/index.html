@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Мої досягнення — Volodymyr</title>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #F2B666;
+      --bg-dark: #05060a;
+      --bg-elevated: #111320;
+      --bg-elevated-soft: #181A28;
+      --text-main: #f5f5f7;
+      --text-soft: #b3b4c2;
+      --border-subtle: rgba(255,255,255,0.06);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-soft: 0 24px 80px rgba(0,0,0,0.65);
+      --scroll-trigger-depth: 300px;
+      --page-bg: radial-gradient(circle at top left, #1c1f3b 0, #05060a 45%, #020308 100%);
+      --shell-bg: linear-gradient(145deg, rgba(242,182,102,0.12), rgba(19,21,36,0.96));
+      --section-bg: radial-gradient(circle at top left, rgba(242,182,102,0.13), var(--bg-elevated-soft));
+      --section-bg-alt: radial-gradient(circle at top right, rgba(7,173,131,0.16), #151624);
+    }
+
+    body[data-theme="light"] {
+      --bg-elevated: #ffffff;
+      --bg-elevated-soft: #f7f2e8;
+      --text-main: #1e2230;
+      --text-soft: #495267;
+      --border-subtle: rgba(20,30,50,0.08);
+      --shadow-soft: 0 24px 70px rgba(47, 56, 78, 0.18);
+      --page-bg: radial-gradient(circle at top left, #fbf4e7 0, #f4f6fb 45%, #e9edf5 100%);
+      --shell-bg: linear-gradient(145deg, rgba(255,255,255,0.88), rgba(251,247,238,0.96));
+      --section-bg: radial-gradient(circle at top left, rgba(242,182,102,0.18), #fffaf2);
+      --section-bg-alt: radial-gradient(circle at top right, rgba(7,173,131,0.10), #f5f7fb);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Ubuntu', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--page-bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 24px 12px;
+      scroll-behavior: smooth;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 980px;
+      background: var(--shell-bg);
+      border-radius: 28px;
+      border: 1px solid rgba(242,182,102,0.35);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(26px);
+      padding: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .shell { padding: 28px 32px 32px; }
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 18px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 2.2vw + 1.2rem, 2.4rem);
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(242,182,102,0.7);
+      color: var(--accent);
+      background: radial-gradient(circle at top, rgba(242,182,102,0.26), transparent 70%);
+      display: flex;
+      align-items: center;
+      height: 40px;
+    }
+
+    .theme-toggle {
+      appearance: none;
+      border: 1px solid rgba(242,182,102,0.7);
+      background: radial-gradient(circle at top, rgba(242,182,102,0.18), rgba(0,0,0,0.22) 72%);
+      color: var(--accent);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      font-size: 20px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-1px);
+      border-color: rgba(242,182,102,0.8);
+    }
+
+    body[data-theme="light"] .theme-toggle {
+      background: rgba(255,255,255,0.7);
+      box-shadow: 0 8px 18px rgba(47, 56, 78, 0.08);
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--text-soft);
+      font-size: 0.92rem;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 7px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .nav-tab {
+      padding: 7px 12px;
+      border: 1px solid rgba(242,182,102,0.28);
+      background: rgba(0,0,0,0.18);
+      color: var(--text-soft);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      appearance: none;
+    }
+
+    .nav-tab:hover {
+      border-color: rgba(242,182,102,0.6);
+      background: rgba(0,0,0,0.3);
+    }
+
+    .nav-tab.active {
+      background: rgba(242,182,102,0.25);
+      border-color: rgba(242,182,102,0.8);
+      color: var(--accent);
+    }
+
+    main {
+      display: grid;
+      gap: 14px;
+    }
+
+    section {
+      background: var(--section-bg);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255,255,255,0.04);
+      padding: 14px 14px 12px;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+      display: none;
+    }
+
+    section.active {
+      display: block;
+    }
+
+    section:hover {
+      box-shadow: 0 10px 28px rgba(0,0,0,0.14);
+    }
+
+    @media (min-width: 768px) {
+      section { padding: 16px 18px 14px; }
+    }
+
+    section:nth-of-type(odd) {
+      background: var(--section-bg-alt);
+    }
+
+    body[data-theme="light"] section {
+      border-color: rgba(20,30,50,0.06);
+      box-shadow: 0 12px 28px rgba(47, 56, 78, 0.05);
+    }
+
+    body[data-theme="light"] section:nth-of-type(odd) {
+      background: var(--section-bg-alt);
+    }
+
+    section h2 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.08);
+      line-height: 1;
+    }
+
+    section h2 span.emoji {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.15em;
+      height: 1.15em;
+      font-size: 1.05rem;
+      line-height: 1;
+      transform: translateY(-0.02em);
+    }
+
+    section h2 span.label {
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.76rem;
+      color: var(--text-soft);
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 10px 0 0;
+      display: grid;
+      gap: 4px;
+    }
+
+    li {
+      position: relative;
+      padding-left: 20px;
+      font-size: 0.93rem;
+      line-height: 1.4;
+      color: var(--text-soft);
+    }
+
+    li::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 8px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent), #ffedc7);
+      box-shadow: 0 0 8px rgba(242,182,102,0.9);
+    }
+
+    strong { color: var(--accent); font-weight: 600; }
+
+    .footer-note {
+      margin-top: 18px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-subtle);
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      text-align: center;
+    }
+
+    .scroll-to-top {
+      position: fixed;
+      bottom: 80px;
+      right: 23px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(242,182,102,0.08);
+      border: 1px solid rgba(242,182,102,0.5);
+      color: var(--accent);
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+      font-size: 24px;
+      line-height: 1;
+      appearance: none;
+      padding: 0;
+    }
+
+    .scroll-to-top:hover {
+      background: rgba(242,182,102,0.35);
+      border-color: rgba(242,182,102,0.8);
+      transform: translateY(-2px);
+    }
+
+    .scroll-to-top.show {
+      display: flex;
+    }
+
+    @media (max-width: 768px) {
+      .nav-tabs {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding-bottom: 4px;
+        margin-bottom: 14px;
+        overflow-x: visible;
+      }
+
+      .nav-tab {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        border-radius: 999px;
+        flex: 0 1 auto;
+      }
+
+      .scroll-to-top {
+        width: 44px;
+        height: 44px;
+        bottom: 70px;
+        right: 28px;
+      }
+
+      header {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .nav-tabs {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="title-block">
+        <h1><span>🏆</span>Мої досягнення</h1>
+        <p class="subtitle">100 моментів, за які я можу себе поважати</p>
+      </div>
+      <div class="header-actions">
+        <div class="badge">Volodymyr Semenko</div>
+        <button class="theme-toggle" type="button" aria-label="Перемкнути тему" data-theme-toggle>🌙</button>
+      </div>
+    </header>
+
+    <div class="nav-tabs" id="navTabs"></div>
+
+    <main>
+      <section>
+        <h2><span class="emoji">💡</span><span class="label">Особистість і світогляд</span></h2>
+        <ul>
+          <li>Сам освоїв професію бізнес і системного аналітика в ІТ в банківському домені</li>
+          <li>Став найкращим оператором місяця чат-підтримки в ПриватБанк по кількості діалогів і % позитивних відгуків</li>
+          <li>Перестав всім нав'язувати власний досвід, почав ділитись тільки за проханням</li>
+          <li>Пішов до психолога і почав латати голову</li>
+          <li>Зумів вчасно виявити критичну ситуацію на кахельній фабриці, зупинив виробництво, провів аналіз даних, вніс коригування в режим виробничої лінії, зекономивши фабриці більше ніж 75% партії продукції за всю зміну</li>
+          <li>Перестав бути рятівником для всіх «жертв»</li>
+          <li>Прийняв усі мінуси власних близьких: пияцтво, фінансову безграмотність, невміння приймати власні помилки</li>
+          <li>Вибудував власний підхід до альтруїзму по 1 спробі на 1 людину</li>
+          <li>Поборов страх рухатися далі по кар'єрі і змінювати місце роботи, коли перейшов в ПУМБ</li>
+          <li>Вибачився перед однокласницею за булінг</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="emoji">🧠</span><span class="label">Освіта і кар'єра</span></h2>
+        <ul>
+          <li>Вступив самотужки на бюджет в університет</li>
+          <li>Самостійно і майже без корупції отримав вищу освіту</li>
+          <li>Вступив в аспірантуру</li>
+          <li>Наварив халяви — купу цифрових продуктів, будучи аспірантом, більше ніж на 1562 USD / рік</li>
+          <li>Самостійно провів розслідування, котре змогло виправити процес і зменшити втрати в заробітній платі операторів у чаті ПриватБанку на 50%</li>
+          <li>Запропонував рішення оптимізації роботи з відпустками і sick days на роботі, котре реалізували і прийняли для всієї компанії з понад 1000 людей</li>
+          <li>Досяг рівня Senior на роботі</li>
+          <li>Спроєктував безшовний механізм автентифікації</li>
+          <li>Впровадив більш нативний підхід до документації в команді</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="emoji">💻</span><span class="label">Технології і творчість</span></h2>
+        <ul>
+          <li>Зробив собі шикарне CV, яким люблю хизуватися</li>
+          <li>Створив перший мобільний застосунок</li>
+          <li>Спроєктував спільне робоче місце для себе і дружини</li>
+          <li>Створив і продовжую робити контент для власного каналу зі стрімінгу ігор</li>
+          <li>Створив канал фанатів найкращої в світі команди з американського футболу</li>
+          <li>Розробив власну настільну гру</li>
+          <li>Придумав авторський панчлайн для реп-батлу</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="emoji">💰</span><span class="label">Фінанси і матеріальне</span></h2>
+        <ul>
+          <li>Заробив на перший ноутбук, роблячи домашні завдання й отримавши гроші наперед на день народження</li>
+          <li>Купив комп'ютер мрії</li>
+          <li>Купив собі стільки кросівок, скільки хотілося</li>
+          <li>Відклав 1 млн гривень</li>
+          <li>Досяг рівня матеріального забезпечення, що дозволило 3 місяці не працювати і не отримувати зарплату</li>
+          <li>Освоїв фінансову грамотність, маючи близько 800000 гривень в доступних кредитних коштах не маю жодних боргів і порушень використання</li>
+          <li>Знайшов і зняв найкращу оселю за весь час</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="emoji">🌍</span><span class="label">Мови і навчання</span></h2>
+        <ul>
+          <li>Досяг рівня англійської, що дозволяє вільно спілкуватися і писати</li>
+          <li>Тримав ударний режим у Duolingo більше 1100 днів поспіль</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="emoji">❤️</span><span class="label">Стосунки і сім'я</span></h2>
+        <ul>
+          <li>Знайшов дружину в інтернеті — вловив удачу за хвіст</li>
+          <li>Перевіз дружину жити до себе на 17-й день після знайомства</li>
+          <li>Придумав власний кастомний підхід знайомства з дівчатами за допомогою саморобних візитівок</li>
+          <li>Закінчив всі стосунки з жінками, лишаючись у нормальних відносинах</li>
+          <li>Знайшов шляхи до спілкування з хрещеницею-підлітком</li>
+          <li>Збудував чесні відносини з братом дружини-підлітком</li>
+          <li>Дав відсіч колишньому хлопцю першої дівчини</li>
+          <li>Писав любовні вірші</li>
+          <li>Став собакотатом</li>
+          <li>Побудований процес поліаморних стосунків з верифікацією через оферту</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="emoji">💪</span><span class="label">Фізичний розвиток і здоров'я</span></h2>
+        <ul>
+          <li>Почав займатися плаванням</li>
+          <li>Пробіг напівмарафон просто так — двічі</li>
+          <li>Пожав від грудей вагу 95 кг</li>
+          <li>Відтиснувся від підлоги більше 1000 разів за 1 тиждень</li>
+          <li>Підтягувався 13 разів</li>
+          <li>Проплив 4 доріжки басейну за 1 раз</li>
+          <li>Пробіг тест Купера</li>
+          <li>Зробив собі голлівудську усмішку</li>
+          <li>Полатав дупу</li>
+          <li>Пережив катетер в уретрі</li>
+          <li>Кинув палити</li>
+          <li>Не став алкашем або наркоманом</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="emoji">🎮</span><span class="label">Ігри і розваги</span></h2>
+        <ul>
+          <li>Пройшов із задоволенням одну з найдовших ігор у сучасній історії</li>
+          <li>Виграв уперше, коли грали в «Таємного фюрера»</li>
+          <li>Отримав 2 картки дробовика в настолці, будучи бомжем</li>
+          <li>Виграв квитки на музичний фестиваль</li>
+          <li>Виграв нагороду за 3-тє місце на кіноквізі за весь сезон</li>
+          <li>Бачив «Доктора Хауса» 4 рази — усі сезони</li>
+          <li>Знаю до біса багато про кіно і серіали</li>
+          <li>Отримав свого першого підписника на GitHub</li>
+          <li>Прочитав усю серію «Темна вежа» Кінга</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="emoji">🎉</span><span class="label">Яскраві і незабутні моменти</span></h2>
+        <ul>
+          <li>Освідчився дружині, як у кіно</li>
+          <li>Реалізував кілька сцен з улюблених фільмів у житті (Сусідка, Темний лицар)</li>
+          <li>Цілувався на концерті в Мінську під дощем із незнайомою дівчиною</li>
+          <li>Склеїв двох незнайомих дівчат в одному вагоні потягу за 4,5 години</li>
+          <li>Був на концертах Jamiroquai та Parov Stelar Band</li>
+          <li>Святкував перемогу улюбленої команди в Супербоулі більше 1-го разу</li>
+          <li>Одружився в гавайській сорочці</li>
+          <li>Роздягнувся на центральній площі міста, тим самим вигравши парі</li>
+          <li>Купався на нудистському пляжі</li>
+          <li>Побував на морі</li>
+          <li>Був у горах Карпат</li>
+          <li>Літав на пасажирському літаку — і все одно кльово</li>
+          <li>Зав'язав усім однокласникам краватку на випускному</li>
+          <li>Отримав запрошення батьків до школи за погану поведінку</li>
+          <li>Побився в школі</li>
+          <li>Зміг відкупитися від арешту за пляшку вина</li>
+          <li>Придумав букет із м'яти і троянд</li>
+          <li>Подарував другові на день народження величезну кулю-пісюн</li>
+          <li>Придумав слова: «пінтікакель», «жиніхіта», «піпша»</li>
+          <li>Зміг утримати таємницю друга — так нікому й не розпатякав</li>
+          <li>Отримав винагороду за репризу на студентській весні</li>
+          <li>Був єдиним тверезим на зустрічі однокласників</li>
+          <li>Попісяв на 5 метрів у довжину</li>
+          <li>Викопав картоплю на дачі сам, без нічиєї допомоги, за 1 день</li>
+          <li>Придумав алібі, щоб бабуся не гамселила</li>
+          <li>Перестав красти (окрім The Sims)</li>
+          <li>Почав дивитися аніме</li>
+          <li>Не платив за секс</li>
+          <li>Завжди з увімкненою камерою</li>
+          <li>Обрав життя з шикарною бородою</li>
+          <li>Отримав 12 балів на екзамені з біології в школі</li>
+          <li>Виготовив футбольну форму для команди зміни на заводі</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2><span class="emoji">🌟</span><span class="label">Фінал</span></h2>
+        <ul>
+          <li><strong>Вижив</strong><span style="color: var(--text-soft);">!!!</span></li>
+          <li>Дописав цей список до 100</li>
+        </ul>
+      </section>
+    </main>
+
+    <div class="footer-note">Складено з любов'ю до себе — бо так і треба 🥕</div>
+    <button class="scroll-to-top" id="scrollToTopBtn" aria-label="Прокрутити на верх">↑</button>
+  </div>
+
+  <script>
+    const root = document.body;
+    const toggle = document.querySelector('[data-theme-toggle]');
+    const navTabsContainer = document.getElementById('navTabs');
+    const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+    const sections = Array.from(document.querySelectorAll('main section'));
+    const storedTheme = localStorage.getItem('achievement-theme');
+
+    // Initialize theme
+    if (storedTheme === 'light' || storedTheme === 'dark') {
+      root.dataset.theme = storedTheme;
+    }
+
+    // Update theme toggle icon
+    const syncToggle = () => {
+      const isLight = root.dataset.theme === 'light';
+      toggle.textContent = isLight ? '☀️' : '🌙';
+      toggle.setAttribute('aria-label', isLight ? 'Перемкнути на темну тему' : 'Перемкнути на світлу тему');
+    };
+
+    syncToggle();
+
+    toggle.addEventListener('click', () => {
+      const nextTheme = root.dataset.theme === 'light' ? 'dark' : 'light';
+      root.dataset.theme = nextTheme;
+      localStorage.setItem('achievement-theme', nextTheme);
+      syncToggle();
+    });
+
+    // Generate tabs
+    const sectionTitles = sections.map(s => s.querySelector('h2 span.label')?.textContent || 'Секція');
+    sectionTitles.push('Всі');
+
+    sectionTitles.forEach((title, index) => {
+      const tab = document.createElement('button');
+      tab.className = 'nav-tab';
+      if (index === 0) tab.classList.add('active');
+      tab.textContent = title;
+      tab.dataset.tabIndex = index;
+
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('main section').forEach(s => s.classList.remove('active'));
+        
+        tab.classList.add('active');
+
+        if (index === sectionTitles.length - 1) {
+          // "Всі" tab
+          sections.forEach(s => s.classList.add('active'));
+        } else {
+          sections[index]?.classList.add('active');
+        }
+      });
+
+      navTabsContainer.appendChild(tab);
+    });
+
+    // Initialize first section as active
+    if (sections.length > 0) {
+      sections[0].classList.add('active');
+    }
+
+    // Scroll to top button
+    const SCROLL_TRIGGER_RATIO = 0.83; // aim for roughly one viewport height on tall pages
+    const getScrollTriggerDepth = () => {
+      const viewportBased = Math.floor(window.innerHeight * SCROLL_TRIGGER_RATIO);
+      const pageBased = Math.max(120, Math.floor((document.documentElement.scrollHeight - window.innerHeight) * 0.55));
+      return Math.min(viewportBased, pageBased);
+    };
+    window.addEventListener('scroll', () => {
+      if (window.scrollY >= getScrollTriggerDepth()) {
+        scrollToTopBtn.classList.add('show');
+      } else {
+        scrollToTopBtn.classList.remove('show');
+      }
+    });
+
+    scrollToTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html>
