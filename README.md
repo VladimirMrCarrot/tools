@@ -3,6 +3,13 @@
 Tools is the public hub for `tools.mrcarrot13666.me`.
 It collects small interactive pages, technical notes, and supporting material for the site.
 
+## Freshness
+
+- Last content update: **2026-04-26**
+- External links checked: **2026-04-26**
+- Validation scope: root `README.md` and `student-pack/index.html`
+- Note: third-party pages and offer terms can change without notice, so re-check before publishing major content updates.
+
 ## Live domain
 
 - [tools.mrcarrot13666.me](https://tools.mrcarrot13666.me)

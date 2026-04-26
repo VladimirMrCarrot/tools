@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
 <style>
   :root {
     --bg: #f4f3ef;
@@ -16,9 +17,9 @@
     --text: #1a1917;
     --text-muted: #6b6a67;
     --text-faint: #a09f9b;
-    --accent: #1a6b4a;
-    --accent-hover: #145538;
-    --accent-light: #e6f2ec;
+    --accent: #F2B666;
+    --accent-hover: #d89a45;
+    --accent-light: #fff2dd;
     --accent-2: #2563eb;
     --accent-2-light: #eff6ff;
     --warn: #b45309;
@@ -38,9 +39,9 @@
     --text: #e8e7e4;
     --text-muted: #8a8884;
     --text-faint: #5a5957;
-    --accent: #4ade80;
-    --accent-hover: #22c55e;
-    --accent-light: #0d2818;
+    --accent: #F2B666;
+    --accent-hover: #f6c57f;
+    --accent-light: #2a2215;
     --accent-2: #60a5fa;
     --accent-2-light: #0f1e35;
     --warn: #fbbf24;
@@ -101,6 +102,11 @@
     transition: all var(--transition); color: var(--text-muted);
   }
   .theme-btn:hover { color: var(--text); background: var(--surface); }
+  .material-symbols-rounded {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-size: 20px;
+    line-height: 1;
+  }
 
   /* ── NAV TABS ── */
   .nav-tabs-wrap {
@@ -123,6 +129,13 @@
   .nav-tab:hover { color: var(--text); }
   .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
   .nav-tab .tab-icon { font-size: 16px; }
+  .nav-tab:focus-visible,
+  .lang-btn:focus-visible,
+  .theme-btn:focus-visible,
+  .scroll-top-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
 
   /* ── LAYOUT ── */
   .main { max-width: 820px; margin: 0 auto; padding: 32px 24px 80px; }
@@ -237,10 +250,45 @@
   /* ── DIVIDER ── */
   .divider { height: 1px; background: var(--border); margin: 8px 0 24px; }
 
+  .scroll-top-btn {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--text);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: opacity var(--transition), transform var(--transition);
+    opacity: 0;
+    transform: translateY(6px);
+    z-index: 60;
+  }
+  .scroll-top-btn.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .scroll-top-btn:hover {
+    background: var(--surface2);
+    color: var(--accent);
+  }
+
   /* LANG TOGGLE */
   [data-ua], [data-en] { }
   html[data-lang="en"] [data-ua] { display: none !important; }
   html[data-lang="uk"] [data-en] { display: none !important; }
+
+  @media (max-width: 768px) {
+    .scroll-top-btn {
+      display: flex;
+    }
+  }
 </style>
 </head>
 <body>
@@ -256,32 +304,32 @@
       <button class="lang-btn" onclick="setLang('en')" id="btn-en">🇬🇧 EN</button>
     </div>
     <button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme" id="theme-btn">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <span id="theme-icon" class="material-symbols-rounded">light_mode</span>
     </button>
   </div>
 </header>
 
 <!-- NAV TABS -->
 <div class="nav-tabs-wrap">
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchTab('github')" id="tab-github">
-      <span class="tab-icon">🐱</span>
+  <div class="nav-tabs" role="tablist" aria-label="Service tabs" id="service-tabs">
+    <button class="nav-tab active" onclick="switchTab('github')" id="tab-github" role="tab" aria-selected="true" aria-controls="panel-github" tabindex="0">
+      <span class="tab-icon material-symbols-rounded">code</span>
       <span data-ua>GitHub Pack</span><span data-en>GitHub Pack</span>
     </button>
-    <button class="nav-tab" onclick="switchTab('miro')" id="tab-miro">
-      <span class="tab-icon">🟡</span>
+    <button class="nav-tab" onclick="switchTab('miro')" id="tab-miro" role="tab" aria-selected="false" aria-controls="panel-miro" tabindex="-1">
+      <span class="tab-icon material-symbols-rounded">dashboard</span>
       <span>Miro</span>
     </button>
-    <button class="nav-tab" onclick="switchTab('figma')" id="tab-figma">
-      <span class="tab-icon">🎨</span>
+    <button class="nav-tab" onclick="switchTab('figma')" id="tab-figma" role="tab" aria-selected="false" aria-controls="panel-figma" tabindex="-1">
+      <span class="tab-icon material-symbols-rounded">draw</span>
       <span>Figma</span>
     </button>
-    <button class="nav-tab" onclick="switchTab('eleven')" id="tab-eleven">
-      <span class="tab-icon">🎧</span>
+    <button class="nav-tab" onclick="switchTab('eleven')" id="tab-eleven" role="tab" aria-selected="false" aria-controls="panel-eleven" tabindex="-1">
+      <span class="tab-icon material-symbols-rounded">headphones</span>
       <span>ElevenReader</span>
     </button>
-    <button class="nav-tab" onclick="switchTab('google')" id="tab-google">
-      <span class="tab-icon">🤖</span>
+    <button class="nav-tab" onclick="switchTab('google')" id="tab-google" role="tab" aria-selected="false" aria-controls="panel-google" tabindex="-1">
+      <span class="tab-icon material-symbols-rounded">smart_toy</span>
       <span data-ua>Google AI</span><span data-en>Google AI</span>
     </button>
   </div>
@@ -290,7 +338,7 @@
 <main class="main">
 
 <!-- ══════════════ GITHUB ══════════════ -->
-<section class="panel active" id="panel-github">
+<section class="panel active" id="panel-github" role="tabpanel" aria-labelledby="tab-github">
 
   <div class="service-hero">
     <div class="service-hero-top">
@@ -401,8 +449,8 @@
         <div class="step-body">
           <div class="step-label" data-ua>Вкажи назву навчального закладу</div>
           <div class="step-label" data-en>Enter your school name</div>
-          <div class="step-note" data-ua>Краще знаходитись фізично на кампусі — GitHub перевіряє геолокацію.</div>
-          <div class="step-note" data-en>Being physically on campus helps — GitHub checks geolocation.</div>
+          <div class="step-note" data-ua>Використовуй офіційну назву закладу та університетську пошту — це підвищує шанс швидкої верифікації.</div>
+          <div class="step-note" data-en>Use your institution's official name and university email to improve approval speed.</div>
         </div>
       </div>
       <div class="step">
@@ -435,7 +483,7 @@
 </section>
 
 <!-- ══════════════ MIRO ══════════════ -->
-<section class="panel" id="panel-miro">
+<section class="panel" id="panel-miro" role="tabpanel" aria-labelledby="tab-miro">
 
   <div class="service-hero">
     <div class="service-hero-top">
@@ -519,7 +567,7 @@
           <div class="step-label" data-en>Confirm student status</div>
           <div class="step-note" data-ua>Якщо автоматично не спрацювало — заповни форму на сторінці Help Center.</div>
           <div class="step-note" data-en>If not auto-approved, fill the form on the Help Center page.</div>
-          <a href="https://help.miro.com/hc/en-us/articles/360017730473" target="_blank" rel="noopener" class="step-link">help.miro.com → Education plan</a>
+          <a href="https://miro.com/education-whiteboard/" target="_blank" rel="noopener" class="step-link">miro.com → Education plan</a>
         </div>
       </div>
       <div class="step">
@@ -543,7 +591,7 @@
 </section>
 
 <!-- ══════════════ FIGMA ══════════════ -->
-<section class="panel" id="panel-figma">
+<section class="panel" id="panel-figma" role="tabpanel" aria-labelledby="tab-figma">
 
   <div class="service-hero">
     <div class="service-hero-top">
@@ -646,7 +694,7 @@
 </section>
 
 <!-- ══════════════ ELEVEN ══════════════ -->
-<section class="panel" id="panel-eleven">
+<section class="panel" id="panel-eleven" role="tabpanel" aria-labelledby="tab-eleven">
 
   <div class="service-hero">
     <div class="service-hero-top">
@@ -681,8 +729,8 @@
       </div>
     </div>
     <div style="margin-top:12px; font-size:13px; color:var(--warn);">
-      ⚠️ <span data-ua>ElevenReader має список перевірених закладів. Обліковий запис ElevenLabs має бути зареєстрований саме на університетську пошту. Вік 18+.</span>
-      <span data-en>ElevenReader maintains a list of verified institutions. Your ElevenLabs account must be registered with the university email. Must be 18+.</span>
+      ⚠️ <span data-ua>ElevenReader має список перевірених закладів, і не всі українські ВИШі наразі додані до програми студентських бенефітів. Обліковий запис ElevenLabs має бути зареєстрований саме на університетську пошту. Вік 18+.</span>
+      <span data-en>ElevenReader maintains a list of verified institutions, and not all Ukrainian universities are currently included in the student benefits program. Your ElevenLabs account must be registered with the university email. Must be 18+.</span>
     </div>
   </div>
 
@@ -701,8 +749,9 @@
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <div class="step-label" data-ua>Натисни "Get 1 year free"</div>
-          <div class="step-label" data-en>Click "Get 1 year free"</div>
+          <div class="step-label" data-ua>Натисни "Get 1 year free" або "Verify & claim free offer"</div>
+          <div class="step-label" data-en>Click "Get 1 year free" or "Verify & claim free offer"</div>
+          <a href="https://aistudentpack.com/" target="_blank" rel="noopener" class="step-link">aistudentpack.com (verification flow)</a>
         </div>
       </div>
       <div class="step">
@@ -744,7 +793,7 @@
 </section>
 
 <!-- ══════════════ GOOGLE AI ══════════════ -->
-<section class="panel" id="panel-google">
+<section class="panel" id="panel-google" role="tabpanel" aria-labelledby="tab-google">
 
   <div class="service-hero">
     <div class="service-hero-top">
@@ -760,7 +809,7 @@
       <span class="badge badge-warn">💰 <span data-ua>$19.99/міс після (Google One AI Premium)</span><span data-en>$19.99/mo after (Google One AI Premium)</span></span>
       <span class="badge badge-blue">🔗 <span data-ua>Верифікація через SheerID</span><span data-en>Verification via SheerID</span></span>
     </div>
-    <a href="https://one.google.com/about/plans/ai-premium-students" target="_blank" rel="noopener" class="service-link">
+    <a href="https://one.google.com/about/ai-premium/" target="_blank" rel="noopener" class="service-link">
       <span data-ua>Отримати безкоштовний план →</span><span data-en>Get free plan →</span>
     </a>
   </div>
@@ -799,6 +848,9 @@
     <div style="margin-top:12px; font-size:13px; color:var(--warn);">
       ⚠️ <span data-ua><strong>Важливо про картку:</strong> Google вимагає додати картку, але не знімає кошти 12–15 місяців. Якщо не скасувати підписку вчасно — почнеться платний план автоматично.</span>
       <span data-en><strong>Card note:</strong> Google requires a card but won't charge for 12–15 months. If you don't cancel before expiry, it auto-converts to a paid plan.</span>
+      <br>
+      <span data-ua><strong>Доступність оферу:</strong> student-офер може бути обмежений країною, віком 18+ і поточними умовами кампанії.</span>
+      <span data-en><strong>Offer availability:</strong> the student offer may be limited by country, age 18+, and active campaign terms.</span>
     </div>
   </div>
 
@@ -809,16 +861,16 @@
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
-          <div class="step-label" data-ua>Перейди на Google One з особистим Google-акаунтом</div>
-          <div class="step-label" data-en>Go to Google One with your personal Google account</div>
-          <a href="https://one.google.com/about/plans/ai-premium-students" target="_blank" rel="noopener" class="step-link">one.google.com → AI Premium for Students</a>
+          <div class="step-label" data-ua>Перейди на Google AI plans з особистим Google-акаунтом</div>
+          <div class="step-label" data-en>Open Google AI plans with your personal Google account</div>
+          <a href="https://one.google.com/about/ai-premium/" target="_blank" rel="noopener" class="step-link">one.google.com → Google AI plans</a>
         </div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <div class="step-label" data-ua>Натисни "Verify student status" — відкриється SheerID</div>
-          <div class="step-label" data-en>Click "Verify student status" — SheerID window opens</div>
+          <div class="step-label" data-ua>Якщо доступно для твого регіону/акаунта, натисни "Verify student status" або "Get student offer"</div>
+          <div class="step-label" data-en>If available for your region/account, click "Verify student status" or "Get student offer"</div>
         </div>
       </div>
       <div class="step">
@@ -868,12 +920,23 @@
 
 </main>
 
+<button class="scroll-top-btn" id="scroll-top-btn" aria-label="Scroll to top" onclick="scrollToTop()">
+  <span class="material-symbols-rounded">keyboard_arrow_up</span>
+</button>
+
 <script>
   function switchTab(id) {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected', 'false');
+      t.tabIndex = -1;
+    });
     document.getElementById('panel-' + id).classList.add('active');
-    document.getElementById('tab-' + id).classList.add('active');
+    const activeTab = document.getElementById('tab-' + id);
+    activeTab.classList.add('active');
+    activeTab.setAttribute('aria-selected', 'true');
+    activeTab.tabIndex = 0;
   }
 
   function setLang(lang) {
@@ -882,14 +945,64 @@
     document.getElementById('btn-en').classList.toggle('active', lang === 'en');
   }
 
-  let dark = false;
+  let dark = true;
+  const themeIcon = document.getElementById('theme-icon');
+  const scrollTopBtn = document.getElementById('scroll-top-btn');
+
+  function updateThemeIcon() {
+    themeIcon.textContent = dark ? 'light_mode' : 'dark_mode';
+  }
+
   function toggleTheme() {
     dark = !dark;
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-    document.getElementById('theme-btn').innerHTML = dark
-      ? '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
-      : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    updateThemeIcon();
   }
+
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateScrollTopVisibility() {
+    if (window.innerWidth <= 768) {
+      scrollTopBtn.classList.toggle('visible', window.scrollY > 220);
+    } else {
+      scrollTopBtn.classList.remove('visible');
+    }
+  }
+
+  function handleTabKeyboardNavigation(event) {
+    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft' && event.key !== 'Enter') {
+      return;
+    }
+    const tabs = Array.from(document.querySelectorAll('.nav-tab'));
+    const currentIndex = tabs.indexOf(document.activeElement);
+    if (currentIndex === -1) {
+      return;
+    }
+    if (event.key === 'Enter') {
+      document.activeElement.click();
+      return;
+    }
+    event.preventDefault();
+    const direction = event.key === 'ArrowRight' ? 1 : -1;
+    const nextIndex = (currentIndex + direction + tabs.length) % tabs.length;
+    tabs[nextIndex].focus();
+    tabs[nextIndex].click();
+  }
+
+  function initPageState() {
+    dark = true;
+    document.documentElement.setAttribute('data-theme', 'dark');
+    setLang('uk');
+    updateThemeIcon();
+    updateScrollTopVisibility();
+    document.getElementById('service-tabs').addEventListener('keydown', handleTabKeyboardNavigation);
+  }
+
+  window.addEventListener('scroll', updateScrollTopVisibility);
+  window.addEventListener('resize', updateScrollTopVisibility);
+  initPageState();
 </script>
 </body>
 </html>
