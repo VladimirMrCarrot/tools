@@ -1,27 +1,28 @@
-﻿﻿# tools
+﻿# tools
 
 Tools is the public hub for `tools.mrcarrot13666.me`.
 It collects small interactive pages, technical notes, and supporting material for the site.
 
 ## Freshness
 
-- Last content update: **2026-04-26**
+- Last content update: **2026-05-10**
 - External links checked: **2026-04-26**
-- Validation scope: root `README.md` and `student-pack/index.html`
-- Note: third-party pages and offer terms can change without notice, so re-check before publishing major content updates.
+- Validation scope: root `README.md` and featured pages on root `index.html` (currently `student-pack`, `conection_types`)
+- Note: the repo may contain extra HTML folders that are deliberately **not** linked from the root landing — use direct URLs below. Third-party pages and offer terms can change without notice.
 
 ## What is inside
 
-- [tools.mrcarrot13666.me](https://tools.mrcarrot13666.me) - main landing page.
-- [tools.mrcarrot13666.me/student-pack](https://tools.mrcarrot13666.me/student-pack/) - GitHub Student Pack guide.
-- [tools.mrcarrot13666.me/conection_types](https://tools.mrcarrot13666.me/conection_types/) - connection types page.
-- [tools.mrcarrot13666.me/ai-files/perplexity](https://tools.mrcarrot13666.me/ai-files/perplexity/) - Perplexity helper page.
+- [tools.mrcarrot13666.me](https://tools.mrcarrot13666.me) — main landing (**curated** cards — not every folder in the repo).
+- [tools.mrcarrot13666.me/student-pack](https://tools.mrcarrot13666.me/student-pack/) — GitHub Student Pack guide.
+- [tools.mrcarrot13666.me/conection_types](https://tools.mrcarrot13666.me/conection_types/) — connection types / UML tree (folder spelled `conection_types` for stable URL).
+
+Other published HTML (not necessarily on root index): [Perplexity hub](https://tools.mrcarrot13666.me/ai-files/perplexity/).
 
 ## Technical notes
 
 - `CNAME` points to `tools.mrcarrot13666.me`.
 - New pages should be added as their own folder with an `index.html` file.
-- After adding a page, update the root `index.html` and this README so the hub stays in sync.
+- After adding a page, update this README (deep links). Add a root `index.html` card only when the page should be **featured** on the landing.
 - Keep this file UTF-8 encoded.
 
 ---

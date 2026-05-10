@@ -1,376 +1,1615 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" data-theme="dark" data-lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UML Tree Ecosystem</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --tree-dark: #1b5e20;
-            --oak-bg: #f9fbe7;
-            --accent: #1976d2;
-            --tooltip-def: #2c3e50;
-            --tooltip-ex: #f8f9fa;
-            --line-color: #34495e;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UML типи звʼязків — екосистема дерева | tools</title>
+  <meta name="description" content="Інтерактивне дерево типів зв'язків UML з прикладом екосистеми: успадкування, композиція, агрегація, асоціація, залежність.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
+  <style>
+    :root[data-theme="light"] {
+      --bg-page: #f4f3ef;
+      --bg-elevated: #ffffff;
+      --text: #1a1917;
+      --text-soft: #6b6a67;
+      --border-subtle: rgba(0,0,0,0.08);
+      --accent: #F2B666;
+      --accent-hover: #d89a45;
+      --tree-dark: #1b5e20;
+      --oak-bg: #f9fbe7;
+      --line-color: #34495e;
+      --tooltip-def: #1e293b;
+      --hint-top-fg: #f8fafc;
+      --hint-top-strong: var(--accent);
+      --hint-bot-bg: #cbd5e1;
+      --hint-bot-fg: #0f172a;
+      --hint-bot-strong: #0f172a;
+      --hint-arrow: var(--hint-bot-bg);
+      --shadow-soft: 0 10px 40px rgba(0,0,0,0.1);
+      --diagram-surface: #fff;
+      --diagram-shadow: rgba(0,0,0,0.1);
+      --switch-h: 32px;
+    }
 
-        body {
-            font-family: 'Ubuntu', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f0f2f5;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            box-sizing: border-box;
-        }
+    :root[data-theme="dark"] {
+      --bg-page: #131211;
+      --bg-elevated: #1c1b19;
+      --text: #e4e3e0;
+      --text-soft: #888784;
+      --border-subtle: rgba(255,255,255,0.08);
+      --accent: #F2B666;
+      --accent-hover: #f6c57f;
+      --tree-dark: #81c784;
+      --oak-bg: #1e2718;
+      --line-color: #90a4ae;
+      --tooltip-def: #0f172a;
+      --hint-top-fg: #f1f5f9;
+      --hint-top-strong: var(--accent);
+      --hint-bot-bg: #334155;
+      --hint-bot-fg: #f1f5f9;
+      --hint-bot-strong: #fef3c7;
+      --hint-arrow: var(--hint-bot-bg);
+      --shadow-soft: 0 10px 40px rgba(0,0,0,0.45);
+      --diagram-surface: #232220;
+      --diagram-shadow: rgba(0,0,0,0.55);
+      --switch-h: 32px;
+    }
 
-        h1 {
-            text-align: center;
-            color: var(--tree-dark);
-            margin-bottom: 30px;
-            font-size: 1.8rem;
-            z-index: 10;
-        }
+    *, *::before, *::after { box-sizing: border-box; }
 
-        /* --- DESKTOP --- */
-        .diagram-container {
-            position: relative;
-            background: #fff;
-            border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            width: 1000px;
-            height: 650px;
-        }
+    html { scroll-behavior: smooth; }
 
-        .entity {
-            position: absolute;
-            width: 140px;
-            height: 100px;
-            background: #fff;
-            border: 2px solid var(--line-color);
-            border-radius: 12px;
-            padding: 10px;
-            box-sizing: border-box;
-            text-align: center;
-            cursor: pointer;
-            z-index: 20;
-            transition: all 0.3s ease;
-				overflow: hidden;
-        }
-        .entity:hover { transform: translateY(-5px); border-color: var(--accent); z-index: 500; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-        .entity img { width: 100%; height: 45px; object-fit: cover; border-radius: 6px; margin-bottom: 5px; }
-        .entity b { display: block; font-size: 0.9rem; margin-bottom: 2px; }
-        .entity i { font-size: 0.6rem; color: #666; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
 
-        /* Дерево тепер у центрі (було p-oak), Дуб вгорі (було p-tree) */
-        .p-tree { top: 275px; left: 430px; background: var(--oak-bg); border-color: var(--tree-dark); }
-        .p-oak  { top: 65px;  left: 430px; border-color: var(--tree-dark); }
-        .p-bark { top: 275px; left: 100px; }
-        .p-nest { top: 275px; left: 760px; }
-        .p-mushroom { top: 500px; left: 230px; }
-        .p-sun { top: 500px; left: 630px; }
+    html[data-lang="uk"] [data-en] { display: none !important; }
+    html[data-lang="en"] [data-ua] { display: none !important; }
 
-        .static-line { position: absolute; background: var(--line-color); z-index: 5; pointer-events: none; }
-        .l-inheritance { top: 165px; left: 499px; width: 2px; height: 110px; }
-        .l-composition { top: 324px; left: 240px; width: 190px; height: 2px; }
-        .l-aggregation  { top: 324px; left: 570px; width: 190px; height: 2px; }
-        .l-association  { top: 550px; left: 300px; width: 301px; height: 2px; transform-origin: left top; transform: rotate(-48.36deg); }
+    body {
+      margin: 0;
+      font-family: 'Ubuntu', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-page);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      font-size: 15px;
+      line-height: 1.5;
+    }
 
-        .sym { position: absolute; z-index: 150; cursor: pointer; pointer-events: auto; }
-        .sym:hover { z-index: 500; }
-        .sym::after { content: ''; position: absolute; top: -20px; left: -20px; right: -20px; bottom: -20px; background: transparent; }
-        .sym-arrow { width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-bottom: 30px solid var(--line-color); }
-        .sym-diamond-f { width: 28px; height: 28px; background: var(--line-color); transform: rotate(45deg); }
-        .sym-diamond-e { width: 28px; height: 28px; border: 5px solid var(--line-color); background: #fff; transform: rotate(45deg); box-sizing: border-box; }
-        .line-badge { width: 60px; height: 60px; background: #fff; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 32px; color: var(--line-color); border: 2px solid #eee; }
+    .material-symbols-rounded {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-size: 22px;
+      line-height: 1;
+      vertical-align: middle;
+    }
 
-        .t-inheritance { top: 165px; left: 482px; }
-        .t-composition { top: 311px; left: 396px; }
-        .t-aggregation { top: 311px; left: 576px; }
-        .t-association { top: 407px; left: 370px; }
-        .t-dependency  { top: 407px; left: 570px; }
+    .page-header {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 16px clamp(14px, 3vw, 28px) 14px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
 
-        .desktop-hint {
-            position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%) translateY(10px);
-            width: 300px; background: #fff; border-radius: 12px; opacity: 0; visibility: hidden;
-            transition: 0.3s; z-index: 200; pointer-events: none;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.25); overflow: hidden; border: 1px solid #ddd;
-        }
-        .hint-def { background: var(--tooltip-def); color: #fff; padding: 12px 15px; font-size: 0.85rem; line-height: 1.4; }
-        .hint-def b { color: #f1c40f; font-size: 0.95rem; }
-        .hint-ex { background: var(--tooltip-ex); color: #333; padding: 12px 15px; font-size: 0.85rem; line-height: 1.4; border-top: 1px solid #eee; }
-        .desktop-hint::after {
-            content: ''; position: absolute; top: 100%; left: 50%; margin-left: -8px;
-            border-width: 8px; border-style: solid; border-color: var(--tooltip-ex) transparent transparent transparent;
-        }
-        .entity:hover .desktop-hint, .sym:hover .desktop-hint { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    .header-row {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 10px 14px;
+      row-gap: 12px;
+    }
 
-        /* --- MOBILE --- */
-        .mobile-trigger { display: none; }
+    .page-header h1 {
+      margin: 0;
+      font-size: clamp(1.2rem, 2.5vw, 1.72rem);
+      font-weight: 700;
+      line-height: 1.22;
+      color: var(--text);
+      flex: 0 1 auto;
+      min-width: 0;
+      white-space: nowrap;
+    }
 
-        @media (max-width: 900px) {
-            body { padding: 0; justify-content: flex-start; }
-            h1 { font-size: 1.4rem; margin-top: 30px; padding: 0 15px; }
+    .header-toolbar {
+      display: flex;
+      align-items: center;
+      flex: 1 1 0%;
+      min-width: 0;
+      gap: 8px;
+    }
 
-            .diagram-container {
-                width: 100%; height: 450px;
-                background: transparent; box-shadow: none; border-radius: 0;
-                position: relative; display: block; margin-top: 20px;
-            }
+    .header-toolbar-spacer {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
 
-            .hide-on-mobile, .static-line, .sym { display: none !important; }
+    /* MD-style help chip + surface (popover) */
+    .md-help-anchor {
+      position: relative;
+      flex: 0 0 auto;
+      z-index: 40;
+    }
 
-            /* На мобільному центральний елемент — Дерево */
-            .p-tree { top: 50%; left: 50%; margin-top: -50px; margin-left: -70px; transform: scale(1.1); z-index: 100; }
-            .p-tree:hover { transform: scale(1.1); }
+    .md-chip {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: var(--switch-h);
+      padding: 0 12px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: color-mix(in srgb, var(--text) 88%, transparent);
+      background: color-mix(in srgb, var(--bg-elevated) 94%, var(--accent));
+      box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent),
+        0 1px 2px rgba(0, 0, 0, 0.06);
+      transition: background 160ms ease, box-shadow 160ms ease, color 160ms ease;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-            .mobile-trigger {
-                display: flex; position: absolute;
-                top: 50%; left: 50%; margin-top: -30px; margin-left: -30px;
-                width: 60px; height: 60px; background: #fff; border-radius: 50%;
-                justify-content: center; align-items: center;
-                box-shadow: 0 6px 15px rgba(0,0,0,0.15); z-index: 200;
-                border: 2px solid var(--line-color); cursor: pointer;
-                -webkit-tap-highlight-color: transparent; transition: opacity 0.2s;
-            }
-            .mobile-trigger:active { opacity: 0.5; }
+    .md-chip .material-symbols-rounded {
+      font-size: 18px;
+      color: color-mix(in srgb, var(--accent) 85%, var(--text));
+    }
 
-            .mobile-trigger .sym-arrow { border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 18px solid var(--line-color); }
-            .mobile-trigger .sym-diamond-f { width: 18px; height: 18px; }
-            .mobile-trigger .sym-diamond-e { width: 18px; height: 18px; border-width: 3px; }
+    .md-chip:hover {
+      background: color-mix(in srgb, var(--bg-elevated) 82%, var(--accent));
+      color: var(--text);
+    }
 
-            .mt-1 { transform: translateY(-135px); }
-            .mt-2 { transform: translateX(-135px); }
-            .mt-3 { transform: translateX(135px); }
-            .mt-4 { transform: translate(-80px, 120px); }
-            .mt-5 { transform: translate(80px, 120px); }
-        }
+    .md-chip:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
 
-        /* OVERLAY */
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #fff; z-index: 2000; display: none; flex-direction: column;
-            padding: 25px; box-sizing: border-box; animation: slideUp 0.3s cubic-bezier(0, 0, 0.2, 1);
-            overflow-y: auto;
-        }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .ov-close { align-self: flex-end; font-size: 2.5rem; color: #999; padding: 10px; cursor: pointer; margin-bottom: -10px; }
-        .ov-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f2f5; }
-        .ov-sym-icon { width: 50px; height: 50px; background: #f0f2f5; border-radius: 12px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
-        .ov-img { width: 100%; height: 220px; object-fit: cover; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); background: #eee; }
-        #ovEx { font-size: 1.15rem; line-height: 1.5; color: #222; margin: 0 0 15px 0; font-weight: 500; }
-        .def-wrapper {
-            background: #f8f9fa; border-radius: 12px; padding: 15px;
-            border-left: 4px solid #adb5bd; margin-top: 0;
-        }
-        .def-wrapper strong { display: block; color: #495057; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
-        #ovDef { font-size: 0.95rem; color: #6c757d; line-height: 1.5; margin: 0; }
-    </style>
+    .md-chip.md-chip--icon-only {
+      padding: 0;
+      width: var(--switch-h);
+      min-width: var(--switch-h);
+      justify-content: center;
+      gap: 0;
+    }
+
+    .header-actions .brand-carrot {
+      font-size: 1.25rem;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .md-help-surface {
+      position: absolute;
+      left: 0;
+      top: calc(100% + 10px);
+      width: min(320px, min(92vw, 360px));
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16), 0 2px 8px rgba(0, 0, 0, 0.08);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      pointer-events: none;
+      transition: opacity 140ms ease, visibility 140ms ease, transform 140ms ease;
+      z-index: 50;
+    }
+
+    @media (min-width: 1040px) {
+      .md-help-surface { left: auto; right: 0; }
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .md-help-anchor:hover .md-help-surface,
+      .md-help-anchor:focus-within .md-help-surface {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+    }
+
+    .md-help-anchor.is-open .md-help-surface {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .md-help-surface .help-block {
+      font-size: 0.835rem;
+      line-height: 1.52;
+      color: var(--text-soft);
+      font-weight: 400;
+      margin: 0;
+    }
+
+    .md-help-surface .help-block + .help-block {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Single-tap locale / theme (laconic pills) */
+    .toggle-chip {
+      min-height: var(--switch-h);
+      min-width: 42px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-elevated);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: color 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+    }
+
+    [data-theme="dark"] .toggle-chip {
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+
+    .toggle-chip:hover {
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+      color: var(--accent);
+    }
+
+    .toggle-chip:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    html[data-lang="en"] #toggle-lang { letter-spacing: 0.02em; }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(14px, 3vw, 28px);
+      gap: 8px;
+    }
+
+    .diagram-scroll {
+      width: 100%;
+      max-width: 1040px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-block: 8px;
+    }
+
+    @media (min-width: 901px) {
+      .diagram-scroll {
+        padding-block: 18px;
+      }
+    }
+
+    .diagram-container {
+      position: relative;
+      background: var(--diagram-surface);
+      border-radius: 22px;
+      box-shadow: var(--shadow-soft);
+      width: 1000px;
+      height: 700px;
+      max-width: none;
+      border: 1px solid var(--border-subtle);
+    }
+
+    @media (min-width: 901px) {
+      .diagram-container {
+        overflow: hidden;
+      }
+    }
+
+    .entity {
+      position: absolute;
+      width: 140px;
+      min-height: 100px;
+      background: var(--diagram-surface);
+      border: 2px solid var(--line-color);
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      z-index: 20;
+      transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+      overflow: hidden;
+      appearance: none;
+      font-family: inherit;
+      font-size: inherit;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: inherit;
+    }
+
+    .entity:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      z-index: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    .entity:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+      z-index: 600;
+    }
+
+    .entity img {
+      width: 100%;
+      height: 45px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 5px;
+    }
+
+    .entity b {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+      font-weight: 500;
+    }
+    .entity i {
+      font-size: 0.62rem;
+      color: var(--text-soft);
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-style: normal;
+    }
+
+    .p-tree { top: 275px; left: 430px; background: var(--oak-bg); border-color: var(--tree-dark); }
+    .p-oak { top: 65px; left: 430px; border-color: var(--tree-dark); }
+    .p-bark { top: 275px; left: 100px; }
+    .p-nest { top: 275px; left: 760px; }
+    .p-mushroom { top: 535px; left: 230px; }
+    .p-sun { top: 535px; left: 630px; }
+
+    .static-line { position: absolute; background: var(--line-color); z-index: 5; pointer-events: none; }
+    .l-inheritance { top: 165px; left: 499px; width: 2px; height: 110px; }
+    .l-composition { top: 324px; left: 240px; width: 190px; height: 2px; }
+    .l-aggregation { top: 324px; left: 570px; width: 190px; height: 2px; }
+    .l-association { top: 585px; left: 300px; width: 301px; height: 2px; transform-origin: left top; transform: rotate(-48.36deg); }
+
+    .sym {
+      position: absolute;
+      z-index: 150;
+      cursor: pointer;
+      pointer-events: auto;
+      border: none;
+      padding: 0;
+      background: transparent;
+      font: inherit;
+      color: inherit;
+      display: grid;
+      place-items: center;
+    }
+
+    .sym:hover { z-index: 500; box-shadow: 0 0 0 2px transparent; }
+    .sym:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+      z-index: 550;
+      border-radius: 4px;
+    }
+
+    .sym::after {
+      content: '';
+      position: absolute;
+      top: -16px;
+      left: -16px;
+      right: -16px;
+      bottom: -16px;
+    }
+
+    .sym-arrow {
+      width: 0;
+      height: 0;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-bottom: 30px solid var(--line-color);
+    }
+
+    .sym-diamond-f { width: 28px; height: 28px; background: var(--line-color); transform: rotate(45deg); }
+    .sym-diamond-e {
+      width: 28px;
+      height: 28px;
+      border: 5px solid var(--line-color);
+      background: var(--diagram-surface);
+      transform: rotate(45deg);
+      box-sizing: border-box;
+    }
+
+    .line-badge {
+      width: 60px;
+      height: 60px;
+      background: var(--diagram-surface);
+      border-radius: 50%;
+      box-shadow: 0 4px 12px var(--diagram-shadow);
+      font-weight: 700;
+      font-size: 32px;
+      color: var(--line-color);
+      border: 2px solid var(--border-subtle);
+    }
+
+    .t-inheritance { top: 167px; left: 482px; }
+    .t-composition { top: 311px; left: 396px; }
+    .t-aggregation { top: 311px; left: 576px; }
+    .t-association { top: 407px; left: 370px; }
+    .t-dependency { top: 407px; left: 570px; }
+
+    .desktop-hint {
+      position: absolute;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      width: min(300px, 70vw);
+      background: transparent;
+      border-radius: 12px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 240ms ease, visibility 240ms ease, transform 240ms ease;
+      z-index: 200;
+      pointer-events: none;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      text-align: left;
+      font-weight: 400;
+    }
+
+    .hint-def {
+      background: var(--tooltip-def);
+      color: var(--hint-top-fg);
+      padding: 12px 15px;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      font-weight: 400;
+    }
+
+    .hint-def b {
+      color: var(--hint-top-strong);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .hint-ex {
+      background: var(--hint-bot-bg);
+      color: var(--hint-bot-fg);
+      padding: 12px 15px;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      border-top: 1px solid rgba(15,23,42,0.15);
+      font-weight: 400;
+    }
+
+    [data-theme="dark"] .hint-ex {
+      border-top-color: rgba(255,255,255,0.12);
+    }
+
+    .hint-ex b {
+      color: var(--hint-bot-strong);
+      font-weight: 600;
+    }
+
+    .desktop-hint::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -8px;
+      border: 8px solid transparent;
+      border-top-color: var(--hint-arrow);
+    }
+
+    /* Hover hint: above icon (lower half of diagram) — default */
+    /* Hover hint: below icon (upper / middle row) — same idea as pinned sticky */
+    .entity.hint-dock-below .desktop-hint,
+    .sym.hint-dock-below .desktop-hint {
+      bottom: auto;
+      top: 100%;
+      margin-top: 10px;
+      transform: translateX(-50%) translateY(8px);
+    }
+
+    .entity.hint-dock-below .desktop-hint::after,
+    .sym.hint-dock-below .desktop-hint::after {
+      top: -8px;
+      bottom: auto;
+      margin-left: -8px;
+      border: 8px solid transparent;
+      border-top-color: transparent;
+      border-bottom-color: var(--hint-arrow);
+    }
+
+    .entity:hover .desktop-hint,
+    .entity:focus-visible .desktop-hint,
+    .sym:hover .desktop-hint,
+    .sym:focus-visible .desktop-hint {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Sticky floating hint — desktop pinning (always top layer) */
+    .sticky-tooltip-root {
+      position: fixed;
+      z-index: 2147483000;
+      min-width: 200px;
+      max-width: min(320px, calc(100vw - 24px));
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 160ms ease, visibility 160ms ease;
+      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      box-sizing: border-box;
+      left: -12000px;
+      top: 0;
+    }
+
+    .sticky-tooltip-root.visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    /* Frosted veil while a diagram card is pinned (desktop) */
+    .pin-focus-veil {
+      position: fixed;
+      inset: 0;
+      z-index: 2147482900;
+      background: rgba(19, 18, 17, 0.28);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 220ms ease, visibility 220ms ease;
+    }
+
+    [data-theme="light"] .pin-focus-veil {
+      background: rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    body.diagram-pin-active .pin-focus-veil {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      cursor: default;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body.diagram-pin-active .pin-focus-veil {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+      }
+    }
+
+    @media (min-width: 901px) {
+      .diagram-container.has-pinned-hint .desktop-hint {
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+
+      /* Never show orbiting tap targets on wide viewports */
+      .mobile-trigger {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+
+      .entity.entity--pin-expanded {
+        z-index: 2147482960 !important;
+        min-height: 168px;
+        transform: translateY(-10px);
+        box-shadow: 0 16px 44px rgba(0, 0, 0, 0.22);
+        transition:
+          width 240ms ease,
+          left 240ms ease,
+          transform 220ms ease,
+          min-height 220ms ease,
+          box-shadow 220ms ease;
+      }
+
+      [data-theme="dark"] .entity.entity--pin-expanded {
+        box-shadow: 0 18px 52px rgba(0, 0, 0, 0.6);
+      }
+
+      .entity.entity--pin-expanded img {
+        flex: 0 0 auto;
+        min-height: 124px;
+        height: auto;
+        max-height: min(200px, 28vh);
+        width: 100%;
+        margin-bottom: 10px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      .sym.sym--pin-active {
+        z-index: 2147482960 !important;
+        filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.28));
+      }
+    }
+
+    .mobile-trigger { display: none; }
+
+    @media (max-width: 900px) {
+      html,
+      body {
+        overflow-x: hidden;
+      }
+
+      .page-header h1 {
+        flex: none;
+        width: 100%;
+        font-size: clamp(0.65rem, 2.95vw + 0.28rem, 0.82rem);
+        font-weight: 700;
+        line-height: 1.2;
+        white-space: nowrap;
+        text-align: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .header-row {
+        flex-direction: column;
+        align-items: stretch;
+        flex-wrap: nowrap;
+        gap: 10px;
+      }
+
+      .header-toolbar {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        width: 100%;
+        align-items: center;
+        gap: 4px;
+        flex: none;
+        min-width: 0;
+      }
+
+      .header-toolbar-spacer {
+        display: none;
+      }
+
+      .header-toolbar .header-actions {
+        display: contents;
+      }
+
+      .header-toolbar > .md-help-anchor {
+        justify-self: center;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        min-width: 0;
+      }
+
+      .header-toolbar > .toggle-chip,
+      .header-toolbar > .brand-carrot {
+        justify-self: center;
+        min-width: 0;
+      }
+
+      .md-help-anchor .md-chip {
+        margin-inline: 0;
+      }
+
+      main {
+        justify-content: flex-start;
+        align-items: center;
+        padding-inline: 12px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      .diagram-scroll {
+        overflow-x: visible;
+        padding: 0;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      .diagram-container {
+        width: 100%;
+        height: 450px;
+        background: transparent;
+        box-shadow: none;
+        border-radius: 0;
+        border: none;
+        margin-inline: auto;
+      }
+
+      .hide-on-mobile, .static-line, .sym { display: none !important; }
+
+      .p-tree {
+        top: 50%;
+        left: 50%;
+        margin-top: -50px;
+        margin-left: -70px;
+        transform: scale(1.1);
+        z-index: 100;
+      }
+      .p-tree:hover { transform: scale(1.1); }
+
+      .mobile-trigger {
+        display: flex;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -30px;
+        margin-left: -30px;
+        width: 60px;
+        height: 60px;
+        background: var(--bg-elevated);
+        border-radius: 50%;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+        z-index: 200;
+        border: 2px solid var(--line-color);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition: opacity 160ms ease;
+      }
+
+      .mobile-trigger:active { opacity: 0.65; }
+
+      .mobile-trigger .sym-arrow {
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-bottom: 18px solid var(--line-color);
+      }
+
+      .mobile-trigger .sym-diamond-f { width: 18px; height: 18px; }
+      .mobile-trigger .sym-diamond-e { width: 18px; height: 18px; border-width: 3px; }
+
+      .mt-1 { transform: translateY(-135px); }
+      .mt-2 { transform: translateX(-135px); }
+      .mt-3 { transform: translateX(135px); }
+      .mt-4 { transform: translate(-80px, 120px); }
+      .mt-5 { transform: translate(80px, 120px); }
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-elevated);
+      z-index: 2000;
+      display: none;
+      flex-direction: column;
+      padding: 24px clamp(14px, 4vw, 28px);
+      box-sizing: border-box;
+      animation: overlayIn 260ms cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+    }
+
+    @keyframes overlayIn {
+      from { transform: translateY(18px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .overlay-close {
+      align-self: flex-end;
+      width: 44px;
+      height: 44px;
+      margin-bottom: 4px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      background: var(--bg-page);
+      color: var(--text-soft);
+      font-size: 1.65rem;
+      line-height: 1;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: color 160ms ease, border-color 160ms ease;
+    }
+
+    .overlay-close:hover { color: var(--accent); border-color: var(--accent); }
+    .overlay-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .ov-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--border-subtle);
+    }
+
+    .ov-sym-icon {
+      width: 52px;
+      height: 52px;
+      background: var(--bg-page);
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .ov-img {
+      width: 100%;
+      max-height: min(260px, 40vh);
+      object-fit: cover;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      background: var(--bg-page);
+    }
+
+    #ovEx {
+      font-size: 1.05rem;
+      line-height: 1.5;
+      color: var(--text);
+      margin: 0 0 14px;
+      font-weight: 500;
+    }
+
+    .def-wrapper {
+      background: color-mix(in srgb, var(--bg-page) 88%, var(--accent));
+      border-radius: 12px;
+      padding: 15px;
+      border-left: 4px solid var(--accent);
+    }
+
+    .def-wrapper strong {
+      display: block;
+      color: var(--text-soft);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+
+    #ovDef {
+      font-size: 0.94rem;
+      color: var(--text-soft);
+      line-height: 1.52;
+      margin: 0;
+    }
+
+    #ovTitle {
+      margin: 0;
+      font-size: 1.35rem;
+      color: var(--tree-dark);
+    }
+
+    [data-theme="dark"] #ovTitle { color: var(--accent); }
+
+    .scroll-top-btn {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      color: var(--text);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+      cursor: pointer;
+      z-index: 150;
+      transition: opacity 180ms ease, transform 180ms ease, color 180ms ease;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+    }
+
+    .scroll-top-btn.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .scroll-top-btn:hover { color: var(--accent); }
+    .scroll-top-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    @media (max-width: 768px) {
+      .scroll-top-btn {
+        display: flex;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <h1>Архітектурні зв'язки: Екосистема Дерева</h1>
-
-    <div class="diagram-container">
-
-        <!-- Дуб вгорі — батьківський абстрактний клас -->
-        <div class="entity hide-on-mobile p-oak" onclick="handleInteraction('oak')">
-            <img src="./oak.jpg" alt=""><b>Дуб</b><i>The Object</i>
-            <div class="desktop-hint">
-                <div class="hint-def"><b>Дуб (Oak)</b><br>Центральна конкретна сутність.</div>
-                <div class="hint-ex">Це живий екземпляр, який наслідує Дерево і є центром усіх зв'язків.</div>
-            </div>
+  <header class="page-header">
+    <div class="header-row">
+      <h1>
+        <span data-ua>Архітектурні звʼязки: екосистема дерева</span>
+        <span data-en>UML relationships: tree ecosystem</span>
+      </h1>
+      <div class="header-toolbar">
+        <div class="md-help-anchor" id="md-help-anchor">
+        <button type="button" class="md-chip md-chip--icon-only" id="md-help-chip" aria-expanded="false" aria-haspopup="true" aria-controls="md-help-panel" aria-label="Довідка про діаграму">
+          <span class="material-symbols-rounded" aria-hidden="true">info</span>
+        </button>
+        <div id="md-help-panel" class="md-help-surface" role="tooltip">
+          <p class="help-block">
+            <span data-ua>На широкому екрані: навідись на блок-приклад або символ звʼязку; клік закріплює картку зверху й розтягує бокс-прев’ю під ту ж ширину. Порожній клік по розмитому тлі або Esc — закрити.</span>
+            <span data-en>Wide layout: hover a sample box or link symbol; click pins the card and widens the preview box to match. Click the dimmed backdrop or Esc to dismiss.</span>
+          </p>
+          <p class="help-block">
+            <span data-ua>На вузькому — тап по піктограмах навколо «Дерево» відкриває картку (текст у картках українською).</span>
+            <span data-en>Narrow screens: tap the icons around «Tree» (sheet stays UA).</span>
+          </p>
         </div>
+      </div>
+      <div class="header-toolbar-spacer" aria-hidden="true"></div>
+      <div class="header-actions">
+        <button type="button" class="toggle-chip" id="toggle-lang" aria-label="Мова UA. Перемкнути на EN">
+          <span class="lang-label-short" id="toggle-lang-label">UA</span>
+        </button>
+        <button type="button" class="toggle-chip" id="toggle-theme" aria-label="Перемкнути тему">
+          <span class="material-symbols-rounded" id="theme-chip-icon" aria-hidden="true">dark_mode</span>
+        </button>
+        <span class="brand-carrot" aria-hidden="true">🥕</span>
+      </div>
+      </div>
+    </div>
+  </header>
 
-        <!-- Дерево в центрі — конкретний об'єкт -->
-        <div class="entity p-tree" onclick="handleInteraction('tree')">
-            <img src="./tree.png" alt=""><b>Дерево</b><i>Abstract Class</i>
-            <div class="desktop-hint">
-                <div class="hint-def"><b>Дерево (Tree)</b><br>Абстрактний базовий клас екосистеми.</div>
-                <div class="hint-ex">Визначає загальну поведінку та атрибути, спільні для всіх дерев.</div>
-            </div>
+  <main>
+    <div class="diagram-scroll">
+      <div class="diagram-container" aria-label="UML tree diagram">
+
+      <button type="button" class="entity hide-on-mobile p-oak hint-dock-below" data-interact="oak" aria-label="Дуб (Oak Object)">
+        <img src="oak.jpg" alt="Дуб, приклад об'єкту успадкування для дерева класів">
+        <b>Дуб</b><i>The Object</i>
+        <div class="desktop-hint">
+          <div class="hint-def"><b>Дуб (Oak)</b><br>Центральна конкретна сутність.</div>
+          <div class="hint-ex">Це живий екземпляр, який наслідує Дерево і є центром усіх зв'язків.</div>
         </div>
+      </button>
 
-        <div class="entity hide-on-mobile p-bark" onclick="handleInteraction('bark')">
-            <img src="./bark.jpg" alt=""><b>Кора</b><i>Component</i>
-            <div class="desktop-hint">
-                <div class="hint-def"><b>Кора (Bark)</b><br>Внутрішній компонент об'єкта.</div>
-                <div class="hint-ex">Складова частина Дерева з жорстким життєвим циклом.</div>
-            </div>
+      <button type="button" class="entity p-tree hint-dock-below" data-interact="tree" aria-label="Дерево (abstract class Tree)">
+        <img src="tree.png" alt="Абстрактний клас дерев в UML дереві екосистеми">
+        <b>Дерево</b><i>Abstract Class</i>
+        <div class="desktop-hint">
+          <div class="hint-def"><b>Дерево (Tree)</b><br>Абстрактний базовий клас екосистеми.</div>
+          <div class="hint-ex">Визначає загальну поведінку та атрибути, спільні для всіх дерев.</div>
         </div>
+      </button>
 
-        <div class="entity hide-on-mobile p-nest" onclick="handleInteraction('nest')">
-            <img src="./nest.jpg" alt=""><b>Гніздо</b><i>Aggregate</i>
-            <div class="desktop-hint">
-                <div class="hint-def"><b>Гніздо (Nest)</b><br>Зовнішня сутність-контейнер.</div>
-                <div class="hint-ex">Знімний об'єкт, який агрегується деревом.</div>
-            </div>
+      <button type="button" class="entity hide-on-mobile p-bark hint-dock-below" data-interact="bark" aria-label="Кора як композиція">
+        <img src="bark.jpg" alt="Кора як складова деревини">
+        <b>Кора</b><i>Component</i>
+        <div class="desktop-hint">
+          <div class="hint-def"><b>Кора (Bark)</b><br>Внутрішній компонент об'єкта.</div>
+          <div class="hint-ex">Складова частина Дерева з жорстким життєвим циклом.</div>
         </div>
+      </button>
 
-        <div class="entity hide-on-mobile p-mushroom" onclick="handleInteraction('mushroom')">
-            <img src="./mushroom.jpg" alt=""><b>Гриб</b><i>Associate</i>
-            <div class="desktop-hint">
-                <div class="hint-def"><b>Гриб (Mushroom)</b><br>Сусідній елемент системи.</div>
-                <div class="hint-ex">Незалежний об'єкт, що взаємодіє з деревом.</div>
-            </div>
+      <button type="button" class="entity hide-on-mobile p-nest hint-dock-below" data-interact="nest" aria-label="Гніздо як агрегація">
+        <img src="nest.jpg" alt="Пташине гніздо на гілках">
+        <b>Гніздо</b><i>Aggregate</i>
+        <div class="desktop-hint">
+          <div class="hint-def"><b>Гніздо (Nest)</b><br>Зовнішня сутність-контейнер.</div>
+          <div class="hint-ex">Знімний об'єкт, який агрегується деревом.</div>
         </div>
+      </button>
 
-        <div class="entity hide-on-mobile p-sun" onclick="handleInteraction('sun')">
-            <img src="./sun.jpg" alt=""><b>Сонце</b><i>Dependency</i>
-            <div class="desktop-hint">
-                <div class="hint-def"><b>Сонце (Sun)</b><br>Зовнішній ресурс.</div>
-                <div class="hint-ex">Ресурс, необхідний для роботи внутрішніх методів дерева.</div>
-            </div>
+      <button type="button" class="entity hide-on-mobile p-mushroom" data-interact="mushroom" aria-label="Гриб як асоційована сторона">
+        <img src="mushroom.jpg" alt="Гриби біля стовбура">
+        <b>Гриб</b><i>Associate</i>
+        <div class="desktop-hint">
+          <div class="hint-def"><b>Гриб (Mushroom)</b><br>Сусідній елемент системи.</div>
+          <div class="hint-ex">Незалежний об'єкт, що взаємодіє з деревом.</div>
         </div>
+      </button>
 
-        <!-- Лінії -->
-        <div class="static-line l-inheritance"></div>
-        <div class="static-line l-composition"></div>
-        <div class="static-line l-aggregation"></div>
-        <div class="static-line l-association"></div>
+      <button type="button" class="entity hide-on-mobile p-sun" data-interact="sun" aria-label="Сонце як зовнішня залежність">
+        <img src="sun.jpg" alt="Сонце над лісом">
+        <b>Сонце</b><i>Dependency</i>
+        <div class="desktop-hint">
+          <div class="hint-def"><b>Сонце (Sun)</b><br>Зовнішній ресурс.</div>
+          <div class="hint-ex">Ресурс, необхідний для роботи внутрішніх методів дерева.</div>
+        </div>
+      </button>
 
-        <!-- SVG пунктир Dependency: від центру Дерева (500,325) до центру Сонця (700,550) -->
-        <svg class="static-line" style="position:absolute; top:325px; left:500px; z-index:5; pointer-events:none; overflow:visible; background:none;">
-            <line x1="0" y1="0" x2="200" y2="225" stroke="#34495e" stroke-width="2" stroke-dasharray="6,4"/>
+      <div class="static-line l-inheritance" aria-hidden="true"></div>
+      <div class="static-line l-composition" aria-hidden="true"></div>
+      <div class="static-line l-aggregation" aria-hidden="true"></div>
+      <div class="static-line l-association" aria-hidden="true"></div>
+
+      <svg class="static-line" style="position:absolute; top:360px; left:500px; z-index:5; pointer-events:none; overflow:visible; background:none;" aria-hidden="true">
+        <line x1="0" y1="0" x2="200" y2="225" stroke="currentColor" stroke-width="2" stroke-dasharray="6,4"/>
+      </svg>
+
+      <button type="button" class="sym t-inheritance hint-dock-below" data-interact="inheritance" aria-label="Наслідування">
+        <div class="sym-arrow" aria-hidden="true"></div>
+        <div class="desktop-hint">
+          <div class="hint-def"><b>Наслідування (Inheritance)</b><br>Зв'язок типу 'IS-A'. Клас успадковує властивості предка.</div>
+          <div class="hint-ex"><b>Приклад:</b> Дуб отримує коріння та здібність до фотосинтезу від абстрактного класу Дерево.</div>
+        </div>
+      </button>
+
+      <button type="button" class="sym t-composition hint-dock-below" data-interact="composition" aria-label="Композиція">
+        <div class="sym-diamond-f" aria-hidden="true"></div>
+        <div class="desktop-hint">
+          <div class="hint-def"><b>Композиція (Composition)</b><br>Жорстка залежність ('PART-OF'). Частина не існує без цілого.</div>
+          <div class="hint-ex"><b>Приклад:</b> Кора є частиною Дерева. Якщо дерево знищується, Кора зникає разом з ним.</div>
+        </div>
+      </button>
+
+      <button type="button" class="sym t-aggregation hint-dock-below" data-interact="aggregation" aria-label="Агрегація">
+        <div class="sym-diamond-e" aria-hidden="true"></div>
+        <div class="desktop-hint">
+          <div class="hint-def"><b>Агрегація (Aggregation)</b><br>Слабкий зв'язок ('HAS-A'). Частини можуть існувати окремо.</div>
+          <div class="hint-ex"><b>Приклад:</b> Дерево містить Гніздо, але гніздо може бути переміщене на інше дерево.</div>
+        </div>
+      </button>
+
+      <button type="button" class="sym line-badge t-association" data-interact="association" aria-label="Асоціація">
+        <span aria-hidden="true">/</span>
+        <div class="desktop-hint">
+          <div class="hint-def"><b>Асоціація (Association)</b><br>Структурний зв'язок між незалежними об'єктами екосистеми.</div>
+          <div class="hint-ex"><b>Приклад:</b> Взаємодія Дерева та Гриба (обмін речовинами через ґрунт).</div>
+        </div>
+      </button>
+
+      <button type="button" class="sym line-badge t-dependency" data-interact="dependency" aria-label="Залежність">
+        <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">
+          <line x1="0" y1="30" x2="30" y2="0" stroke="currentColor" stroke-width="3" stroke-dasharray="5,3"/>
         </svg>
-
-        <!-- Символи зв'язків -->
-        <div class="sym t-inheritance">
-            <div class="sym-arrow"></div>
-            <div class="desktop-hint">
-                <div class="hint-def"><b>Наслідування (Inheritance)</b><br>Зв'язок типу 'IS-A'. Клас успадковує властивості предка.</div>
-                <div class="hint-ex"><b>Приклад:</b> Дуб отримує коріння та здібність до фотосинтезу від абстрактного класу Дерево.</div>
-            </div>
+        <div class="desktop-hint">
+          <div class="hint-def"><b>Залежність (Dependency)</b><br>Тимчасовий зв'язок ('USES'). Об'єкт потрібен для методу.</div>
+          <div class="hint-ex"><b>Приклад:</b> Дерево тимчасово використовує Сонце для процесу фотосинтезу.</div>
         </div>
+      </button>
 
-        <div class="sym t-composition">
-            <div class="sym-diamond-f"></div>
-            <div class="desktop-hint">
-                <div class="hint-def"><b>Композиція (Composition)</b><br>Жорстка залежність ('PART-OF'). Частина не існує без цілого.</div>
-                <div class="hint-ex"><b>Приклад:</b> Кора є частиною Дерева. Якщо дерево знищується, Кора зникає разом з ним.</div>
-            </div>
-        </div>
+      <button type="button" class="mobile-trigger mt-1" data-interact="inheritance" aria-label="Наслідування (мобільний)">
+        <div class="sym-arrow" aria-hidden="true"></div>
+      </button>
+      <button type="button" class="mobile-trigger mt-2" data-interact="composition" aria-label="Композиція (мобільний)">
+        <div class="sym-diamond-f" aria-hidden="true"></div>
+      </button>
+      <button type="button" class="mobile-trigger mt-3" data-interact="aggregation" aria-label="Агрегація (мобільний)">
+        <div class="sym-diamond-e" aria-hidden="true"></div>
+      </button>
+      <button type="button" class="mobile-trigger mt-4" data-interact="association" aria-label="Асоціація (мобільний)">
+        <span style="font-size:22px; font-weight:700; color:var(--line-color);" aria-hidden="true">/</span>
+      </button>
+      <button type="button" class="mobile-trigger mt-5" data-interact="dependency" aria-label="Залежність (мобільний)">
+        <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+          <line x1="0" y1="28" x2="28" y2="0" stroke="var(--line-color)" stroke-width="3" stroke-dasharray="5,3"/>
+        </svg>
+      </button>
 
-        <div class="sym t-aggregation">
-            <div class="sym-diamond-e"></div>
-            <div class="desktop-hint">
-                <div class="hint-def"><b>Агрегація (Aggregation)</b><br>Слабкий зв'язок ('HAS-A'). Частини можуть існувати окремо.</div>
-                <div class="hint-ex"><b>Приклад:</b> Дерево містить Гніздо, але гніздо може бути переміщене на інше дерево.</div>
-            </div>
-        </div>
-
-        <div class="sym line-badge t-association">
-            /
-            <div class="desktop-hint">
-                <div class="hint-def"><b>Асоціація (Association)</b><br>Структурний зв'язок між незалежними об'єктами екосистеми.</div>
-                <div class="hint-ex"><b>Приклад:</b> Взаємодія Дерева та Гриба (обмін речовинами через ґрунт).</div>
-            </div>
-        </div>
-
-        <div class="sym line-badge t-dependency">
-            <svg width="30" height="30" viewBox="0 0 30 30">
-                <line x1="0" y1="30" x2="30" y2="0" stroke="#34495e" stroke-width="3" stroke-dasharray="5,3"/>
-            </svg>
-            <div class="desktop-hint">
-                <div class="hint-def"><b>Залежність (Dependency)</b><br>Тимчасовий зв'язок ('USES'). Об'єкт потрібен для методу.</div>
-                <div class="hint-ex"><b>Приклад:</b> Дерево тимчасово використовує Сонце для процесу фотосинтезу.</div>
-            </div>
-        </div>
-
-        <!-- Mobile triggers -->
-        <div class="mobile-trigger mt-1" onclick="handleInteraction('inheritance')"><div class="sym-arrow"></div></div>
-        <div class="mobile-trigger mt-2" onclick="handleInteraction('composition')"><div class="sym-diamond-f"></div></div>
-        <div class="mobile-trigger mt-3" onclick="handleInteraction('aggregation')"><div class="sym-diamond-e"></div></div>
-        <div class="mobile-trigger mt-4" onclick="handleInteraction('association')"><div style="font-size:24px; font-weight:bold; color:var(--line-color);">/</div></div>
-        <div class="mobile-trigger mt-5" onclick="handleInteraction('dependency')">
-            <svg width="28" height="28" viewBox="0 0 28 28">
-                <line x1="0" y1="28" x2="28" y2="0" stroke="#34495e" stroke-width="3" stroke-dasharray="5,3"/>
-            </svg>
-        </div>
-
+      </div>
     </div>
+  </main>
 
-    <div id="mOverlay" class="overlay">
-        <div class="ov-close" onclick="closeOverlay()">×</div>
-        <div class="ov-header">
-            <div class="ov-sym-icon" id="ovSym"></div>
-            <h2 id="ovTitle" style="margin:0; font-size:1.4rem; color:var(--tree-dark);"></h2>
-        </div>
-        <img id="ovImg" class="ov-img" src="" alt="Photo">
-        <p id="ovEx"></p>
-        <div class="def-wrapper">
-            <strong>Тип зв'язку: теорія</strong>
-            <p id="ovDef"></p>
-        </div>
+  <div id="mOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="ovTitle" aria-hidden="true">
+    <button type="button" class="overlay-close" id="overlayClose" aria-label="Закрити">×</button>
+    <div class="ov-header">
+      <div class="ov-sym-icon" id="ovSym" aria-hidden="true"></div>
+      <h2 id="ovTitle"></h2>
     </div>
+    <img id="ovImg" class="ov-img" src="" alt="">
+    <p id="ovEx"></p>
+    <div class="def-wrapper">
+      <strong data-ua>Тип зв'язку: теорія</strong>
+      <strong data-en>Link type: theory</strong>
+      <p id="ovDef"></p>
+    </div>
+  </div>
 
-    <script>
-        const data = {
-            tree: {
-                sym: '🌳', title: "Дерево (Tree Class)",
-                ex: "Визначає загальну поведінку та атрибути, спільні для всіх дерев.",
-                def: "Абстрактний опис. Базовий клас екосистеми.", img: "./tree.png"
-            },
-            oak: {
-                sym: '🌰', title: "Дуб (Oak Object)",
-                ex: "Це живий екземпляр, який наслідує Дерево і є центром усіх зв'язків.",
-                def: "Центральна конкретна сутність у нашій системі.", img: "./oak.jpg"
-            },
-            inheritance: {
-                sym: '<div class="sym-arrow" style="border-left:10px solid transparent; border-right:10px solid transparent; border-bottom:18px solid #34495e;"></div>',
-                title: "Наслідування (Inheritance)",
-                ex: "Приклад: Дуб отримує коріння та здібність до фотосинтезу від абстрактного класу Дерево.",
-                def: "Зв'язок типу 'IS-A' (Є одним із). Клас успадковує базові властивості та методи свого предка.", img: "./oak.jpg"
-            },
-            composition: {
-                sym: '<div class="sym-diamond-f" style="width:18px; height:18px;"></div>',
-                title: "Композиція (Composition)",
-                ex: "Приклад: Кора є частиною Дерева. Якщо дерево знищується, Кора зникає разом з ним.",
-                def: "Жорстка залежність 'PART-OF'. Частина не може існувати без цілого.", img: "./bark.jpg"
-            },
-            aggregation: {
-                sym: '<div class="sym-diamond-e" style="width:18px; height:18px; border-width:3px;"></div>',
-                title: "Агрегація (Aggregation)",
-                ex: "Приклад: Дерево містить Гніздо, але гніздо може бути переміщене на інше дерево.",
-                def: "Слабкий зв'язок 'HAS-A'. Агреговані частини можуть існувати окремо від цілого.", img: "./nest.jpg"
-            },
-            association: {
-                sym: '<div style="font-size:28px; font-weight:bold; color:#34495e;">/</div>',
-                title: "Асоціація (Association)",
-                ex: "Приклад: Взаємодія Дерева та Гриба (наприклад, обмін речовинами через ґрунт).",
-                def: "Структурний зв'язок між незалежними об'єктами. Вони знають один про одного, але не володіють одне одним.", img: "./mushroom.jpg"
-            },
-            dependency: {
-                sym: '<svg width="28" height="28" viewBox="0 0 28 28"><line x1="0" y1="28" x2="28" y2="0" stroke="#34495e" stroke-width="3" stroke-dasharray="5,3"/></svg>',
-                title: "Залежність (Dependency)",
-                ex: "Приклад: Дерево тимчасово використовує Сонце для процесу фотосинтезу.",
-                def: "Тимчасовий зв'язок 'USES'. Об'єкт потрібен лише як інструмент або параметр для виконання конкретного методу.", img: "./sun.jpg"
-            }
-        };
+  <button type="button" class="scroll-top-btn" id="scroll-top-btn" aria-label="Вгору">
+    <span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_up</span>
+  </button>
 
-        function handleInteraction(key) {
-            if (window.matchMedia("(max-width: 900px)").matches) {
-                const item = data[key];
-                if (item) {
-                    document.getElementById('ovSym').innerHTML = item.sym;
-                    document.getElementById('ovTitle').innerText = item.title;
-                    document.getElementById('ovEx').innerText = item.ex;
-                    document.getElementById('ovDef').innerText = item.def;
-                    document.getElementById('ovImg').src = item.img;
-                    document.getElementById('mOverlay').style.display = 'flex';
-                }
+  <div id="pin-focus-veil" class="pin-focus-veil" aria-hidden="true" hidden></div>
+  <div id="sticky-tooltip" class="sticky-tooltip-root" role="tooltip" aria-hidden="true" hidden></div>
+
+  <style>
+    .diagram-container svg.static-line { color: var(--line-color); }
+    .diagram-container svg.static-line line { stroke: currentColor; }
+    .sym.t-dependency svg { color: var(--line-color); }
+  </style>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var THEME_KEY = 'uml-tree-theme';
+      var LANG_KEY = 'uml-tree-lang';
+
+      var data = {
+        tree: {
+          sym: '🌳',
+          title: "Дерево (Tree Class)",
+          ex: "Визначає загальну поведінку та атрибути, спільні для всіх дерев.",
+          def: "Абстрактний опис. Базовий клас екосистеми.",
+          img: "tree.png",
+          alt: "Ілюстрація абстрактного класу Дерево"
+        },
+        oak: {
+          sym: '🌰',
+          title: "Дуб (Oak Object)",
+          ex: "Це живий екземпляр, який наслідує Дерево і є центром усіх зв'язків.",
+          def: "Центральна конкретна сутність у нашій системі.",
+          img: "oak.jpg",
+          alt: "Дуб як конкретний об'єкт"
+        },
+        inheritance: {
+          symHTML: '<div class="sym-arrow" style="border-left:10px solid transparent; border-right:10px solid transparent; border-bottom:18px solid var(--line-color);"></div>',
+          title: "Наслідування (Inheritance)",
+          ex: "Приклад: Дуб отримує коріння та здібність до фотосинтезу від абстрактного класу Дерево.",
+          def: "Зв'язок типу 'IS-A' (Є одним із). Клас успадковує базові властивості та методи свого предка.",
+          img: "oak.jpg",
+          alt: "Приклад наслідування"
+        },
+        composition: {
+          symHTML: '<div class="sym-diamond-f" style="width:18px; height:18px;"></div>',
+          title: "Композиція (Composition)",
+          ex: "Приклад: Кора є частиною Дерева. Якщо дерево знищується, Кора зникає разом з ним.",
+          def: "Жорстка залежність 'PART-OF'. Частина не може існувати без цілого.",
+          img: "bark.jpg",
+          alt: "Приклад композиції"
+        },
+        aggregation: {
+          symHTML: '<div class="sym-diamond-e" style="width:18px; height:18px; border-width:3px;"></div>',
+          title: "Агрегація (Aggregation)",
+          ex: "Приклад: Дерево містить Гніздо, але гніздо може бути переміщене на інше дерево.",
+          def: "Слабкий зв'язок 'HAS-A'. Агреговані частини можуть існувати окремо від цілого.",
+          img: "nest.jpg",
+          alt: "Приклад агрегації"
+        },
+        association: {
+          symHTML: '<div style="font-size:24px; font-weight:bold; color:var(--line-color);">/</div>',
+          title: "Асоціація (Association)",
+          ex: "Приклад: Взаємодія Дерева та Гриба (наприклад, обмін речовинами через ґрунт).",
+          def: "Структурний зв'язок між незалежними об'єктами. Вони знають один про одного, але не володіють одне одним.",
+          img: "mushroom.jpg",
+          alt: "Приклад асоціації"
+        },
+        dependency: {
+          symHTML: '<svg width="28" height="28" viewBox="0 0 28 28"><line x1="0" y1="28" x2="28" y2="0" stroke="var(--line-color)" stroke-width="3" stroke-dasharray="5,3"/></svg>',
+          title: "Залежність (Dependency)",
+          ex: "Приклад: Дерево тимчасово використовує Сонце для процесу фотосинтезу.",
+          def: "Тимчасовий зв'язок 'USES'. Об'єкт потрібен лише як інструмент або параметр для виконання конкретного методу.",
+          img: "sun.jpg",
+          alt: "Приклад залежності"
+        }
+      };
+
+      var overlay = document.getElementById('mOverlay');
+      var scrollTopBtn = document.getElementById('scroll-top-btn');
+      var stickyTooltip = document.getElementById('sticky-tooltip');
+      var pinFocusVeil = document.getElementById('pin-focus-veil');
+      var mdHelpAnchor = document.getElementById('md-help-anchor');
+      var mdHelpChip = document.getElementById('md-help-chip');
+      var toggleLangBtn = document.getElementById('toggle-lang');
+      var toggleThemeBtn = document.getElementById('toggle-theme');
+      var toggleLangLabel = document.getElementById('toggle-lang-label');
+      var themeChipIcon = document.getElementById('theme-chip-icon');
+      var diagram = document.querySelector('.diagram-container');
+      var pinnedAnchor = null;
+
+      function mqMobile() {
+        return window.matchMedia('(max-width: 900px)').matches;
+      }
+
+      function syncChrome() {
+        var lang = document.documentElement.getAttribute('data-lang');
+        toggleLangLabel.textContent = lang === 'uk' ? 'UA' : 'EN';
+        toggleLangBtn.setAttribute(
+          'aria-label',
+          lang === 'uk' ? 'Мова UA. Перемкнути на EN' : 'Language EN. Switch to UA'
+        );
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        themeChipIcon.textContent = isDark ? 'dark_mode' : 'light_mode';
+        toggleThemeBtn.setAttribute(
+          'aria-label',
+          isDark ? 'Темна тема. Перемкнути на світлу' : 'Light theme. Switch to dark'
+        );
+      }
+
+      function setTheme(mode) {
+        if (mode !== 'light' && mode !== 'dark') mode = 'dark';
+        document.documentElement.setAttribute('data-theme', mode);
+        try { localStorage.setItem(THEME_KEY, mode); } catch (e) {}
+        syncChrome();
+      }
+
+      function setLang(lang) {
+        if (lang !== 'uk' && lang !== 'en') lang = 'uk';
+        document.documentElement.setAttribute('data-lang', lang);
+        document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'uk');
+        try { localStorage.setItem(LANG_KEY, lang); } catch (e) {}
+        syncChrome();
+      }
+
+      function hideStickyTooltipVisual() {
+        stickyTooltip.classList.remove('visible');
+        stickyTooltip.innerHTML = '';
+        stickyTooltip.hidden = true;
+        stickyTooltip.style.left = '';
+        stickyTooltip.style.top = '';
+        stickyTooltip.style.width = '';
+        stickyTooltip.style.maxWidth = '';
+        stickyTooltip.style.visibility = '';
+        stickyTooltip.setAttribute('aria-hidden', 'true');
+      }
+
+      function clearPinFocusVeil() {
+        document.body.classList.remove('diagram-pin-active');
+        if (pinFocusVeil) {
+          pinFocusVeil.hidden = true;
+          pinFocusVeil.setAttribute('aria-hidden', 'true');
+        }
+      }
+
+      function showPinFocusVeil() {
+        if (!pinFocusVeil) return;
+        pinFocusVeil.hidden = false;
+        pinFocusVeil.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('diagram-pin-active');
+      }
+
+      function unpinDesktop() {
+        if (!pinnedAnchor) return;
+        if (pinnedAnchor.classList.contains('entity')) {
+          pinnedAnchor.style.width = '';
+          pinnedAnchor.style.left = '';
+          pinnedAnchor.style.top = '';
+          delete pinnedAnchor.dataset.pinOrigTop;
+        }
+        diagram.classList.remove('has-pinned-hint');
+        pinnedAnchor.classList.remove('sym--pin-active');
+        pinnedAnchor.classList.remove('entity--pin-expanded');
+        pinnedAnchor = null;
+        clearPinFocusVeil();
+        hideStickyTooltipVisual();
+      }
+
+      function layoutStickyNearAnchor() {
+        if (!pinnedAnchor) return;
+        stickyTooltip.hidden = false;
+        stickyTooltip.classList.remove('visible');
+
+        window.requestAnimationFrame(function () {
+          window.requestAnimationFrame(function () {
+            var pad = 12;
+            var gap = 14;
+            var maxW = Math.min(320, window.innerWidth - 24);
+            var dr = diagram.getBoundingClientRect();
+            var dPad = 8;
+            var diagramMidY = dr.top + dr.height * 0.5;
+            var dW = diagram.clientWidth;
+            var dH = diagram.clientHeight;
+
+            if (pinnedAnchor.classList.contains('entity')) {
+              pinnedAnchor.style.transition = 'none';
+
+              var origTop = parseFloat(pinnedAnchor.dataset.pinOrigTop);
+              if (isNaN(origTop)) origTop = NaN;
+
+              var rowBand = 'mid';
+              if (!isNaN(origTop)) {
+                if (origTop < 145) rowBand = 'top';
+                else if (origTop > 410) rowBand = 'bottom';
+              }
+
+              var er0 = pinnedAnchor.getBoundingClientRect();
+              var centerX = er0.left + er0.width / 2 - dr.left;
+              var newLeft = centerX - maxW / 2;
+
+              if (rowBand === 'top' || rowBand === 'bottom') {
+                var idealLeft = dW * 0.5 - maxW / 2;
+                newLeft = newLeft + (idealLeft - newLeft) * 0.28;
+              }
+
+              var maxLeft = dW - dPad - maxW;
+              newLeft = Math.max(dPad, Math.min(newLeft, maxLeft));
+
+              pinnedAnchor.style.width = maxW + 'px';
+              pinnedAnchor.style.left = Math.round(newLeft) + 'px';
+              void pinnedAnchor.offsetHeight;
+
+              if (rowBand === 'top' || rowBand === 'bottom') {
+                var eh = pinnedAnchor.offsetHeight;
+                var idealTop = dH * 0.5 - eh * 0.5;
+                var oT = origTop;
+                var nudged = oT + (idealTop - oT) * 0.42;
+                nudged = Math.max(6, Math.min(nudged, dH - eh - 6));
+                pinnedAnchor.style.top = Math.round(nudged) + 'px';
+              } else {
+                pinnedAnchor.style.removeProperty('top');
+              }
+
+              void pinnedAnchor.offsetHeight;
+              pinnedAnchor.style.removeProperty('transition');
             }
+
+            stickyTooltip.style.position = 'fixed';
+            stickyTooltip.style.width = maxW + 'px';
+            stickyTooltip.style.maxWidth = maxW + 'px';
+            stickyTooltip.style.left = '-99999px';
+            stickyTooltip.style.top = '0';
+            stickyTooltip.style.visibility = 'hidden';
+
+            var r = pinnedAnchor.getBoundingClientRect();
+            var tw = stickyTooltip.offsetWidth || maxW;
+            var th = stickyTooltip.offsetHeight;
+
+            var anchorMidY = r.top + r.height * 0.5;
+            var placeStickyBelow = anchorMidY < diagramMidY;
+
+            var ttTop;
+            if (placeStickyBelow) {
+              ttTop = r.bottom + gap;
+            } else {
+              ttTop = r.top - th - gap;
+            }
+
+            ttTop = Math.max(pad, Math.min(ttTop, window.innerHeight - pad - th));
+
+            var leftMid = r.left + r.width / 2 - tw / 2;
+            var ttLeft = Math.max(pad, Math.min(leftMid, window.innerWidth - pad - tw));
+
+            var db = diagram.getBoundingClientRect();
+            var dInset = 10;
+            ttLeft = Math.max(db.left + dInset, Math.min(ttLeft, db.right - tw - dInset));
+            ttTop = Math.max(db.top + dInset, Math.min(ttTop, db.bottom - th - dInset));
+
+            stickyTooltip.style.left = Math.round(ttLeft) + 'px';
+            stickyTooltip.style.top = Math.round(ttTop) + 'px';
+            stickyTooltip.style.removeProperty('visibility');
+            stickyTooltip.classList.add('visible');
+          });
+        });
+
+        stickyTooltip.setAttribute('aria-hidden', 'false');
+      }
+
+      function pinDesktop(pinHost, hintEl) {
+        if (mqMobile()) return;
+        if (pinnedAnchor && pinnedAnchor !== pinHost) {
+          if (pinnedAnchor.classList.contains('entity')) {
+            pinnedAnchor.style.width = '';
+            pinnedAnchor.style.left = '';
+            pinnedAnchor.style.top = '';
+            delete pinnedAnchor.dataset.pinOrigTop;
+          }
+          pinnedAnchor.classList.remove('sym--pin-active');
+          pinnedAnchor.classList.remove('entity--pin-expanded');
+        }
+        pinnedAnchor = pinHost;
+        stickyTooltip.innerHTML = hintEl.innerHTML;
+        diagram.classList.add('has-pinned-hint');
+        if (pinnedAnchor.classList.contains('sym')) pinnedAnchor.classList.add('sym--pin-active');
+        if (pinnedAnchor.classList.contains('entity')) {
+          pinnedAnchor.classList.add('entity--pin-expanded');
+          var c = getComputedStyle(pinnedAnchor);
+          pinnedAnchor.dataset.pinOrigTop = String(parseFloat(c.top));
+        }
+        stickyTooltip.hidden = false;
+        showPinFocusVeil();
+        layoutStickyNearAnchor();
+      }
+
+      function openOverlay(key) {
+        var item = data[key];
+        if (!item) return;
+
+        var symEl = document.getElementById('ovSym');
+        if (item.sym) {
+          symEl.textContent = '';
+          symEl.innerHTML = '';
+          symEl.textContent = item.sym;
+        } else {
+          symEl.innerHTML = item.symHTML;
         }
 
-        function closeOverlay() {
-            document.getElementById('mOverlay').style.display = 'none';
+        document.getElementById('ovTitle').textContent = item.title;
+        document.getElementById('ovEx').textContent = item.ex;
+        document.getElementById('ovDef').textContent = item.def;
+        var img = document.getElementById('ovImg');
+        img.src = item.img;
+        img.alt = item.alt;
+
+        overlay.classList.add('is-open');
+        overlay.style.display = 'flex';
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        document.getElementById('overlayClose').focus();
+      }
+
+      function closeOverlay() {
+        overlay.classList.remove('is-open');
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      function handleInteraction(key) {
+        if (!mqMobile()) return;
+        var item = data[key];
+        if (item) openOverlay(key);
+      }
+
+      function initState() {
+        var t = null;
+        var l = null;
+        try { t = localStorage.getItem(THEME_KEY); } catch (e) {}
+        try { l = localStorage.getItem(LANG_KEY); } catch (e) {}
+        setTheme(t === 'light' || t === 'dark' ? t : 'dark');
+        setLang(l === 'en' || l === 'uk' ? l : 'uk');
+
+        syncChrome();
+      }
+
+      function updateScrollTop() {
+        if (window.innerWidth > 768) {
+          scrollTopBtn.classList.remove('visible');
+          return;
         }
-    </script>
+        scrollTopBtn.classList.toggle('visible', window.scrollY > 200);
+      }
+
+      function onViewportChange() {
+        updateScrollTop();
+        if (pinnedAnchor) {
+          if (mqMobile()) unpinDesktop();
+          else layoutStickyNearAnchor();
+        }
+      }
+
+      diagram.addEventListener('click', function (e) {
+        var btnInteract = e.target.closest('[data-interact]');
+
+        if (mqMobile()) {
+          if (!btnInteract) return;
+          e.preventDefault();
+          handleInteraction(btnInteract.getAttribute('data-interact'));
+          return;
+        }
+
+        var pinHost = e.target.closest('.entity, .sym');
+        if (!pinHost || !pinHost.querySelector('.desktop-hint')) return;
+
+        var hintEl = pinHost.querySelector('.desktop-hint');
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (pinnedAnchor === pinHost) {
+          unpinDesktop();
+          return;
+        }
+
+        pinDesktop(pinHost, hintEl);
+      });
+
+      diagram.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        var btnInteract = e.target.closest('[data-interact]');
+        if (!btnInteract) return;
+        e.preventDefault();
+        if (mqMobile()) handleInteraction(btnInteract.getAttribute('data-interact'));
+      });
+
+      toggleThemeBtn.addEventListener('click', function () {
+        var cur = document.documentElement.getAttribute('data-theme');
+        setTheme(cur === 'dark' ? 'light' : 'dark');
+      });
+
+      toggleLangBtn.addEventListener('click', function () {
+        var cur = document.documentElement.getAttribute('data-lang');
+        setLang(cur === 'uk' ? 'en' : 'uk');
+      });
+
+      if (pinFocusVeil) {
+        pinFocusVeil.addEventListener('click', function () {
+          if (pinnedAnchor) unpinDesktop();
+        });
+      }
+
+      function mdHelpNeedsToggleOnTap() {
+        return window.matchMedia('(hover: none), (pointer: coarse)').matches;
+      }
+
+      function closeMdHelp() {
+        if (!mdHelpAnchor || !mdHelpChip) return;
+        mdHelpAnchor.classList.remove('is-open');
+        mdHelpChip.setAttribute('aria-expanded', 'false');
+      }
+
+      if (mdHelpChip && mdHelpAnchor) {
+        mdHelpChip.addEventListener('click', function (e) {
+          if (!mdHelpNeedsToggleOnTap()) return;
+          e.stopPropagation();
+          var isOpen = mdHelpAnchor.classList.toggle('is-open');
+          mdHelpChip.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+      }
+
+      document.addEventListener('click', function (e) {
+        if (mdHelpAnchor && mdHelpChip && mdHelpNeedsToggleOnTap() && !mdHelpAnchor.contains(e.target)) {
+          closeMdHelp();
+        }
+        if (mqMobile() || !pinnedAnchor || !stickyTooltip.classList.contains('visible')) return;
+        if (stickyTooltip.contains(e.target)) return;
+        if (pinFocusVeil && pinFocusVeil.contains(e.target)) return;
+        if (e.target.closest('.page-header')) return;
+        unpinDesktop();
+      });
+
+      document.getElementById('overlayClose').addEventListener('click', closeOverlay);
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        if (overlay.getAttribute('aria-hidden') === 'false') {
+          closeOverlay();
+          return;
+        }
+        if (!mqMobile() && pinnedAnchor) unpinDesktop();
+        closeMdHelp();
+      });
+
+      scrollTopBtn.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      window.addEventListener('scroll', onViewportChange, true);
+      window.addEventListener('resize', onViewportChange);
+
+      initState();
+      updateScrollTop();
+    })();
+  </script>
 </body>
 </html>
