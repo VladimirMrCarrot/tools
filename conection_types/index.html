@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>UML типи звʼязків — екосистема дерева | tools</title>
-  <meta name="description" content="Інтерактивне дерево типів зв'язків UML з прикладом екосистеми: успадкування, композиція, агрегація, асоціація, залежність.">
+  <meta name="description" content="Інтерактивна схема типів звʼязків UML на прикладі лісу: успадкування, композиція, агрегація, асоціація, залежність.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
@@ -85,6 +85,20 @@
       align-items: stretch;
       font-size: 15px;
       line-height: 1.5;
+      --d-scale: 1;
+    }
+
+    @media (min-width: 901px) {
+      body {
+        --header-est: 108px;
+        --framed-w: calc(88vw - 32px);
+        --framed-h: calc((100dvh - var(--header-est) - 36px) * 0.88);
+        --d-scale: min(
+          2.35,
+          var(--framed-w) / 1000,
+          var(--framed-h) / 700
+        );
+      }
     }
 
     .material-symbols-rounded {
@@ -95,18 +109,33 @@
     }
 
     .page-header {
-      max-width: 1040px;
+      position: relative;
+      z-index: 2000;
+      width: 100%;
       margin: 0 auto;
       padding: 16px clamp(14px, 3vw, 28px) 14px;
-      border-bottom: 1px solid var(--border-subtle);
+      border-bottom: none;
     }
 
     .header-row {
       display: flex;
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
+      justify-content: center;
       align-items: center;
       gap: 10px 14px;
       row-gap: 12px;
+      width: 100%;
+      max-width: 100%;
+      margin-inline: auto;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      box-sizing: border-box;
+    }
+
+    @media (min-width: 901px) {
+      .header-row {
+        max-width: calc(1000px * var(--d-scale));
+      }
     }
 
     .page-header h1 {
@@ -118,26 +147,29 @@
       flex: 0 1 auto;
       min-width: 0;
       white-space: nowrap;
+      text-align: center;
+    }
+
+    @media (min-width: 901px) {
+      .page-header h1 {
+        white-space: normal;
+      }
     }
 
     .header-toolbar {
       display: flex;
       align-items: center;
-      flex: 1 1 0%;
+      flex: 0 0 auto;
       min-width: 0;
       gap: 8px;
     }
 
-    .header-toolbar-spacer {
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-
     /* MD-style help chip + surface (popover) */
+    /* Popover must stack over diagram (diagram uses transform → stacking; header above main). */
     .md-help-anchor {
       position: relative;
       flex: 0 0 auto;
-      z-index: 40;
+      z-index: 2;
     }
 
     .md-chip {
@@ -210,10 +242,10 @@
       transform: translateY(-4px);
       pointer-events: none;
       transition: opacity 140ms ease, visibility 140ms ease, transform 140ms ease;
-      z-index: 50;
+      z-index: 3;
     }
 
-    @media (min-width: 1040px) {
+    @media (min-width: 901px) {
       .md-help-surface { left: auto; right: 0; }
     }
 
@@ -240,6 +272,11 @@
       color: var(--text-soft);
       font-weight: 400;
       margin: 0;
+    }
+
+    .md-help-surface .help-block strong {
+      color: var(--text);
+      font-weight: 600;
     }
 
     .md-help-surface .help-block + .help-block {
@@ -295,25 +332,58 @@
 
     main {
       flex: 1;
+      min-height: 0;
+      position: relative;
+      z-index: 0;
+      width: 100%;
+      max-width: none;
+      margin-inline: auto;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: clamp(14px, 3vw, 28px);
+      padding: clamp(8px, 1.5vw, 20px) clamp(14px, 3vw, 28px);
       gap: 8px;
     }
 
     .diagram-scroll {
       width: 100%;
-      max-width: 1040px;
-      overflow-x: auto;
+      max-width: 100%;
+      flex: 0 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
       -webkit-overflow-scrolling: touch;
-      padding-block: 8px;
+      padding-block: 6px;
+    }
+
+    .diagram-stage {
+      width: 100%;
+      position: relative;
+      margin-inline: auto;
     }
 
     @media (min-width: 901px) {
+      .diagram-stage {
+        width: calc(1000px * var(--d-scale));
+        height: calc(700px * var(--d-scale));
+        flex-shrink: 0;
+      }
+
+      .diagram-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        transform: scale(var(--d-scale));
+        transform-origin: top left;
+        overflow: hidden;
+      }
+
       .diagram-scroll {
-        padding-block: 18px;
+        padding-block: clamp(4px, 1.2vw, 14px);
       }
     }
 
@@ -326,12 +396,6 @@
       height: 700px;
       max-width: none;
       border: 1px solid var(--border-subtle);
-    }
-
-    @media (min-width: 901px) {
-      .diagram-container {
-        overflow: hidden;
-      }
     }
 
     .entity {
@@ -567,6 +631,37 @@
       transform: translateX(-50%) translateY(0);
     }
 
+    /* Frosted overlay only on diagram (pinned card stays above this layer). */
+    .diagram-pin-veil {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 2800;
+      border-radius: inherit;
+      background: rgba(19, 18, 17, 0.22);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      pointer-events: auto;
+      cursor: default;
+    }
+
+    [data-theme="light"] .diagram-pin-veil {
+      background: rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    @media (max-width: 900px) {
+      .diagram-pin-veil { display: none !important; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .diagram-pin-veil {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+      }
+    }
+
     /* Sticky floating hint — desktop pinning (always top layer) */
     .sticky-tooltip-root {
       position: fixed;
@@ -592,14 +687,12 @@
       pointer-events: auto;
     }
 
-    /* Frosted veil while a diagram card is pinned (desktop) */
+    /* Full-screen dim only (no backdrop blur) — blur lives on .diagram-pin-veil so pinned UI stays sharp */
     .pin-focus-veil {
       position: fixed;
       inset: 0;
       z-index: 2147482900;
       background: rgba(19, 18, 17, 0.28);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
@@ -608,8 +701,6 @@
 
     [data-theme="light"] .pin-focus-veil {
       background: rgba(255, 255, 255, 0.35);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
     }
 
     body.diagram-pin-active .pin-focus-veil {
@@ -619,20 +710,16 @@
       cursor: default;
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      body.diagram-pin-active .pin-focus-veil {
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-      }
-    }
-
     @media (min-width: 901px) {
+      .diagram-container.has-pinned-hint .diagram-pin-veil {
+        display: block;
+      }
       .diagram-container.has-pinned-hint .desktop-hint {
         opacity: 0 !important;
         visibility: hidden !important;
       }
 
-      /* Never show orbiting tap targets on wide viewports */
+      /* Orbiting tap targets only on mobile */
       .mobile-trigger {
         display: none !important;
         visibility: hidden !important;
@@ -640,7 +727,7 @@
       }
 
       .entity.entity--pin-expanded {
-        z-index: 2147482960 !important;
+        z-index: 3200 !important;
         min-height: 168px;
         transform: translateY(-10px);
         box-shadow: 0 16px 44px rgba(0, 0, 0, 0.22);
@@ -668,7 +755,7 @@
       }
 
       .sym.sym--pin-active {
-        z-index: 2147482960 !important;
+        z-index: 3200 !important;
         filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.28));
       }
     }
@@ -676,70 +763,84 @@
     .mobile-trigger { display: none; }
 
     @media (max-width: 900px) {
-      html,
+      html {
+        overflow-x: hidden;
+        --mobile-dock-clearance: calc(20px + var(--switch-h) + 20px + env(safe-area-inset-bottom, 0px));
+      }
+
       body {
         overflow-x: hidden;
       }
 
+      /* Dock: theme / lang / brand — fixed bottom; keep in header DOM for syncChrome & pin click guard */
+      .header-actions {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 2050;
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+        margin: 0;
+        box-sizing: border-box;
+        background: color-mix(in srgb, var(--bg-page) 92%, var(--bg-elevated));
+        border-top: 1px solid var(--border-subtle);
+        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
+      }
+
+      [data-theme="dark"] .header-actions {
+        box-shadow: 0 -4px 28px rgba(0, 0, 0, 0.35);
+      }
+
       .page-header h1 {
-        flex: none;
-        width: 100%;
+        flex: 1 1 auto;
+        min-width: 0;
+        width: auto;
         font-size: clamp(0.65rem, 2.95vw + 0.28rem, 0.82rem);
         font-weight: 700;
         line-height: 1.2;
         white-space: nowrap;
-        text-align: center;
+        text-align: left;
         overflow: hidden;
         text-overflow: ellipsis;
       }
 
       .header-row {
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row;
+        align-items: center;
         flex-wrap: nowrap;
         gap: 10px;
+        padding-bottom: 12px;
       }
 
       .header-toolbar {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        width: 100%;
-        align-items: center;
-        gap: 4px;
-        flex: none;
-        min-width: 0;
-      }
-
-      .header-toolbar-spacer {
-        display: none;
-      }
-
-      .header-toolbar .header-actions {
-        display: contents;
-      }
-
-      .header-toolbar > .md-help-anchor {
-        justify-self: center;
-        width: 100%;
         display: flex;
-        justify-content: center;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: flex-end;
+        width: auto;
         min-width: 0;
-      }
-
-      .header-toolbar > .toggle-chip,
-      .header-toolbar > .brand-carrot {
-        justify-self: center;
-        min-width: 0;
+        gap: 0;
       }
 
       .md-help-anchor .md-chip {
         margin-inline: 0;
       }
 
+      .md-help-surface {
+        left: auto;
+        right: 0;
+      }
+
       main {
-        justify-content: flex-start;
+        justify-content: center;
         align-items: center;
         padding-inline: 12px;
+        padding-bottom: var(--mobile-dock-clearance);
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
@@ -753,7 +854,17 @@
         box-sizing: border-box;
       }
 
+      .diagram-stage {
+        width: 100%;
+        height: auto;
+        min-height: 0;
+      }
+
       .diagram-container {
+        position: relative;
+        left: auto;
+        top: auto;
+        transform: none;
         width: 100%;
         height: 450px;
         background: transparent;
@@ -959,6 +1070,8 @@
     @media (max-width: 768px) {
       .scroll-top-btn {
         display: flex;
+        bottom: calc(14px + var(--mobile-dock-clearance));
+        z-index: 2060;
       }
     }
   </style>
@@ -978,16 +1091,15 @@
         </button>
         <div id="md-help-panel" class="md-help-surface" role="tooltip">
           <p class="help-block">
-            <span data-ua>На широкому екрані: навідись на блок-приклад або символ звʼязку; клік закріплює картку зверху й розтягує бокс-прев’ю під ту ж ширину. Порожній клік по розмитому тлі або Esc — закрити.</span>
-            <span data-en>Wide layout: hover a sample box or link symbol; click pins the card and widens the preview box to match. Click the dimmed backdrop or Esc to dismiss.</span>
+            <span data-ua><strong>Компʼютер:</strong> наведи курсор на блок або значок звʼязку, клікни — зʼявиться закріплена підказка. Прибрати: клік поза діаграмою, по затемненню або клавіша Esc.</span>
+            <span data-en><strong>Desktop:</strong> hover a block or link icon, then click to pin the hint. Dismiss: click outside the diagram, the dimmed backdrop, or press Esc.</span>
           </p>
           <p class="help-block">
-            <span data-ua>На вузькому — тап по піктограмах навколо «Дерево» відкриває картку (текст у картках українською).</span>
-            <span data-en>Narrow screens: tap the icons around «Tree» (sheet stays UA).</span>
+            <span data-ua><strong>Телефон:</strong> натисни значок навколо «Дерево». Мова тексту — перемикач UA/EN.</span>
+            <span data-en><strong>Mobile:</strong> tap an icon around Tree. Card text follows the UA/EN toggle.</span>
           </p>
         </div>
       </div>
-      <div class="header-toolbar-spacer" aria-hidden="true"></div>
       <div class="header-actions">
         <button type="button" class="toggle-chip" id="toggle-lang" aria-label="Мова UA. Перемкнути на EN">
           <span class="lang-label-short" id="toggle-lang-label">UA</span>
@@ -1003,59 +1115,72 @@
 
   <main>
     <div class="diagram-scroll">
+      <div class="diagram-stage">
       <div class="diagram-container" aria-label="UML tree diagram">
 
-      <button type="button" class="entity hide-on-mobile p-oak hint-dock-below" data-interact="oak" aria-label="Дуб (Oak Object)">
-        <img src="oak.jpg" alt="Дуб, приклад об'єкту успадкування для дерева класів">
-        <b>Дуб</b><i>The Object</i>
+      <button type="button" class="entity hide-on-mobile p-oak hint-dock-below" data-interact="oak" aria-label="Дуб (об'єкт)">
+        <img src="oak.jpg" alt="" data-alt-ua="Дуб, приклад об'єкту успадкування для дерева класів" data-alt-en="Oak, example object for class inheritance">
+        <b><span data-ua>Дуб</span><span data-en>Oak</span></b><i><span data-ua>Об'єкт</span><span data-en>The Object</span></i>
         <div class="desktop-hint">
-          <div class="hint-def"><b>Дуб (Oak)</b><br>Центральна конкретна сутність.</div>
-          <div class="hint-ex">Це живий екземпляр, який наслідує Дерево і є центром усіх зв'язків.</div>
+          <div class="hint-def" data-ua><b>Дуб</b><br>Конкретний об'єкт у центрі схеми.</div>
+          <div class="hint-def" data-en><b>Oak</b><br>Concrete object at the center.</div>
+          <div class="hint-ex" data-ua>Живий «екземпляр дерева»: усі стрілки в прикладі відходять або приходять до нього.</div>
+          <div class="hint-ex" data-en>The living “tree instance” — in this diagram, most links involve it.</div>
         </div>
       </button>
 
-      <button type="button" class="entity p-tree hint-dock-below" data-interact="tree" aria-label="Дерево (abstract class Tree)">
-        <img src="tree.png" alt="Абстрактний клас дерев в UML дереві екосистеми">
-        <b>Дерево</b><i>Abstract Class</i>
+      <button type="button" class="entity p-tree hint-dock-below" data-interact="tree" aria-label="Дерево (абстрактний клас)">
+        <img src="tree.png" alt="" data-alt-ua="Абстрактний клас дерев в UML дереві екосистеми" data-alt-en="Abstract Tree class in the UML ecosystem diagram">
+        <b><span data-ua>Дерево</span><span data-en>Tree</span></b><i><span data-ua>Абстрактний клас</span><span data-en>Abstract Class</span></i>
         <div class="desktop-hint">
-          <div class="hint-def"><b>Дерево (Tree)</b><br>Абстрактний базовий клас екосистеми.</div>
-          <div class="hint-ex">Визначає загальну поведінку та атрибути, спільні для всіх дерев.</div>
+          <div class="hint-def" data-ua><b>Дерево</b><br>Узагальнення: «будь-яке дерево».</div>
+          <div class="hint-def" data-en><b>Tree</b><br>Generalization: “any tree”.</div>
+          <div class="hint-ex" data-ua>Спільні риси (коріння, гілки тощо). Дуб показує конкретний вид.</div>
+          <div class="hint-ex" data-en>Shared traits (roots, branches, etc.). Oak shows one concrete kind.</div>
         </div>
       </button>
 
-      <button type="button" class="entity hide-on-mobile p-bark hint-dock-below" data-interact="bark" aria-label="Кора як композиція">
-        <img src="bark.jpg" alt="Кора як складова деревини">
-        <b>Кора</b><i>Component</i>
+      <button type="button" class="entity hide-on-mobile p-bark hint-dock-below" data-interact="bark" aria-label="Кора (композиція)">
+        <img src="bark.jpg" alt="" data-alt-ua="Кора як складова деревини" data-alt-en="Bark as part of the wood structure">
+        <b><span data-ua>Кора</span><span data-en>Bark</span></b><i><span data-ua>Компонент</span><span data-en>Component</span></i>
         <div class="desktop-hint">
-          <div class="hint-def"><b>Кора (Bark)</b><br>Внутрішній компонент об'єкта.</div>
-          <div class="hint-ex">Складова частина Дерева з жорстким життєвим циклом.</div>
+          <div class="hint-def" data-ua><b>Кора</b><br>Частина дерева (композиція).</div>
+          <div class="hint-def" data-en><b>Bark</b><br>Part of the tree (composition).</div>
+          <div class="hint-ex" data-ua>Не існує окремо від стовбура: дерево зникло — кори теж немає.</div>
+          <div class="hint-ex" data-en>Can’t exist without the trunk; if the tree is gone, so is the bark.</div>
         </div>
       </button>
 
-      <button type="button" class="entity hide-on-mobile p-nest hint-dock-below" data-interact="nest" aria-label="Гніздо як агрегація">
-        <img src="nest.jpg" alt="Пташине гніздо на гілках">
-        <b>Гніздо</b><i>Aggregate</i>
+      <button type="button" class="entity hide-on-mobile p-nest hint-dock-below" data-interact="nest" aria-label="Гніздо (агрегація)">
+        <img src="nest.jpg" alt="" data-alt-ua="Пташине гніздо на гілках" data-alt-en="Bird nest on branches">
+        <b><span data-ua>Гніздо</span><span data-en>Nest</span></b><i><span data-ua>Агрегат</span><span data-en>Aggregate</span></i>
         <div class="desktop-hint">
-          <div class="hint-def"><b>Гніздо (Nest)</b><br>Зовнішня сутність-контейнер.</div>
-          <div class="hint-ex">Знімний об'єкт, який агрегується деревом.</div>
+          <div class="hint-def" data-ua><b>Гніздо</b><br>На дереві, але не «орган дерева» (агрегація).</div>
+          <div class="hint-def" data-en><b>Nest</b><br>On the tree, but not “part of” it (aggregation).</div>
+          <div class="hint-ex" data-ua>Його можна перенести на інше дерево — зв'язок слабший, ніж у кори.</div>
+          <div class="hint-ex" data-en>You can move it to another tree — a weaker link than bark.</div>
         </div>
       </button>
 
-      <button type="button" class="entity hide-on-mobile p-mushroom" data-interact="mushroom" aria-label="Гриб як асоційована сторона">
-        <img src="mushroom.jpg" alt="Гриби біля стовбура">
-        <b>Гриб</b><i>Associate</i>
+      <button type="button" class="entity hide-on-mobile p-mushroom" data-interact="mushroom" aria-label="Гриб (асоціація)">
+        <img src="mushroom.jpg" alt="" data-alt-ua="Гриби біля стовбура" data-alt-en="Mushrooms near the trunk">
+        <b><span data-ua>Гриб</span><span data-en>Mushroom</span></b><i><span data-ua>Асоціат</span><span data-en>Associate</span></i>
         <div class="desktop-hint">
-          <div class="hint-def"><b>Гриб (Mushroom)</b><br>Сусідній елемент системи.</div>
-          <div class="hint-ex">Незалежний об'єкт, що взаємодіє з деревом.</div>
+          <div class="hint-def" data-ua><b>Гриб</b><br>Сусід у системі (асоціація).</div>
+          <div class="hint-def" data-en><b>Mushroom</b><br>Neighbor in the system (association).</div>
+          <div class="hint-ex" data-ua>Окремий об'єкт; дерево й гриб просто пов'язані, наприклад через ґрунт.</div>
+          <div class="hint-ex" data-en>Separate objects; the tree and mushroom simply interact (e.g. via soil).</div>
         </div>
       </button>
 
-      <button type="button" class="entity hide-on-mobile p-sun" data-interact="sun" aria-label="Сонце як зовнішня залежність">
-        <img src="sun.jpg" alt="Сонце над лісом">
-        <b>Сонце</b><i>Dependency</i>
+      <button type="button" class="entity hide-on-mobile p-sun" data-interact="sun" aria-label="Сонце (залежність)">
+        <img src="sun.jpg" alt="" data-alt-ua="Сонце над лісом" data-alt-en="Sun above the forest">
+        <b><span data-ua>Сонце</span><span data-en>Sun</span></b><i><span data-ua>Залежність</span><span data-en>Dependency</span></i>
         <div class="desktop-hint">
-          <div class="hint-def"><b>Сонце (Sun)</b><br>Зовнішній ресурс.</div>
-          <div class="hint-ex">Ресурс, необхідний для роботи внутрішніх методів дерева.</div>
+          <div class="hint-def" data-ua><b>Сонце</b><br>Зовнішнє джерело (залежність).</div>
+          <div class="hint-def" data-en><b>Sun</b><br>Outside resource (dependency).</div>
+          <div class="hint-ex" data-ua>Дерево не «має» сонце як кору, але користується ним для процесів — наприклад фотосинтезу.</div>
+          <div class="hint-ex" data-en>The tree doesn’t “own” the sun like bark, but uses it for processes such as photosynthesis.</div>
         </div>
       </button>
 
@@ -1071,32 +1196,40 @@
       <button type="button" class="sym t-inheritance hint-dock-below" data-interact="inheritance" aria-label="Наслідування">
         <div class="sym-arrow" aria-hidden="true"></div>
         <div class="desktop-hint">
-          <div class="hint-def"><b>Наслідування (Inheritance)</b><br>Зв'язок типу 'IS-A'. Клас успадковує властивості предка.</div>
-          <div class="hint-ex"><b>Приклад:</b> Дуб отримує коріння та здібність до фотосинтезу від абстрактного класу Дерево.</div>
+          <div class="hint-def" data-ua><b>Наслідування</b><br>«Це є різновид того» (IS-A).</div>
+          <div class="hint-def" data-en><b>Inheritance</b><br>“This is a kind of that” (IS-A).</div>
+          <div class="hint-ex" data-ua><b>Приклад:</b> дубові коріння й листя доцільніше шукати в спільному описі «дерево».</div>
+          <div class="hint-ex" data-en><b>Example:</b> oak “is a” tree — shared structure lives in the parent, specifics in Oak.</div>
         </div>
       </button>
 
       <button type="button" class="sym t-composition hint-dock-below" data-interact="composition" aria-label="Композиція">
         <div class="sym-diamond-f" aria-hidden="true"></div>
         <div class="desktop-hint">
-          <div class="hint-def"><b>Композиція (Composition)</b><br>Жорстка залежність ('PART-OF'). Частина не існує без цілого.</div>
-          <div class="hint-ex"><b>Приклад:</b> Кора є частиною Дерева. Якщо дерево знищується, Кора зникає разом з ним.</div>
+          <div class="hint-def" data-ua><b>Композиція</b><br>Повний ромб: частина не відділяється від цілого (PART-OF).</div>
+          <div class="hint-def" data-en><b>Composition</b><br>Filled diamond: the part doesn’t exist without the whole (PART-OF).</div>
+          <div class="hint-ex" data-ua><b>Приклад:</b> кора з дерева не забирається як окреме живе дерево.</div>
+          <div class="hint-ex" data-en><b>Example:</b> bark isn’t a standalone tree without the trunk.</div>
         </div>
       </button>
 
       <button type="button" class="sym t-aggregation hint-dock-below" data-interact="aggregation" aria-label="Агрегація">
         <div class="sym-diamond-e" aria-hidden="true"></div>
         <div class="desktop-hint">
-          <div class="hint-def"><b>Агрегація (Aggregation)</b><br>Слабкий зв'язок ('HAS-A'). Частини можуть існувати окремо.</div>
-          <div class="hint-ex"><b>Приклад:</b> Дерево містить Гніздо, але гніздо може бути переміщене на інше дерево.</div>
+          <div class="hint-def" data-ua><b>Агрегація</b><br>Порожній ромб: «є у складі», але річ жива сама по собі (HAS-A).</div>
+          <div class="hint-def" data-en><b>Aggregation</b><br>Hollow diamond: “has”, but the part can live on its own (HAS-A).</div>
+          <div class="hint-ex" data-ua><b>Приклад:</b> гніздо зняли — воно лишилося гніздом, просто вже не на цьому дереві.</div>
+          <div class="hint-ex" data-en><b>Example:</b> remove the nest — it’s still a nest, just not on this tree.</div>
         </div>
       </button>
 
       <button type="button" class="sym line-badge t-association" data-interact="association" aria-label="Асоціація">
         <span aria-hidden="true">/</span>
         <div class="desktop-hint">
-          <div class="hint-def"><b>Асоціація (Association)</b><br>Структурний зв'язок між незалежними об'єктами екосистеми.</div>
-          <div class="hint-ex"><b>Приклад:</b> Взаємодія Дерева та Гриба (обмін речовинами через ґрунт).</div>
+          <div class="hint-def" data-ua><b>Асоціація</b><br>Простий зв'язок між двома рівноправними об'єктами.</div>
+          <div class="hint-def" data-en><b>Association</b><br>A plain link between two peers.</div>
+          <div class="hint-ex" data-ua><b>Приклад:</b> дерево й гриб зустрілися в одному місці й обмінюються через ґрунт.</div>
+          <div class="hint-ex" data-en><b>Example:</b> tree and mushroom meet in one place and interact through the soil.</div>
         </div>
       </button>
 
@@ -1105,29 +1238,34 @@
           <line x1="0" y1="30" x2="30" y2="0" stroke="currentColor" stroke-width="3" stroke-dasharray="5,3"/>
         </svg>
         <div class="desktop-hint">
-          <div class="hint-def"><b>Залежність (Dependency)</b><br>Тимчасовий зв'язок ('USES'). Об'єкт потрібен для методу.</div>
-          <div class="hint-ex"><b>Приклад:</b> Дерево тимчасово використовує Сонце для процесу фотосинтезу.</div>
+          <div class="hint-def" data-ua><b>Залежність</b><br>Пунктирна стрілка: «на хвилинку скористався», без постійного зв'язку.</div>
+          <div class="hint-def" data-en><b>Dependency</b><br>Dashed arrow: “used for a moment”, no lasting ownership.</div>
+          <div class="hint-ex" data-ua><b>Приклад:</b> для фотосинтезу потрібне світло — без сонця процес не йде, але сонце не «належить» дереву.</div>
+          <div class="hint-ex" data-en><b>Example:</b> photosynthesis needs sunlight — no lasting “owns” relationship.</div>
         </div>
       </button>
 
-      <button type="button" class="mobile-trigger mt-1" data-interact="inheritance" aria-label="Наслідування (мобільний)">
+      <button type="button" class="mobile-trigger mt-1" data-interact="inheritance" aria-label="Наслідування (телефон)">
         <div class="sym-arrow" aria-hidden="true"></div>
       </button>
-      <button type="button" class="mobile-trigger mt-2" data-interact="composition" aria-label="Композиція (мобільний)">
+      <button type="button" class="mobile-trigger mt-2" data-interact="composition" aria-label="Композиція (телефон)">
         <div class="sym-diamond-f" aria-hidden="true"></div>
       </button>
-      <button type="button" class="mobile-trigger mt-3" data-interact="aggregation" aria-label="Агрегація (мобільний)">
+      <button type="button" class="mobile-trigger mt-3" data-interact="aggregation" aria-label="Агрегація (телефон)">
         <div class="sym-diamond-e" aria-hidden="true"></div>
       </button>
-      <button type="button" class="mobile-trigger mt-4" data-interact="association" aria-label="Асоціація (мобільний)">
+      <button type="button" class="mobile-trigger mt-4" data-interact="association" aria-label="Асоціація (телефон)">
         <span style="font-size:22px; font-weight:700; color:var(--line-color);" aria-hidden="true">/</span>
       </button>
-      <button type="button" class="mobile-trigger mt-5" data-interact="dependency" aria-label="Залежність (мобільний)">
+      <button type="button" class="mobile-trigger mt-5" data-interact="dependency" aria-label="Залежність (телефон)">
         <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
           <line x1="0" y1="28" x2="28" y2="0" stroke="var(--line-color)" stroke-width="3" stroke-dasharray="5,3"/>
         </svg>
       </button>
 
+      <div id="diagram-pin-veil" class="diagram-pin-veil" aria-hidden="true"></div>
+
+      </div>
       </div>
     </div>
   </main>
@@ -1141,8 +1279,8 @@
     <img id="ovImg" class="ov-img" src="" alt="">
     <p id="ovEx"></p>
     <div class="def-wrapper">
-      <strong data-ua>Тип зв'язку: теорія</strong>
-      <strong data-en>Link type: theory</strong>
+      <strong data-ua>Що означає звʼязок</strong>
+      <strong data-en>What this link means</strong>
       <p id="ovDef"></p>
     </div>
   </div>
@@ -1167,69 +1305,213 @@
       var THEME_KEY = 'uml-tree-theme';
       var LANG_KEY = 'uml-tree-lang';
 
+      var DOC_TITLE = {
+        uk: 'UML типи звʼязків — екосистема дерева | tools',
+        en: 'UML relationship types — tree ecosystem | tools'
+      };
+
+      var DOC_META_DESC = {
+        uk: 'Інтерактивна схема типів звʼязків UML на прикладі лісу: успадкування, композиція, агрегація, асоціація, залежність.',
+        en: 'Interactive UML relationship map using a forest example: inheritance, composition, aggregation, association, dependency.'
+      };
+
+      var DIAGRAM_ARIA = {
+        uk: 'Діаграма UML: екосистема дерева',
+        en: 'UML diagram: tree ecosystem'
+      };
+
+      var ARIA_INTERACT = {
+        oak: { uk: 'Дуб (обʼєкт)', en: 'Oak (object)' },
+        tree: { uk: 'Дерево (абстрактний клас)', en: 'Tree (abstract class)' },
+        bark: { uk: 'Кора (композиція)', en: 'Bark (composition)' },
+        nest: { uk: 'Гніздо (агрегація)', en: 'Nest (aggregation)' },
+        mushroom: { uk: 'Гриб (асоціація)', en: 'Mushroom (association)' },
+        sun: { uk: 'Сонце (залежність)', en: 'Sun (dependency)' },
+        inheritance: { uk: 'Наслідування', en: 'Inheritance' },
+        composition: { uk: 'Композиція', en: 'Composition' },
+        aggregation: { uk: 'Агрегація', en: 'Aggregation' },
+        association: { uk: 'Асоціація', en: 'Association' },
+        dependency: { uk: 'Залежність', en: 'Dependency' },
+        'inheritance-mobile': { uk: 'Наслідування (телефон)', en: 'Inheritance (mobile)' },
+        'composition-mobile': { uk: 'Композиція (телефон)', en: 'Composition (mobile)' },
+        'aggregation-mobile': { uk: 'Агрегація (телефон)', en: 'Aggregation (mobile)' },
+        'association-mobile': { uk: 'Асоціація (телефон)', en: 'Association (mobile)' },
+        'dependency-mobile': { uk: 'Залежність (телефон)', en: 'Dependency (mobile)' }
+      };
+
       var data = {
         tree: {
           sym: '🌳',
-          title: "Дерево (Tree Class)",
-          ex: "Визначає загальну поведінку та атрибути, спільні для всіх дерев.",
-          def: "Абстрактний опис. Базовий клас екосистеми.",
-          img: "tree.png",
-          alt: "Ілюстрація абстрактного класу Дерево"
+          img: 'tree.png',
+          symHTML: null,
+          uk: {
+            title: 'Дерево (клас)',
+            ex: 'Спільні риси будь-якого дерева; дуб показує один конкретний вид.',
+            def: 'Узагальнення: коріння, гілки, фотосинтез тощо.',
+            alt: 'Абстрактне дерево на схемі'
+          },
+          en: {
+            title: 'Tree (class)',
+            ex: 'Shared traits of any tree; oak is one concrete kind.',
+            def: 'Generalization — roots, branches, photosynthesis, and so on.',
+            alt: 'Abstract tree in the diagram'
+          }
         },
         oak: {
           sym: '🌰',
-          title: "Дуб (Oak Object)",
-          ex: "Це живий екземпляр, який наслідує Дерево і є центром усіх зв'язків.",
-          def: "Центральна конкретна сутність у нашій системі.",
-          img: "oak.jpg",
-          alt: "Дуб як конкретний об'єкт"
+          img: 'oak.jpg',
+          symHTML: null,
+          uk: {
+            title: 'Дуб (обʼєкт)',
+            ex: 'Живий екземпляр: у цьому прикладі від нього йдуть майже всі стрілки.',
+            def: 'Конкретний обʼєкт у центрі схеми.',
+            alt: 'Дуб як конкретний обʼєкт'
+          },
+          en: {
+            title: 'Oak (object)',
+            ex: 'A living instance — in this example, most links involve it.',
+            def: 'Concrete object at the center.',
+            alt: 'Oak as a concrete object'
+          }
         },
         inheritance: {
           symHTML: '<div class="sym-arrow" style="border-left:10px solid transparent; border-right:10px solid transparent; border-bottom:18px solid var(--line-color);"></div>',
-          title: "Наслідування (Inheritance)",
-          ex: "Приклад: Дуб отримує коріння та здібність до фотосинтезу від абстрактного класу Дерево.",
-          def: "Зв'язок типу 'IS-A' (Є одним із). Клас успадковує базові властивості та методи свого предка.",
-          img: "oak.jpg",
-          alt: "Приклад наслідування"
+          img: 'oak.jpg',
+          uk: {
+            title: 'Наслідування',
+            ex: 'Дубові коріння й листя зручно тримати в спільному описі «дерево».',
+            def: '«Це є різновид того» (IS-A): нащадок бере базові властивості від предка.',
+            alt: 'Приклад наслідування'
+          },
+          en: {
+            title: 'Inheritance',
+            ex: 'Oak “is a” tree — shared structure lives in the parent.',
+            def: '“This is a kind of that” (IS-A): the child inherits the parent’s base behavior.',
+            alt: 'Inheritance example'
+          }
         },
         composition: {
           symHTML: '<div class="sym-diamond-f" style="width:18px; height:18px;"></div>',
-          title: "Композиція (Composition)",
-          ex: "Приклад: Кора є частиною Дерева. Якщо дерево знищується, Кора зникає разом з ним.",
-          def: "Жорстка залежність 'PART-OF'. Частина не може існувати без цілого.",
-          img: "bark.jpg",
-          alt: "Приклад композиції"
+          img: 'bark.jpg',
+          uk: {
+            title: 'Композиція',
+            ex: 'Кора без стовбура не існує як окреме дерево.',
+            def: 'Повний ромб (PART-OF): частина зникає разом із цілим.',
+            alt: 'Приклад композиції'
+          },
+          en: {
+            title: 'Composition',
+            ex: 'Bark can’t be a standalone tree without the trunk.',
+            def: 'Filled diamond (PART-OF): the part dies with the whole.',
+            alt: 'Composition example'
+          }
         },
         aggregation: {
           symHTML: '<div class="sym-diamond-e" style="width:18px; height:18px; border-width:3px;"></div>',
-          title: "Агрегація (Aggregation)",
-          ex: "Приклад: Дерево містить Гніздо, але гніздо може бути переміщене на інше дерево.",
-          def: "Слабкий зв'язок 'HAS-A'. Агреговані частини можуть існувати окремо від цілого.",
-          img: "nest.jpg",
-          alt: "Приклад агрегації"
+          img: 'nest.jpg',
+          uk: {
+            title: 'Агрегація',
+            ex: 'Гніздо можна перенести — воно лишається гніздом без цього дерева.',
+            def: 'Порожній ромб (HAS-A): ціле «має» частину, але вона жива сама.',
+            alt: 'Приклад агрегації'
+          },
+          en: {
+            title: 'Aggregation',
+            ex: 'Move the nest — it’s still a nest, just elsewhere.',
+            def: 'Hollow diamond (HAS-A): the whole “has” a part that can live on its own.',
+            alt: 'Aggregation example'
+          }
         },
         association: {
           symHTML: '<div style="font-size:24px; font-weight:bold; color:var(--line-color);">/</div>',
-          title: "Асоціація (Association)",
-          ex: "Приклад: Взаємодія Дерева та Гриба (наприклад, обмін речовинами через ґрунт).",
-          def: "Структурний зв'язок між незалежними об'єктами. Вони знають один про одного, але не володіють одне одним.",
-          img: "mushroom.jpg",
-          alt: "Приклад асоціації"
+          img: 'mushroom.jpg',
+          uk: {
+            title: 'Асоціація',
+            ex: 'Дерево й гриб — різні істоти, але звʼязані через ґрунт чи місце.',
+            def: 'Звичайна лінія між рівноправними обʼєктами без «власності».',
+            alt: 'Приклад асоціації'
+          },
+          en: {
+            title: 'Association',
+            ex: 'Tree and mushroom — different things, linked by place or soil.',
+            def: 'A simple peer-to-peer link, no ownership implied.',
+            alt: 'Association example'
+          }
         },
         dependency: {
           symHTML: '<svg width="28" height="28" viewBox="0 0 28 28"><line x1="0" y1="28" x2="28" y2="0" stroke="var(--line-color)" stroke-width="3" stroke-dasharray="5,3"/></svg>',
-          title: "Залежність (Dependency)",
-          ex: "Приклад: Дерево тимчасово використовує Сонце для процесу фотосинтезу.",
-          def: "Тимчасовий зв'язок 'USES'. Об'єкт потрібен лише як інструмент або параметр для виконання конкретного методу.",
-          img: "sun.jpg",
-          alt: "Приклад залежності"
+          img: 'sun.jpg',
+          uk: {
+            title: 'Залежність',
+            ex: 'Для фотосинтезу потрібне світло — короткий звʼязок, без «власності» сонцем.',
+            def: 'Пунктир (USES): один обʼєкт тимчасово потребує іншого для дії.',
+            alt: 'Приклад залежності'
+          },
+          en: {
+            title: 'Dependency',
+            ex: 'Photosynthesis needs light — brief use, no “owning” the sun.',
+            def: 'Dashed arrow (USES): one object briefly needs another to act.',
+            alt: 'Dependency example'
+          }
         }
       };
+
+      function currentLang() {
+        return document.documentElement.getAttribute('data-lang') === 'en' ? 'en' : 'uk';
+      }
+
+      function pickLocStrings(item) {
+        if (!item) return null;
+        var L = currentLang();
+        if (item[L]) {
+          return {
+            sym: item.sym,
+            symHTML: item.symHTML,
+            img: item.img,
+            title: item[L].title,
+            ex: item[L].ex,
+            def: item[L].def,
+            alt: item[L].alt
+          };
+        }
+        return item;
+      }
+
+      function applyImgAlts() {
+        var L = currentLang();
+        document.querySelectorAll('img[data-alt-uk]').forEach(function (img) {
+          var v = L === 'en' ? img.getAttribute('data-alt-en') : img.getAttribute('data-alt-uk');
+          img.setAttribute('alt', v || '');
+        });
+      }
+
+      function applyInteractAria() {
+        var L = currentLang();
+        document.querySelectorAll('[data-interact]').forEach(function (el) {
+          var k = el.getAttribute('data-interact');
+          var row = ARIA_INTERACT[k];
+          if (!row) return;
+          var lab = row[L] || row.uk;
+          if (el.classList.contains('mobile-trigger')) {
+            var mk = k + '-mobile';
+            if (ARIA_INTERACT[mk]) lab = ARIA_INTERACT[mk][L] || ARIA_INTERACT[mk].uk;
+          }
+          el.setAttribute('aria-label', lab);
+        });
+      }
+
+      function refreshOpenOverlay() {
+        var ov = document.getElementById('mOverlay');
+        if (!ov || ov.getAttribute('aria-hidden') !== 'false') return;
+        var key = ov.getAttribute('data-open-key');
+        if (key) openOverlay(key);
+      }
 
       var overlay = document.getElementById('mOverlay');
       var scrollTopBtn = document.getElementById('scroll-top-btn');
       var stickyTooltip = document.getElementById('sticky-tooltip');
       var pinFocusVeil = document.getElementById('pin-focus-veil');
+      var diagramPinVeil = document.getElementById('diagram-pin-veil');
       var mdHelpAnchor = document.getElementById('md-help-anchor');
       var mdHelpChip = document.getElementById('md-help-chip');
       var toggleLangBtn = document.getElementById('toggle-lang');
@@ -1245,17 +1527,34 @@
 
       function syncChrome() {
         var lang = document.documentElement.getAttribute('data-lang');
-        toggleLangLabel.textContent = lang === 'uk' ? 'UA' : 'EN';
+        var isEn = lang === 'en';
+        toggleLangLabel.textContent = isEn ? 'EN' : 'UA';
         toggleLangBtn.setAttribute(
           'aria-label',
-          lang === 'uk' ? 'Мова UA. Перемкнути на EN' : 'Language EN. Switch to UA'
+          isEn ? 'Language EN. Switch to UA' : 'Мова UA. Перемкнути на EN'
         );
         var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         themeChipIcon.textContent = isDark ? 'dark_mode' : 'light_mode';
         toggleThemeBtn.setAttribute(
           'aria-label',
-          isDark ? 'Темна тема. Перемкнути на світлу' : 'Light theme. Switch to dark'
+          isEn
+            ? (isDark ? 'Dark theme. Switch to light' : 'Light theme. Switch to dark')
+            : (isDark ? 'Темна тема. Перемкнути на світлу' : 'Світла тема. Перемкнути на темну')
         );
+        if (mdHelpChip) {
+          mdHelpChip.setAttribute('aria-label', isEn ? 'Diagram help' : 'Довідка про діаграму');
+        }
+        var oc = document.getElementById('overlayClose');
+        if (oc) oc.setAttribute('aria-label', isEn ? 'Close' : 'Закрити');
+        if (scrollTopBtn) scrollTopBtn.setAttribute('aria-label', isEn ? 'Scroll to top' : 'Вгору');
+        document.title = isEn ? DOC_TITLE.en : DOC_TITLE.uk;
+        var metaD = document.querySelector('meta[name="description"]');
+        if (metaD) metaD.setAttribute('content', isEn ? DOC_META_DESC.en : DOC_META_DESC.uk);
+        var diagramEl = document.querySelector('.diagram-container');
+        if (diagramEl) diagramEl.setAttribute('aria-label', isEn ? DIAGRAM_ARIA.en : DIAGRAM_ARIA.uk);
+        applyImgAlts();
+        applyInteractAria();
+        refreshOpenOverlay();
       }
 
       function setTheme(mode) {
@@ -1443,7 +1742,7 @@
       }
 
       function openOverlay(key) {
-        var item = data[key];
+        var item = pickLocStrings(data[key]);
         if (!item) return;
 
         var symEl = document.getElementById('ovSym');
@@ -1462,6 +1761,7 @@
         img.src = item.img;
         img.alt = item.alt;
 
+        overlay.setAttribute('data-open-key', key);
         overlay.classList.add('is-open');
         overlay.style.display = 'flex';
         overlay.setAttribute('aria-hidden', 'false');
@@ -1473,6 +1773,7 @@
         overlay.classList.remove('is-open');
         overlay.style.display = 'none';
         overlay.setAttribute('aria-hidden', 'true');
+        overlay.removeAttribute('data-open-key');
         document.body.style.overflow = '';
       }
 
@@ -1489,8 +1790,6 @@
         try { l = localStorage.getItem(LANG_KEY); } catch (e) {}
         setTheme(t === 'light' || t === 'dark' ? t : 'dark');
         setLang(l === 'en' || l === 'uk' ? l : 'uk');
-
-        syncChrome();
       }
 
       function updateScrollTop() {
@@ -1554,6 +1853,13 @@
 
       if (pinFocusVeil) {
         pinFocusVeil.addEventListener('click', function () {
+          if (pinnedAnchor) unpinDesktop();
+        });
+      }
+
+      if (diagramPinVeil) {
+        diagramPinVeil.addEventListener('click', function (e) {
+          e.stopPropagation();
           if (pinnedAnchor) unpinDesktop();
         });
       }
