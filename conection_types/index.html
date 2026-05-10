@@ -711,6 +711,15 @@
     }
 
     @media (min-width: 901px) {
+      /*
+        Lift <main> above fullscreen pin dim: otherwise #pin-focus-veil composites on top of
+        the diagram and expanded entity imgs look faded/milky (not img mask/opacity).
+        Stay below sticky tooltip (higher z-index on #sticky-tooltip).
+      */
+      body.diagram-pin-active main {
+        z-index: 2147482920;
+      }
+
       .diagram-container.has-pinned-hint .diagram-pin-veil {
         display: block;
       }
