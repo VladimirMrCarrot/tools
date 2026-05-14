@@ -9,7 +9,6 @@ skinparam SequenceMessageAlignment center
 skinparam maxMessageSize 200
 skinparam NoteBackgroundColor #F2B666
 skinparam NoteTextAlignment left
-skinparam defaultFontName Roboto
 skinparam SequenceReferenceBackgroundColor #F2B666
 skinparam roundcorner 5
 skinparam ParticipantPadding 10
