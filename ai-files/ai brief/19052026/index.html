@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ШІ-Бриф | 19.05.2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  :root {
+    --accent: #F2B666;
+    --accent-dark: #d9943a;
+    --bg: #f5f5f5;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #666666;
+    --border: #e0e0e0;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --radius: 12px;
+    --nav-bg: #ffffff;
+  }
+  [data-theme="dark"] {
+    --bg: #121212;
+    --surface: #1e1e1e;
+    --text: #e8e8e8;
+    --text-muted: #999999;
+    --border: #333333;
+    --shadow: 0 2px 8px rgba(0,0,0,0.4);
+    --nav-bg: #1a1a1a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Ubuntu', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.3s, color 0.3s;
+    line-height: 1.6;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus, button:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    height: 52px;
+    gap: 0.5rem;
+    overflow-x: auto;
+  }
+  nav a {
+    white-space: nowrap;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding: 4px 10px;
+    border-radius: 20px;
+    transition: background 0.2s, color 0.2s;
+  }
+  nav a:hover { background: var(--accent); color: #1a1a1a; text-decoration: none; }
+  .nav-brand { font-weight: 700; color: var(--accent) !important; font-size: 0.9rem; margin-right: 0.5rem; }
+  .nav-spacer { flex: 1; }
+  #theme-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  #theme-toggle:hover { background: var(--border); }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 3px solid var(--accent);
+    padding: 2.5rem 1.5rem 2rem;
+    text-align: center;
+  }
+  header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .header-meta {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .header-meta .material-icons { font-size: 16px; vertical-align: middle; }
+  .brief-count {
+    background: var(--accent);
+    color: #1a1a1a;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 2px 12px;
+    font-size: 0.85rem;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+  .cards-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* CARD */
+  article {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  article:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+  .card-header {
+    padding: 1.2rem 1.5rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .card-rank {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--bg);
+    border-radius: 6px;
+    padding: 2px 8px;
+    align-self: center;
+    flex-shrink: 0;
+  }
+  .card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+  }
+  .badge {
+    font-size: 0.72rem;
+    font-weight: 500;
+    border-radius: 20px;
+    padding: 2px 10px;
+    white-space: nowrap;
+  }
+  .badge-consensus-fire { background: rgba(220,60,30,0.15); color: #cc3300; border: 1px solid rgba(220,60,30,0.3); }
+  .badge-consensus-check { background: rgba(40,160,80,0.15); color: #1a8c40; border: 1px solid rgba(40,160,80,0.3); }
+  .badge-consensus-pin { background: rgba(100,100,100,0.12); color: var(--text-muted); border: 1px solid var(--border); }
+  [data-theme="dark"] .badge-consensus-fire { color: #ff7755; }
+  [data-theme="dark"] .badge-consensus-check { color: #44cc70; }
+
+  .badge-cat-model { background: rgba(90,120,255,0.13); color: #4455cc; border: 1px solid rgba(90,120,255,0.25); }
+  .badge-cat-feature { background: rgba(255,160,0,0.13); color: #c07000; border: 1px solid rgba(255,160,0,0.25); }
+  .badge-cat-integration { background: rgba(150,60,200,0.13); color: #8030b0; border: 1px solid rgba(150,60,200,0.25); }
+  .badge-cat-research { background: rgba(0,150,180,0.13); color: #006080; border: 1px solid rgba(0,150,180,0.25); }
+  .badge-cat-pricing { background: rgba(200,60,60,0.13); color: #a02020; border: 1px solid rgba(200,60,60,0.25); }
+  [data-theme="dark"] .badge-cat-model { color: #8899ff; }
+  [data-theme="dark"] .badge-cat-feature { color: #ffb733; }
+  [data-theme="dark"] .badge-cat-integration { color: #cc88ee; }
+  [data-theme="dark"] .badge-cat-research { color: #33ccee; }
+  [data-theme="dark"] .badge-cat-pricing { color: #ff8888; }
+
+  .badge-free { background: rgba(40,160,80,0.13); color: #1a8c40; border: 1px solid rgba(40,160,80,0.25); }
+  .badge-paid { background: rgba(200,60,60,0.13); color: #a02020; border: 1px solid rgba(200,60,60,0.25); }
+  .badge-student { background: rgba(242,182,102,0.2); color: #9a6200; border: 1px solid rgba(242,182,102,0.4); }
+  .badge-verify { background: rgba(255,140,0,0.15); color: #b06000; border: 1px solid rgba(255,140,0,0.3); }
+  [data-theme="dark"] .badge-free { color: #44cc70; }
+  [data-theme="dark"] .badge-paid { color: #ff8888; }
+  [data-theme="dark"] .badge-student { color: #F2B666; }
+  [data-theme="dark"] .badge-verify { color: #ffaa44; }
+
+  article h2 {
+    padding: 1rem 1.5rem 0.2rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .card-date {
+    padding: 0 1.5rem 0.8rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .card-date .material-icons { font-size: 13px; }
+
+  .card-body { padding: 0 1.5rem 1rem; }
+  .card-body p { font-size: 0.9rem; color: var(--text); margin-bottom: 0.8rem; }
+
+  .relevance-block {
+    background: rgba(242,182,102,0.08);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 0.8rem 1rem;
+    margin: 0.8rem 0;
+  }
+  .relevance-block h3 {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  [data-theme="dark"] .relevance-block h3 { color: var(--accent); }
+  .relevance-block h3 .material-icons { font-size: 14px; }
+  .relevance-block p { font-size: 0.85rem; color: var(--text); margin: 0; }
+
+  .cost-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0.8rem 0 0;
+    flex-wrap: wrap;
+  }
+  .cost-row .material-icons { font-size: 15px; color: var(--text-muted); }
+  .cost-text { font-size: 0.82rem; color: var(--text-muted); flex: 1; min-width: 0; }
+
+  .card-footer {
+    padding: 0.8rem 1.5rem 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  .source-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #1a1a1a !important;
+    font-weight: 600;
+    font-size: 0.82rem;
+    border-radius: 8px;
+    padding: 7px 16px;
+    text-decoration: none !important;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .source-btn:hover { background: var(--accent-dark); transform: translateY(-1px); }
+  .source-btn .material-icons { font-size: 14px; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+  }
+  footer strong { color: var(--accent); }
+
+  /* SCROLL TO TOP */
+  #scroll-top {
+    display: none;
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background: var(--accent);
+    color: #1a1a1a;
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 200;
+    transition: transform 0.2s;
+  }
+  #scroll-top:hover { transform: translateY(-2px); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    header h1 { font-size: 1.6rem; }
+    main { padding: 1rem 0.75rem 4rem; }
+    article h2 { font-size: 1rem; }
+    nav { padding: 0 0.75rem; }
+    .card-header, article h2, .card-date, .card-body, .card-footer { padding-left: 1rem; padding-right: 1rem; }
+    #scroll-top { display: flex; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#top">ШІ-Бриф</a>
+  <a href="#item1">#1</a>
+  <a href="#item2">#2</a>
+  <a href="#item3">#3</a>
+  <a href="#item4">#4</a>
+  <a href="#item5">#5</a>
+  <a href="#item6">#6</a>
+  <a href="#item7">#7</a>
+  <div class="nav-spacer"></div>
+  <button id="theme-toggle" aria-label="Змінити тему">
+    <span class="material-icons" id="theme-icon">dark_mode</span>
+  </button>
+</nav>
+
+<header id="top">
+  <h1>ШІ-Бриф</h1>
+  <div class="header-meta">
+    <span><span class="material-icons">calendar_today</span> 19.05.2026</span>
+    <span class="brief-count">7 новин</span>
+    <span><span class="material-icons">source</span> Gemini · Claude · GPT</span>
+  </div>
+</header>
+
+<main>
+<div class="cards-grid">
+
+<!-- CARD 1 -->
+<article id="item1">
+  <div class="card-header">
+    <span class="card-rank">#1</span>
+    <div class="card-badges">
+      <span class="badge badge-consensus-fire">🔥 3/3 джерела</span>
+      <span class="badge badge-cat-model">Model Update</span>
+      <span class="badge badge-student">🎓 Student Pack</span>
+    </div>
+  </div>
+  <h2>Gemini 3.5 Flash тепер загальнодоступний у GitHub Copilot</h2>
+  <div class="card-date"><span class="material-icons">event</span> 2026-05-19</div>
+  <div class="card-body">
+    <p>GitHub зробив модель Gemini 3.5 Flash загальнодоступною для всіх користувачів GitHub Copilot. Тепер її можна обирати через випадаючий список моделей у Copilot. Модель забезпечує баланс між низькою затримкою та високою якістю — для чату, вбудованих редагувань і автодоповнення коду.</p>
+    <div class="relevance-block">
+      <h3><span class="material-icons">tips_and_updates</span> Чому це важливо для тебе</h3>
+      <p><strong>BA/SA:</strong> Gemini 3.5 Flash у Copilot — новий варіант для генерації PlantUML-діаграм і автоматизації документації вимог прямо в IDE. <strong>Стрімер:</strong> Швидша модель без зміни підписки. <strong>Obsidian:</strong> Copilot у VS Code можна використовувати для автоматичного форматування Zettelkasten-нотаток.</p>
+    </div>
+    <div class="cost-row">
+      <span class="material-icons">payments</span>
+      <span class="cost-text">Безкоштовно в межах GitHub Student Developer Pack — окремих витрат немає.</span>
+    </div>
+  </div>
+  <div class="card-footer">
+    <a href="https://github.blog/changelog/2026-05-19-gemini-3-5-flash-is-generally-available-for-github-copilot/" target="_blank" rel="noopener noreferrer" class="source-btn">
+      <span class="material-icons">open_in_new</span> Джерело
+    </a>
+  </div>
+</article>
+
+<!-- CARD 2 -->
+<article id="item2">
+  <div class="card-header">
+    <span class="card-rank">#2</span>
+    <div class="card-badges">
+      <span class="badge badge-consensus-fire">🔥 3/3 джерела</span>
+      <span class="badge badge-cat-research">Research</span>
+      <span class="badge badge-free">✅ Безкоштовно</span>
+    </div>
+  </div>
+  <h2>OpenAI посилює прозорість походження AI-контенту (C2PA + SynthID)</h2>
+  <div class="card-date"><span class="material-icons">event</span> 2026-05-19</div>
+  <div class="card-body">
+    <p>OpenAI інтегрує стандарт C2PA та невидиме маркування SynthID у свої інструменти генерації зображень і аудіо. Криптографічні підписи дозволяють верифікувати, чи є медіа AI-згенерованим або відредагованим. Також запущено публічний інструмент верифікації для перевірки цифрового контенту.</p>
+    <div class="relevance-block">
+      <h3><span class="material-icons">tips_and_updates</span> Чому це важливо для тебе</h3>
+      <p><strong>Стрімер:</strong> AI-генеровані оверлеї, обкладинки та аудіо-ефекти тепер матимуть прозоре маркування — важливо для відповідності правилам платформ. <strong>BA/SA:</strong> Трасування походження артефактів специфікацій і презентацій стає стандартом для корпоративного комплаєнсу.</p>
+    </div>
+    <div class="cost-row">
+      <span class="material-icons">payments</span>
+      <span class="cost-text">Вбудовано в стандартні інструменти OpenAI без додаткової оплати.</span>
+    </div>
+  </div>
+  <div class="card-footer">
+    <a href="https://openai.com/index/advancing-content-provenance/" target="_blank" rel="noopener noreferrer" class="source-btn">
+      <span class="material-icons">open_in_new</span> Джерело
+    </a>
+  </div>
+</article>
+
+<!-- CARD 3 -->
+<article id="item3">
+  <div class="card-header">
+    <span class="card-rank">#3</span>
+    <div class="card-badges">
+      <span class="badge badge-consensus-check">✅ 2/3 джерела</span>
+      <span class="badge badge-cat-feature">New Feature</span>
+      <span class="badge badge-student">🎓 Student Pack</span>
+    </div>
+  </div>
+  <h2>Дистанційне керування Copilot CLI тепер загальнодоступне (мобільний, веб, VS Code)</h2>
+  <div class="card-date"><span class="material-icons">event</span> 2026-05-18</div>
+  <div class="card-body">
+    <p>Функція дистанційного керування сесіями Copilot CLI стала загальнодоступною на GitHub Mobile, у браузері та VS Code. Можна ініціювати агентну сесію у терміналі або IDE та керувати нею з телефону в реальному часі. Тепер підтримуються й репозиторії поза GitHub та локальні директорії.</p>
+    <div class="relevance-block">
+      <h3><span class="material-icons">tips_and_updates</span> Чому це важливо для тебе</h3>
+      <p><strong>Стрімер:</strong> Запускай важкі скрипти підготовки стриму на основному ПК, а зі стрімінгового пристрою — тільки моніторуй і схвалюй кроки. <strong>BA/SA:</strong> Зручно для асинхронних агентних задач під час зустрічей або в дорозі.</p>
+    </div>
+    <div class="cost-row">
+      <span class="material-icons">payments</span>
+      <span class="cost-text">Безкоштовно в межах GitHub Student Developer Pack.</span>
+    </div>
+  </div>
+  <div class="card-footer">
+    <a href="https://github.blog/changelog/2026-05-18-remote-control-for-copilot-cli-sessions-now-generally-available-on-mobile-web-and-vs-code/" target="_blank" rel="noopener noreferrer" class="source-btn">
+      <span class="material-icons">open_in_new</span> Джерело
+    </a>
+  </div>
+</article>
+
+<!-- CARD 4 -->
+<article id="item4">
+  <div class="card-header">
+    <span class="card-rank">#4</span>
+    <div class="card-badges">
+      <span class="badge badge-consensus-check">✅ 2/3 джерела</span>
+      <span class="badge badge-cat-pricing">Pricing</span>
+      <span class="badge badge-verify">⚠️ Перевір умови</span>
+    </div>
+  </div>
+  <h2>GitHub Copilot переходить на оплату за AI Credits з 1 червня 2026</h2>
+  <div class="card-date"><span class="material-icons">event</span> Оголошено 2026-04-26 · набирає чинності 2026-06-01</div>
+  <div class="card-body">
+    <p>З 1 червня 2026 усі тарифи Copilot переходять на систему GitHub AI Credits замість Premium Request Units (PRUs). Зміна торкається планів Free, Pro та Pro+. Для тих, хто користується Student Pack — необхідно окремо перевірити умови переходу та обсяг безкоштовних кредитів.</p>
+    <div class="relevance-block">
+      <h3><span class="material-icons">warning</span> Чому це важливо для тебе</h3>
+      <p><strong>⚠️ Бюджетне попередження:</strong> Без уваги до деталей перехід може призвести до непередбачуваних витрат. Перевір умови на <strong>github.com/education</strong> та у своєму акаунті Copilot до 1 червня. Особливо важливо розуміти, скільки AI Credits входить у Student Pack.</p>
+    </div>
+    <div class="cost-row">
+      <span class="material-icons">payments</span>
+      <span class="cost-text">⚠️ Потребує перевірки — умови Student Pack при переході на Credits.</span>
+    </div>
+  </div>
+  <div class="card-footer">
+    <a href="https://github.blog/news-insights/company-news/github-copilot-is-moving-to-usage-based-billing/" target="_blank" rel="noopener noreferrer" class="source-btn">
+      <span class="material-icons">open_in_new</span> Джерело
+    </a>
+  </div>
+</article>
+
+<!-- CARD 5 -->
+<article id="item5">
+  <div class="card-header">
+    <span class="card-rank">#5</span>
+    <div class="card-badges">
+      <span class="badge badge-consensus-pin">📌 1/3 джерела</span>
+      <span class="badge badge-cat-integration">Integration</span>
+      <span class="badge badge-paid">💳 Платно (Cursor Pro)</span>
+    </div>
+  </div>
+  <h2>Cursor у Jira: AI-агент тепер отримує задачі прямо з трекера</h2>
+  <div class="card-date"><span class="material-icons">event</span> 2026-05-19</div>
+  <div class="card-body">
+    <p>Cursor оголосив інтеграцію з Jira: тепер можна призначати тікети на Cursor або згадувати @Cursor у коментарях. Агент бере в роботу назву, опис і коментарі тікета, виконує задачу та повертає посилання на pull request прямо у Jira. Підтримуються: фікси, нові фічі, оновлення тестів та investigation.</p>
+    <div class="relevance-block">
+      <h3><span class="material-icons">tips_and_updates</span> Чому це важливо для тебе</h3>
+      <p><strong>BA/SA:</strong> AI-агент тепер живе там, де живуть вимоги — у трекері задач. Можна делегувати рутинні implementation-задачі прямо з Jira без перемикання контексту. <strong>Requirements engineering:</strong> Сильний сигнал, що AI-агенти вбудовуються в системи управління вимогами.</p>
+    </div>
+    <div class="cost-row">
+      <span class="material-icons">payments</span>
+      <span class="cost-text">Потребує Cursor Pro + Jira Commercial Cloud з Rovo. Cursor Pro — у GitHub Student Pack.</span>
+    </div>
+  </div>
+  <div class="card-footer">
+    <a href="https://cursor.com/changelog/05-19-26" target="_blank" rel="noopener noreferrer" class="source-btn">
+      <span class="material-icons">open_in_new</span> Джерело
+    </a>
+  </div>
+</article>
+
+<!-- CARD 6 -->
+<article id="item6">
+  <div class="card-header">
+    <span class="card-rank">#6</span>
+    <div class="card-badges">
+      <span class="badge badge-consensus-pin">📌 1/3 джерела</span>
+      <span class="badge badge-cat-model">Model Update</span>
+      <span class="badge badge-student">🎓 Google AI Pro</span>
+    </div>
+  </div>
+  <h2>Gemini 3.1 Pro доступний у NotebookLM та Gemini API (ARC-AGI-2: 77.1%)</h2>
+  <div class="card-date"><span class="material-icons">event</span> Хвиля оновлень до 2026-05-17</div>
+  <div class="card-body">
+    <p>Google розгорнув Gemini 3.1 Pro у NotebookLM для Pro/Ultra користувачів, у Gemini app та через API в AI Studio й Vertex AI. Модель показує 77.1% на бенчмарку ARC-AGI-2 — вдвічі краще за попередній Gemini 3 Pro. Доступна також через Gemini CLI та Android Studio.</p>
+    <div class="relevance-block">
+      <h3><span class="material-icons">tips_and_updates</span> Чому це важливо для тебе</h3>
+      <p><strong>Obsidian/Zettelkasten:</strong> NotebookLM з Gemini 3.1 Pro — потужний інструмент для побудови knowledge graph поверх власних нотаток. <strong>BA/SA:</strong> Покращений reasoning прямо в AI Studio для аналізу вимог і генерації діаграм. Все включено в Google AI Pro.</p>
+    </div>
+    <div class="cost-row">
+      <span class="material-icons">payments</span>
+      <span class="cost-text">Доступно з Google AI Pro підпискою (вже є у читача).</span>
+    </div>
+  </div>
+  <div class="card-footer">
+    <a href="https://deepmind.google/blog/gemini-3-1-pro-a-smarter-model-for-your-most-complex-tasks/" target="_blank" rel="noopener noreferrer" class="source-btn">
+      <span class="material-icons">open_in_new</span> Джерело
+    </a>
+  </div>
+</article>
+
+<!-- CARD 7 -->
+<article id="item7">
+  <div class="card-header">
+    <span class="card-rank">#7</span>
+    <div class="card-badges">
+      <span class="badge badge-consensus-check">✅ 2/3 джерела</span>
+      <span class="badge badge-cat-integration">Integration</span>
+      <span class="badge badge-student">🎓 Student Pack</span>
+    </div>
+  </div>
+  <h2>Copilot Memory запам'ятовує твої персональні налаштування (Pro/Pro+)</h2>
+  <div class="card-date"><span class="material-icons">event</span> 2026-05-15</div>
+  <div class="card-body">
+    <p>GitHub Copilot Memory тепер підтримує user-level preferences: AI запам'ятовує стиль коду, тон комунікації та стандарти форматування. Раніше пам'ять була лише на рівні репозиторію — тепер налаштування слідують за тобою в усіх workspace і агентних сесіях. Переглядати, редагувати та видаляти спогади можна в налаштуваннях Copilot.</p>
+    <div class="relevance-block">
+      <h3><span class="material-icons">tips_and_updates</span> Чому це важливо для тебе</h3>
+      <p><strong>Zettelkasten/Obsidian:</strong> Copilot запам'ятає твій синтаксис PlantUML і стиль Obsidian frontmatter — більше не потрібно повторювати інструкції щоразу. <strong>BA/SA:</strong> Персоналізовані шаблони вимог і діаграм без повторного налаштування контексту.</p>
+    </div>
+    <div class="cost-row">
+      <span class="material-icons">payments</span>
+      <span class="cost-text">Early access для Copilot Pro і Pro+. Перевір, чи охоплює Student Pack Pro-рівень.</span>
+    </div>
+  </div>
+  <div class="card-footer">
+    <a href="https://github.blog/changelog/2026-05-15-copilot-memory-supports-user-preferences-for-pro-pro-users/" target="_blank" rel="noopener noreferrer" class="source-btn">
+      <span class="material-icons">open_in_new</span> Джерело
+    </a>
+  </div>
+</article>
+
+</div>
+</main>
+
+<footer>
+  <p>Згенеровано: <strong>19.05.2026, 22:15 EEST</strong> · Джерела: Gemini · Claude · GPT</p>
+  <p style="margin-top:6px;">Зберегти як: <strong>ai-brief-2026-05-19.html</strong></p>
+</footer>
+
+<button id="scroll-top" aria-label="Вгору">
+  <span class="material-icons">keyboard_arrow_up</span>
+</button>
+
+<script>
+  // Theme
+  let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    document.getElementById('theme-icon').textContent = isDark ? 'light_mode' : 'dark_mode';
+  }
+  applyTheme();
+  document.getElementById('theme-toggle').addEventListener('click', function() {
+    isDark = !isDark;
+    applyTheme();
+  });
+
+  // Scroll to top
+  var scrollBtn = document.getElementById('scroll-top');
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 300) scrollBtn.style.display = 'flex';
+    else scrollBtn.style.display = 'none';
+  });
+  scrollBtn.addEventListener('click', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+</body>
+</html>
