@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark" data-lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Типи автентифікації — API gateway | tools</title>
+  <meta name="description" content="Інтерактивна схема типів автентифікації: Basic, Session, JWT, OAuth 2.0, API Key, mTLS — з прикладами та підказками.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
+  <style>
+    :root[data-theme="light"] {
+      --bg-page: #f4f3ef;
+      --bg-elevated: #ffffff;
+      --text: #1a1917;
+      --text-soft: #6b6a67;
+      --border-subtle: rgba(0,0,0,0.08);
+      --accent: #F2B666;
+      --accent-hover: #d89a45;
+      --accent-strong: #1565c0;
+      --line-color: #34495e;
+      --tooltip-def: #1e293b;
+      --hint-top-fg: #f8fafc;
+      --hint-top-strong: var(--accent);
+      --hint-bot-bg: #cbd5e1;
+      --hint-bot-fg: #0f172a;
+      --hint-bot-strong: #0f172a;
+      --hint-arrow: var(--hint-bot-bg);
+      --shadow-soft: 0 10px 40px rgba(0,0,0,0.1);
+      --diagram-surface: #fff;
+      --diagram-shadow: rgba(0,0,0,0.1);
+      --switch-h: 32px;
+    }
+
+    :root[data-theme="dark"] {
+      --bg-page: #131211;
+      --bg-elevated: #1c1b19;
+      --text: #e4e3e0;
+      --text-soft: #888784;
+      --border-subtle: rgba(255,255,255,0.08);
+      --accent: #F2B666;
+      --accent-hover: #f6c57f;
+      --accent-strong: #64b5f6;
+      --line-color: #90a4ae;
+      --tooltip-def: #0f172a;
+      --hint-top-fg: #f1f5f9;
+      --hint-top-strong: var(--accent);
+      --hint-bot-bg: #334155;
+      --hint-bot-fg: #f1f5f9;
+      --hint-bot-strong: #fef3c7;
+      --hint-arrow: var(--hint-bot-bg);
+      --shadow-soft: 0 10px 40px rgba(0,0,0,0.45);
+      --diagram-surface: #232220;
+      --diagram-shadow: rgba(0,0,0,0.55);
+      --switch-h: 32px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    html[data-lang="uk"] [data-en] { display: none !important; }
+    html[data-lang="en"] [data-ua] { display: none !important; }
+
+    body {
+      margin: 0;
+      font-family: 'Ubuntu', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-page);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      font-size: 15px;
+      line-height: 1.5;
+      --d-scale: 1;
+    }
+
+    @media (min-width: 901px) {
+      body {
+        --header-est: 108px;
+        --framed-w: calc(88vw - 32px);
+        --framed-h: calc((100dvh - var(--header-est) - 36px) * 0.88);
+        --d-scale: min(2.35, var(--framed-w) / 1000, var(--framed-h) / 700);
+      }
+    }
+
+    .material-symbols-rounded {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-size: 22px;
+      line-height: 1;
+      vertical-align: middle;
+    }
+
+    .page-header {
+      position: relative;
+      z-index: 2000;
+      width: 100%;
+      padding: 16px clamp(14px, 3vw, 28px) 14px;
+    }
+
+    .header-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 10px 14px;
+      width: 100%;
+      max-width: 100%;
+      margin-inline: auto;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    @media (min-width: 901px) {
+      .header-row { max-width: calc(1000px * var(--d-scale)); }
+    }
+
+    .page-header h1 {
+      margin: 0;
+      font-size: clamp(1.2rem, 2.5vw, 1.72rem);
+      font-weight: 700;
+      line-height: 1.22;
+      flex: 0 1 auto;
+      min-width: 0;
+      text-align: center;
+    }
+
+    .header-toolbar { display: flex; align-items: center; gap: 8px; }
+
+    .md-help-anchor { position: relative; z-index: 2; }
+
+    .md-chip {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      height: var(--switch-h);
+      padding: 0;
+      width: var(--switch-h);
+      justify-content: center;
+      border-radius: 999px;
+      font-family: inherit;
+      background: color-mix(in srgb, var(--bg-elevated) 94%, var(--accent));
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .md-chip .material-symbols-rounded {
+      font-size: 18px;
+      color: color-mix(in srgb, var(--accent) 85%, var(--text));
+    }
+
+    .md-help-surface {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 10px);
+      width: min(320px, 92vw);
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.16);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      pointer-events: none;
+      transition: opacity 140ms ease, visibility 140ms ease, transform 140ms ease;
+      z-index: 3;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .md-help-anchor:hover .md-help-surface,
+      .md-help-anchor:focus-within .md-help-surface {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+    }
+
+    .md-help-anchor.is-open .md-help-surface {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .md-help-surface .help-block {
+      font-size: 0.835rem;
+      line-height: 1.52;
+      color: var(--text-soft);
+      margin: 0;
+    }
+
+    .md-help-surface .help-block strong { color: var(--text); }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-carrot { font-size: 1.25rem; line-height: 1; }
+
+    .toggle-chip {
+      min-height: var(--switch-h);
+      min-width: 42px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-elevated);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle-chip:hover {
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+      color: var(--accent);
+    }
+
+    main {
+      flex: 1;
+      position: relative;
+      z-index: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(8px, 1.5vw, 20px) clamp(14px, 3vw, 28px);
+    }
+
+    .diagram-scroll {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      overflow: auto;
+      padding-block: 6px;
+    }
+
+    .diagram-stage { width: 100%; position: relative; margin-inline: auto; }
+
+    @media (min-width: 901px) {
+      .diagram-stage {
+        width: calc(1000px * var(--d-scale));
+        height: calc(700px * var(--d-scale));
+      }
+      .diagram-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        transform: scale(var(--d-scale));
+        transform-origin: top left;
+      }
+    }
+
+    .diagram-container {
+      position: relative;
+      background: var(--diagram-surface);
+      border-radius: 22px;
+      box-shadow: var(--shadow-soft);
+      width: 1000px;
+      height: 700px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .entity {
+      position: absolute;
+      width: 148px;
+      min-height: 108px;
+      background: var(--diagram-surface);
+      border: 2px solid var(--line-color);
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      z-index: 20;
+      transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+      appearance: none;
+      font-family: inherit;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .entity:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      z-index: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    .entity-icon {
+      width: 100%;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      background: color-mix(in srgb, var(--accent) 12%, var(--diagram-surface));
+    }
+
+    .entity b { display: block; font-size: 0.88rem; margin-bottom: 2px; font-weight: 600; }
+    .entity i { font-size: 0.62rem; color: var(--text-soft); font-style: normal; }
+
+    .p-api { top: 275px; left: 426px; border-color: var(--accent-strong); background: color-mix(in srgb, var(--accent) 8%, var(--diagram-surface)); }
+    .p-oauth { top: 58px; left: 426px; }
+    .p-basic { top: 275px; left: 88px; }
+    .p-apikey { top: 275px; left: 764px; }
+    .p-jwt { top: 528px; left: 168px; }
+    .p-session { top: 528px; left: 684px; }
+    .p-mtls { top: 528px; left: 426px; }
+
+    .static-line {
+      position: absolute;
+      background: var(--line-color);
+      z-index: 5;
+      pointer-events: none;
+      opacity: 0.35;
+    }
+
+    .l-hub-v { top: 165px; left: 499px; width: 2px; height: 110px; }
+    .l-hub-h1 { top: 324px; left: 236px; width: 190px; height: 2px; }
+    .l-hub-h2 { top: 324px; left: 574px; width: 190px; height: 2px; }
+    .l-hub-d1 { top: 383px; left: 499px; width: 2px; height: 145px; }
+    .l-hub-d2 { top: 383px; left: 240px; width: 2px; height: 145px; transform: rotate(28deg); transform-origin: top center; }
+    .l-hub-d3 { top: 383px; left: 758px; width: 2px; height: 145px; transform: rotate(-28deg); transform-origin: top center; }
+
+    .desktop-hint {
+      position: absolute;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      width: min(300px, 70vw);
+      border-radius: 12px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 240ms ease, visibility 240ms ease, transform 240ms ease;
+      z-index: 200;
+      pointer-events: none;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      text-align: left;
+    }
+
+    .hint-def {
+      background: var(--tooltip-def);
+      color: var(--hint-top-fg);
+      padding: 12px 15px;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .hint-def b { color: var(--hint-top-strong); font-weight: 600; }
+
+    .hint-ex {
+      background: var(--hint-bot-bg);
+      color: var(--hint-bot-fg);
+      padding: 12px 15px;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      border-top: 1px solid rgba(15,23,42,0.15);
+    }
+
+    .hint-ex b { color: var(--hint-bot-strong); font-weight: 600; }
+
+    .desktop-hint::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -8px;
+      border: 8px solid transparent;
+      border-top-color: var(--hint-bot-bg);
+    }
+
+    .entity.hint-dock-below .desktop-hint {
+      bottom: auto;
+      top: 100%;
+      margin-top: 10px;
+      transform: translateX(-50%) translateY(8px);
+    }
+
+    .entity.hint-dock-below .desktop-hint::after {
+      top: -8px;
+      border-top-color: transparent;
+      border-bottom-color: var(--hint-bot-bg);
+    }
+
+    .entity:hover .desktop-hint,
+    .entity:focus-visible .desktop-hint {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .diagram-pin-veil {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 2800;
+      border-radius: inherit;
+      background: rgba(19, 18, 17, 0.22);
+      backdrop-filter: blur(6px);
+      pointer-events: auto;
+    }
+
+    .sticky-tooltip-root {
+      position: fixed;
+      z-index: 2147483000;
+      min-width: 200px;
+      max-width: min(320px, calc(100vw - 24px));
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 160ms ease, visibility 160ms ease;
+      box-shadow: 0 22px 60px rgba(0,0,0,0.4);
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      left: -12000px;
+    }
+
+    .sticky-tooltip-root.visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .pin-focus-veil {
+      position: fixed;
+      inset: 0;
+      z-index: 2147482900;
+      background: rgba(19, 18, 17, 0.28);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 220ms ease, visibility 220ms ease;
+    }
+
+    body.diagram-pin-active .pin-focus-veil {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    @media (min-width: 901px) {
+      body.diagram-pin-active main { z-index: 2147482920; }
+      .diagram-container.has-pinned-hint .diagram-pin-veil { display: block; }
+      .diagram-container.has-pinned-hint .desktop-hint {
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+      .entity.entity--pin-expanded {
+        z-index: 3200 !important;
+        min-height: 168px;
+        transform: translateY(-10px);
+        box-shadow: 0 16px 44px rgba(0,0,0,0.22);
+      }
+    }
+
+    .mobile-trigger { display: none; }
+
+    @media (max-width: 900px) {
+      html { --mobile-dock-clearance: calc(20px + var(--switch-h) + 20px + env(safe-area-inset-bottom, 0px)); }
+
+      .header-actions {
+        position: fixed;
+        left: 0; right: 0; bottom: 0;
+        z-index: 2050;
+        justify-content: center;
+        padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+        background: color-mix(in srgb, var(--bg-page) 92%, var(--bg-elevated));
+        border-top: 1px solid var(--border-subtle);
+      }
+
+      .page-header h1 {
+        font-size: clamp(0.65rem, 2.95vw + 0.28rem, 0.82rem);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      main { padding-bottom: var(--mobile-dock-clearance); }
+
+      .diagram-container {
+        width: 100%;
+        height: 450px;
+        background: transparent;
+        box-shadow: none;
+        border: none;
+      }
+
+      .hide-on-mobile, .static-line { display: none !important; }
+
+      .p-api {
+        top: 50%; left: 50%;
+        margin-top: -54px; margin-left: -74px;
+        transform: scale(1.08);
+        z-index: 100;
+      }
+
+      .mobile-trigger {
+        display: flex;
+        position: absolute;
+        top: 50%; left: 50%;
+        margin-top: -30px; margin-left: -30px;
+        width: 60px; height: 60px;
+        background: var(--bg-elevated);
+        border-radius: 50%;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+        z-index: 200;
+        border: 2px solid var(--line-color);
+        cursor: pointer;
+        font-size: 24px;
+      }
+
+      .mt-1 { transform: translateY(-135px); }
+      .mt-2 { transform: translateX(-135px); }
+      .mt-3 { transform: translateX(135px); }
+      .mt-4 { transform: translate(-80px, 120px); }
+      .mt-5 { transform: translate(80px, 120px); }
+      .mt-6 { transform: translateY(135px); }
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-elevated);
+      z-index: 2000;
+      display: none;
+      flex-direction: column;
+      padding: 24px clamp(14px, 4vw, 28px);
+      overflow-y: auto;
+    }
+
+    .overlay-close {
+      align-self: flex-end;
+      width: 44px; height: 44px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      background: var(--bg-page);
+      font-size: 1.65rem;
+      cursor: pointer;
+    }
+
+    .ov-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--border-subtle);
+    }
+
+    .ov-sym-icon {
+      width: 52px; height: 52px;
+      background: var(--bg-page);
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 28px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    #ovEx { font-size: 1.05rem; line-height: 1.5; margin: 0 0 14px; font-weight: 500; }
+
+    .def-wrapper {
+      background: color-mix(in srgb, var(--bg-page) 88%, var(--accent));
+      border-radius: 12px;
+      padding: 15px;
+      border-left: 4px solid var(--accent);
+    }
+
+    .def-wrapper strong {
+      display: block;
+      color: var(--text-soft);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+
+    #ovDef { font-size: 0.94rem; color: var(--text-soft); line-height: 1.52; margin: 0; }
+    #ovTitle { margin: 0; font-size: 1.35rem; color: var(--accent-strong); }
+
+    .scroll-top-btn {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      width: 44px; height: 44px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 150;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .scroll-top-btn.visible { opacity: 1; pointer-events: auto; }
+
+    @media (max-width: 768px) {
+      .scroll-top-btn {
+        display: flex;
+        bottom: calc(14px + var(--mobile-dock-clearance));
+        z-index: 2060;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="header-row">
+      <h1>
+        <span data-ua>Типи автентифікації: доступ до API</span>
+        <span data-en>Authentication types: API access</span>
+      </h1>
+      <div class="header-toolbar">
+        <div class="md-help-anchor" id="md-help-anchor">
+          <button type="button" class="md-chip" id="md-help-chip" aria-expanded="false" aria-haspopup="true" aria-controls="md-help-panel" aria-label="Довідка">
+            <span class="material-symbols-rounded" aria-hidden="true">info</span>
+          </button>
+          <div id="md-help-panel" class="md-help-surface" role="tooltip">
+            <p class="help-block">
+              <span data-ua><strong>Компʼютер:</strong> наведи на блок, клікни — закріплена підказка. Зняти: клік поза діаграмою або Esc.</span>
+              <span data-en><strong>Desktop:</strong> hover a block, click to pin. Dismiss: click outside or Esc.</span>
+            </p>
+            <p class="help-block">
+              <span data-ua><strong>Телефон:</strong> натисни значок навколо «Protected API».</span>
+              <span data-en><strong>Mobile:</strong> tap an icon around Protected API.</span>
+            </p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button type="button" class="toggle-chip" id="toggle-lang" aria-label="Мова UA"><span id="toggle-lang-label">UA</span></button>
+          <button type="button" class="toggle-chip" id="toggle-theme" aria-label="Тема">
+            <span class="material-symbols-rounded" id="theme-chip-icon" aria-hidden="true">dark_mode</span>
+          </button>
+          <span class="brand-carrot" aria-hidden="true">🥕</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="diagram-scroll">
+      <div class="diagram-stage">
+        <div class="diagram-container" aria-label="Auth types diagram">
+
+          <button type="button" class="entity hide-on-mobile p-oauth hint-dock-below" data-interact="oauth" aria-label="OAuth 2.0">
+            <div class="entity-icon" aria-hidden="true">🔗</div>
+            <b><span data-ua>OAuth 2.0</span><span data-en>OAuth 2.0</span></b>
+            <i><span data-ua>Делегований доступ</span><span data-en>Delegated access</span></i>
+            <div class="desktop-hint">
+              <div class="hint-def" data-ua><b>OAuth 2.0 / OIDC</b><br>Клієнт не бачить пароль — доступ видає довірений провайдер.</div>
+              <div class="hint-def" data-en><b>OAuth 2.0 / OIDC</b><br>The client never sees the password — a trusted provider grants access.</div>
+              <div class="hint-ex" data-ua><b>Приклад:</b> «Увійти через Google» — токен від Google, не твій пароль на сайті.</div>
+              <div class="hint-ex" data-en><b>Example:</b> “Sign in with Google” — token from Google, not your password on the app.</div>
+            </div>
+          </button>
+
+          <button type="button" class="entity p-api hint-dock-below" data-interact="api" aria-label="Protected API">
+            <div class="entity-icon" aria-hidden="true">🛡️</div>
+            <b><span data-ua>Protected API</span><span data-en>Protected API</span></b>
+            <i><span data-ua>Ресурс сервер</span><span data-en>Resource server</span></i>
+            <div class="desktop-hint">
+              <div class="hint-def" data-ua><b>Protected API</b><br>Сервіс, який перевіряє «хто ти» перед видачею даних.</div>
+              <div class="hint-def" data-en><b>Protected API</b><br>A service that verifies “who you are” before returning data.</div>
+              <div class="hint-ex" data-ua>У центрі схеми — усі механізми ведуть сюди для перевірки доступу.</div>
+              <div class="hint-ex" data-en>At the center — every mechanism ultimately validates access here.</div>
+            </div>
+          </button>
+
+          <button type="button" class="entity hide-on-mobile p-basic hint-dock-below" data-interact="basic" aria-label="Basic Auth">
+            <div class="entity-icon" aria-hidden="true">🔑</div>
+            <b><span data-ua>Basic Auth</span><span data-en>Basic Auth</span></b>
+            <i><span data-ua>Логін + пароль</span><span data-en>Username + password</span></i>
+            <div class="desktop-hint">
+              <div class="hint-def" data-ua><b>HTTP Basic</b><br>Логін і пароль у заголовку <code>Authorization</code> (Base64).</div>
+              <div class="hint-def" data-en><b>HTTP Basic</b><br>Username and password in the <code>Authorization</code> header (Base64).</div>
+              <div class="hint-ex" data-ua><b>Приклад:</b> внутрішній admin-panel за HTTPS — просто, але лише з TLS.</div>
+              <div class="hint-ex" data-en><b>Example:</b> internal admin panel over HTTPS — simple, but only with TLS.</div>
+            </div>
+          </button>
+
+          <button type="button" class="entity hide-on-mobile p-apikey hint-dock-below" data-interact="apikey" aria-label="API Key">
+            <div class="entity-icon" aria-hidden="true">🏷️</div>
+            <b><span data-ua>API Key</span><span data-en>API Key</span></b>
+            <i><span data-ua>Статичний секрет</span><span data-en>Static secret</span></i>
+            <div class="desktop-hint">
+              <div class="hint-def" data-ua><b>API Key</b><br>Довгоживучий секрет у заголовку або query — «пропуск для сервісу».</div>
+              <div class="hint-def" data-en><b>API Key</b><br>Long-lived secret in header or query — a “service pass”.</div>
+              <div class="hint-ex" data-ua><b>Приклад:</b> <code>X-API-Key: sk_live_…</code> для публічного REST API.</div>
+              <div class="hint-ex" data-en><b>Example:</b> <code>X-API-Key: sk_live_…</code> for a public REST API.</div>
+            </div>
+          </button>
+
+          <button type="button" class="entity hide-on-mobile p-jwt" data-interact="jwt" aria-label="JWT Bearer">
+            <div class="entity-icon" aria-hidden="true">🎫</div>
+            <b><span data-ua>JWT Bearer</span><span data-en>JWT Bearer</span></b>
+            <i><span data-ua>Підписаний токен</span><span data-en>Signed token</span></i>
+            <div class="desktop-hint">
+              <div class="hint-def" data-ua><b>JWT</b><br>Самодостатній токен з claims + підпис; сервер перевіряє підпис і термін.</div>
+              <div class="hint-def" data-en><b>JWT</b><br>Self-contained token with claims + signature; server verifies both.</div>
+              <div class="hint-ex" data-ua><b>Приклад:</b> <code>Authorization: Bearer eyJhbG…</code> після логіну в SPA.</div>
+              <div class="hint-ex" data-en><b>Example:</b> <code>Authorization: Bearer eyJhbG…</code> after login in an SPA.</div>
+            </div>
+          </button>
+
+          <button type="button" class="entity hide-on-mobile p-session" data-interact="session" aria-label="Session Cookie">
+            <div class="entity-icon" aria-hidden="true">🍪</div>
+            <b><span data-ua>Session</span><span data-en>Session</span></b>
+            <i><span data-ua>Cookie + server state</span><span data-en>Cookie + server state</span></i>
+            <div class="desktop-hint">
+              <div class="hint-def" data-ua><b>Session-based</b><br>Браузер тримає session id; стан живе на сервері.</div>
+              <div class="hint-def" data-en><b>Session-based</b><br>Browser holds a session id; state lives on the server.</div>
+              <div class="hint-ex" data-ua><b>Приклад:</b> <code>SESSIONID=abc</code> — класичний веб-додаток після форми логіну.</div>
+              <div class="hint-ex" data-en><b>Example:</b> <code>SESSIONID=abc</code> — classic web app after a login form.</div>
+            </div>
+          </button>
+
+          <button type="button" class="entity hide-on-mobile p-mtls" data-interact="mtls" aria-label="mTLS">
+            <div class="entity-icon" aria-hidden="true">📜</div>
+            <b><span data-ua>mTLS</span><span data-en>mTLS</span></b>
+            <i><span data-ua>Взаємні сертифікати</span><span data-en>Mutual certificates</span></i>
+            <div class="desktop-hint">
+              <div class="hint-def" data-ua><b>Mutual TLS</b><br>І клієнт, і сервер предʼявляють X.509 сертифікат на TLS-рівні.</div>
+              <div class="hint-def" data-en><b>Mutual TLS</b><br>Both client and server present X.509 certs at the TLS layer.</div>
+              <div class="hint-ex" data-ua><b>Приклад:</b> service-to-service у Kubernetes або банківські B2B API.</div>
+              <div class="hint-ex" data-en><b>Example:</b> service-to-service in Kubernetes or banking B2B APIs.</div>
+            </div>
+          </button>
+
+          <div class="static-line l-hub-v" aria-hidden="true"></div>
+          <div class="static-line l-hub-h1" aria-hidden="true"></div>
+          <div class="static-line l-hub-h2" aria-hidden="true"></div>
+          <div class="static-line l-hub-d1" aria-hidden="true"></div>
+          <div class="static-line l-hub-d2" aria-hidden="true"></div>
+          <div class="static-line l-hub-d3" aria-hidden="true"></div>
+
+          <button type="button" class="mobile-trigger mt-1" data-interact="oauth" aria-label="OAuth 2.0 (телефон)">🔗</button>
+          <button type="button" class="mobile-trigger mt-2" data-interact="basic" aria-label="Basic Auth (телефон)">🔑</button>
+          <button type="button" class="mobile-trigger mt-3" data-interact="apikey" aria-label="API Key (телефон)">🏷️</button>
+          <button type="button" class="mobile-trigger mt-4" data-interact="jwt" aria-label="JWT (телефон)">🎫</button>
+          <button type="button" class="mobile-trigger mt-5" data-interact="session" aria-label="Session (телефон)">🍪</button>
+          <button type="button" class="mobile-trigger mt-6" data-interact="mtls" aria-label="mTLS (телефон)">📜</button>
+
+          <div id="diagram-pin-veil" class="diagram-pin-veil" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="mOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="ovTitle" aria-hidden="true">
+    <button type="button" class="overlay-close" id="overlayClose" aria-label="Закрити">×</button>
+    <div class="ov-header">
+      <div class="ov-sym-icon" id="ovSym" aria-hidden="true"></div>
+      <h2 id="ovTitle"></h2>
+    </div>
+    <p id="ovEx"></p>
+    <div class="def-wrapper">
+      <strong data-ua>Що це означає</strong>
+      <strong data-en>What it means</strong>
+      <p id="ovDef"></p>
+    </div>
+  </div>
+
+  <button type="button" class="scroll-top-btn" id="scroll-top-btn" aria-label="Вгору">
+    <span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_up</span>
+  </button>
+
+  <div id="pin-focus-veil" class="pin-focus-veil" aria-hidden="true" hidden></div>
+  <div id="sticky-tooltip" class="sticky-tooltip-root" role="tooltip" aria-hidden="true" hidden></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var THEME_KEY = 'auth-types-theme';
+      var LANG_KEY = 'auth-types-lang';
+
+      var DOC_TITLE = {
+        uk: 'Типи автентифікації — API gateway | tools',
+        en: 'Authentication types — API gateway | tools'
+      };
+
+      var data = {
+        api: {
+          sym: '🛡️',
+          uk: { title: 'Protected API', ex: 'Сервіс перевіряє доступ перед видачею даних.', def: 'Resource server — центр схеми; усі механізми ведуть до перевірки тут.' },
+          en: { title: 'Protected API', ex: 'The service verifies access before returning data.', def: 'Resource server at the center — every mechanism validates access here.' }
+        },
+        oauth: {
+          sym: '🔗',
+          uk: { title: 'OAuth 2.0 / OIDC', ex: '«Увійти через Google» — токен від провайдера, не пароль на сайті.', def: 'Delegated access: client gets tokens from an authorization server; user consents without sharing password with the app.' },
+          en: { title: 'OAuth 2.0 / OIDC', ex: '“Sign in with Google” — token from provider, not your password on the app.', def: 'Delegated access: client receives tokens from an authorization server after user consent.' }
+        },
+        basic: {
+          sym: '🔑',
+          uk: { title: 'HTTP Basic Auth', ex: 'Admin-panel за HTTPS — просто, але тільки з TLS.', def: 'Username:password encoded in Authorization header (Base64). Easy, but never without HTTPS.' },
+          en: { title: 'HTTP Basic Auth', ex: 'Admin panel over HTTPS — simple, but TLS is mandatory.', def: 'Username:password in Authorization header (Base64). Never use without HTTPS.' }
+        },
+        apikey: {
+          sym: '🏷️',
+          uk: { title: 'API Key', ex: 'X-API-Key у заголовку для публічного REST API.', def: 'Static long-lived secret identifying the caller or project. Simple, but rotate and scope carefully.' },
+          en: { title: 'API Key', ex: 'X-API-Key header for a public REST API.', def: 'Static long-lived secret identifying the caller. Simple — rotate and scope carefully.' }
+        },
+        jwt: {
+          sym: '🎫',
+          uk: { title: 'JWT Bearer', ex: 'Authorization: Bearer eyJ… після логіну в SPA.', def: 'Signed token with claims (sub, exp, roles). Stateless verification if signature and expiry check out.' },
+          en: { title: 'JWT Bearer', ex: 'Authorization: Bearer eyJ… after SPA login.', def: 'Signed token with claims (sub, exp, roles). Stateless if signature and expiry are valid.' }
+        },
+        session: {
+          sym: '🍪',
+          uk: { title: 'Session (Cookie)', ex: 'SESSIONID=abc — класичний веб після форми логіну.', def: 'Server stores session state; browser sends session id cookie. Easy revoke, needs sticky sessions or shared store.' },
+          en: { title: 'Session (Cookie)', ex: 'SESSIONID=abc — classic web after login form.', def: 'Server-side session state; browser sends session cookie. Easy revoke; needs shared store at scale.' }
+        },
+        mtls: {
+          sym: '📜',
+          uk: { title: 'Mutual TLS (mTLS)', ex: 'Service-to-service у K8s або банківські B2B API.', def: 'Both peers present X.509 certificates during TLS handshake — strong machine-to-machine identity.' },
+          en: { title: 'Mutual TLS (mTLS)', ex: 'Service-to-service in K8s or banking B2B APIs.', def: 'Both peers present X.509 certificates during TLS — strong machine-to-machine identity.' }
+        }
+      };
+
+      function currentLang() {
+        return document.documentElement.getAttribute('data-lang') === 'en' ? 'en' : 'uk';
+      }
+
+      function pick(item) {
+        var L = currentLang();
+        return { sym: item.sym, title: item[L].title, ex: item[L].ex, def: item[L].def };
+      }
+
+      var overlay = document.getElementById('mOverlay');
+      var scrollTopBtn = document.getElementById('scroll-top-btn');
+      var stickyTooltip = document.getElementById('sticky-tooltip');
+      var pinFocusVeil = document.getElementById('pin-focus-veil');
+      var diagramPinVeil = document.getElementById('diagram-pin-veil');
+      var mdHelpAnchor = document.getElementById('md-help-anchor');
+      var mdHelpChip = document.getElementById('md-help-chip');
+      var diagram = document.querySelector('.diagram-container');
+      var pinnedAnchor = null;
+
+      function mqMobile() { return window.matchMedia('(max-width: 900px)').matches; }
+
+      function syncChrome() {
+        var isEn = document.documentElement.getAttribute('data-lang') === 'en';
+        document.getElementById('toggle-lang-label').textContent = isEn ? 'EN' : 'UA';
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        document.getElementById('theme-chip-icon').textContent = isDark ? 'dark_mode' : 'light_mode';
+        document.title = isEn ? DOC_TITLE.en : DOC_TITLE.uk;
+        var oc = document.getElementById('overlayClose');
+        if (oc) oc.setAttribute('aria-label', isEn ? 'Close' : 'Закрити');
+        if (scrollTopBtn) scrollTopBtn.setAttribute('aria-label', isEn ? 'Scroll to top' : 'Вгору');
+        refreshOverlay();
+      }
+
+      function setTheme(mode) {
+        document.documentElement.setAttribute('data-theme', mode === 'light' ? 'light' : 'dark');
+        try { localStorage.setItem(THEME_KEY, mode); } catch (e) {}
+        syncChrome();
+      }
+
+      function setLang(lang) {
+        document.documentElement.setAttribute('data-lang', lang === 'en' ? 'en' : 'uk');
+        document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'uk');
+        try { localStorage.setItem(LANG_KEY, lang); } catch (e) {}
+        syncChrome();
+      }
+
+      function hideSticky() {
+        stickyTooltip.classList.remove('visible');
+        stickyTooltip.innerHTML = '';
+        stickyTooltip.hidden = true;
+      }
+
+      function unpin() {
+        if (!pinnedAnchor) return;
+        if (pinnedAnchor.classList.contains('entity')) {
+          pinnedAnchor.style.width = '';
+          pinnedAnchor.style.left = '';
+          pinnedAnchor.style.top = '';
+        }
+        diagram.classList.remove('has-pinned-hint');
+        pinnedAnchor.classList.remove('entity--pin-expanded');
+        pinnedAnchor = null;
+        document.body.classList.remove('diagram-pin-active');
+        if (pinFocusVeil) pinFocusVeil.hidden = true;
+        hideSticky();
+      }
+
+      function layoutSticky() {
+        if (!pinnedAnchor) return;
+        stickyTooltip.hidden = false;
+        stickyTooltip.classList.remove('visible');
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            var pad = 12, gap = 14;
+            var maxW = Math.min(320, window.innerWidth - 24);
+            var r = pinnedAnchor.getBoundingClientRect();
+            stickyTooltip.style.width = maxW + 'px';
+            stickyTooltip.style.left = '-99999px';
+            stickyTooltip.style.top = '0';
+            var th = stickyTooltip.offsetHeight;
+            var ttTop = r.top + r.height * 0.5 < window.innerHeight * 0.5 ? r.bottom + gap : r.top - th - gap;
+            var ttLeft = Math.max(pad, Math.min(r.left + r.width / 2 - maxW / 2, window.innerWidth - pad - maxW));
+            stickyTooltip.style.left = Math.round(ttLeft) + 'px';
+            stickyTooltip.style.top = Math.round(Math.max(pad, ttTop)) + 'px';
+            stickyTooltip.classList.add('visible');
+          });
+        });
+        stickyTooltip.setAttribute('aria-hidden', 'false');
+      }
+
+      function pin(host, hintEl) {
+        if (mqMobile()) return;
+        if (pinnedAnchor && pinnedAnchor !== host) unpin();
+        pinnedAnchor = host;
+        stickyTooltip.innerHTML = hintEl.innerHTML;
+        diagram.classList.add('has-pinned-hint');
+        pinnedAnchor.classList.add('entity--pin-expanded');
+        stickyTooltip.hidden = false;
+        document.body.classList.add('diagram-pin-active');
+        if (pinFocusVeil) pinFocusVeil.hidden = false;
+        layoutSticky();
+      }
+
+      function openOverlay(key) {
+        var item = pick(data[key]);
+        if (!item) return;
+        document.getElementById('ovSym').textContent = item.sym;
+        document.getElementById('ovTitle').textContent = item.title;
+        document.getElementById('ovEx').textContent = item.ex;
+        document.getElementById('ovDef').textContent = item.def;
+        overlay.setAttribute('data-open-key', key);
+        overlay.style.display = 'flex';
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeOverlay() {
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.removeAttribute('data-open-key');
+        document.body.style.overflow = '';
+      }
+
+      function refreshOverlay() {
+        var key = overlay.getAttribute('data-open-key');
+        if (overlay.getAttribute('aria-hidden') === 'false' && key) openOverlay(key);
+      }
+
+      diagram.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-interact]');
+        if (mqMobile()) {
+          if (!btn) return;
+          e.preventDefault();
+          openOverlay(btn.getAttribute('data-interact'));
+          return;
+        }
+        var host = e.target.closest('.entity');
+        if (!host || !host.querySelector('.desktop-hint')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (pinnedAnchor === host) { unpin(); return; }
+        pin(host, host.querySelector('.desktop-hint'));
+      });
+
+      document.getElementById('toggle-theme').addEventListener('click', function () {
+        setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+      });
+
+      document.getElementById('toggle-lang').addEventListener('click', function () {
+        setLang(document.documentElement.getAttribute('data-lang') === 'uk' ? 'en' : 'uk');
+      });
+
+      document.getElementById('overlayClose').addEventListener('click', closeOverlay);
+
+      if (pinFocusVeil) pinFocusVeil.addEventListener('click', unpin);
+      if (diagramPinVeil) diagramPinVeil.addEventListener('click', function (e) { e.stopPropagation(); unpin(); });
+
+      document.addEventListener('click', function (e) {
+        if (!mqMobile() && pinnedAnchor && !stickyTooltip.contains(e.target) && !e.target.closest('.page-header')) unpin();
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          if (overlay.getAttribute('aria-hidden') === 'false') closeOverlay();
+          else unpin();
+        }
+      });
+
+      scrollTopBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+      window.addEventListener('scroll', function () {
+        scrollTopBtn.classList.toggle('visible', window.innerWidth <= 768 && window.scrollY > 200);
+      });
+
+      var t, l;
+      try { t = localStorage.getItem(THEME_KEY); } catch (e) {}
+      try { l = localStorage.getItem(LANG_KEY); } catch (e) {}
+      setTheme(t === 'light' || t === 'dark' ? t : 'dark');
+      setLang(l === 'en' || l === 'uk' ? l : 'uk');
+    })();
+  </script>
+</body>
+</html>

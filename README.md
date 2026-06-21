@@ -5,9 +5,9 @@ It collects small interactive pages, technical notes, and supporting material fo
 
 ## Freshness
 
-- Last content update: **2026-05-10**
+- Last content update: **2026-06-21**
 - External links checked: **2026-04-26**
-- Validation scope: root `README.md` and featured pages on root `index.html` (currently `student-pack`, `conection_types`)
+- Validation scope: root `README.md` and featured pages on root `index.html` (currently `student-pack`, `conection_types`, `auth_types`)
 - Note: the repo may contain extra HTML folders that are deliberately **not** linked from the root landing — use direct URLs below. Third-party pages and offer terms can change without notice.
 
 ## What is inside
@@ -15,6 +15,7 @@ It collects small interactive pages, technical notes, and supporting material fo
 - [tools.mrcarrot13666.me](https://tools.mrcarrot13666.me) — main landing (**curated** cards — not every folder in the repo).
 - [tools.mrcarrot13666.me/student-pack](https://tools.mrcarrot13666.me/student-pack/) — GitHub Student Pack guide.
 - [tools.mrcarrot13666.me/conection_types](https://tools.mrcarrot13666.me/conection_types/) — connection types / UML tree (folder spelled `conection_types` for stable URL).
+- [tools.mrcarrot13666.me/auth_types](https://tools.mrcarrot13666.me/auth_types/) — AuthArchitect: authentication methods for BA & SA (market chart, decision matrix, catalog with Mermaid).
 - [tools.mrcarrot13666.me/ai-files/ai brief/19052026](https://tools.mrcarrot13666.me/ai-files/ai%20brief/19052026/) — AI brief archive for 19.05.2026.
 
 Other published HTML (not necessarily on root index): [Perplexity hub](https://tools.mrcarrot13666.me/ai-files/perplexity/).

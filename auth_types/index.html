@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuthArchitect — методи автентифікації 2026 | tools</title>
+    <meta name="description" content="Довідник для BA та SA: популярність методів автентифікації, матриця вибору та каталог з sequence/architecture діаграмами.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Mermaid.js -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+
+    <style>
+        :root {
+            --accent-color: #F2B666;
+            --accent-hover: #f6c57f;
+            --bg-color: #131211;
+            --text-color: #e4e3e0;
+            --text-soft: #888784;
+            --card-bg: #1c1b19;
+            --border-color: rgba(255,255,255,0.08);
+            --code-bg: #242320;
+            --hover-bg: #2a2927;
+            --radius: 12px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.35);
+            --transition: 180ms cubic-bezier(0.16,1,0.3,1);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f4f3ef;
+            --text-color: #1a1917;
+            --text-soft: #6b6a67;
+            --card-bg: #ffffff;
+            --border-color: rgba(0,0,0,0.08);
+            --code-bg: #f0efeb;
+            --hover-bg: #e8e7e4;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        header {
+            background-color: color-mix(in srgb, var(--card-bg) 92%, transparent);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 clamp(14px, 4vw, 28px);
+            min-height: 56px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .brand-carrot { font-size: 1.25rem; line-height: 1; flex-shrink: 0; }
+
+        h1, h2, h3, h4 {
+            color: var(--accent-color);
+            margin-top: 0;
+        }
+
+        h1 {
+            font-size: clamp(1rem, 2.5vw, 1.35rem);
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .material-symbols-rounded {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 22px;
+            line-height: 1;
+        }
+
+        .icon-btn {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 8px;
+            transition: color var(--transition), border-color var(--transition), background var(--transition);
+        }
+
+        .icon-btn:hover {
+            border-color: color-mix(in srgb, var(--accent-color) 45%, transparent);
+            color: var(--accent-color);
+        }
+
+        .icon-btn:focus-visible {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 5%;
+        }
+
+        .auth-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: clamp(1.2rem, 3vw, 2rem);
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            width: 100%;
+        }
+
+        .auth-card > p,
+        .auth-card .matrix-form + p {
+            color: var(--text-soft);
+        }
+
+        .chart-container {
+            max-width: 600px;
+            margin: 0 auto 2rem auto;
+            position: relative;
+        }
+
+        /* Навігація */
+        .desktop-nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .desktop-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.2s;
+        }
+
+        .desktop-nav a:hover {
+            color: var(--accent-color);
+        }
+
+        .mobile-only {
+            display: none;
+        }
+
+        .mobile-menu {
+            display: none;
+            flex-direction: column;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 74px;
+            left: 0;
+            width: 100%;
+            z-index: 99;
+            padding: 0 5%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .mobile-menu.active {
+            display: flex;
+        }
+
+        .mobile-menu a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 500;
+        }
+
+        .mobile-menu a:last-child {
+            border-bottom: none;
+        }
+
+        .mobile-menu a:hover {
+            color: var(--accent-color);
+        }
+
+        /* Matrix Styles */
+        .matrix-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            width: 100%;
+        }
+
+        .form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            width: 100%;
+        }
+
+        .form-row label {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-row select {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Ubuntu', sans-serif;
+            font-size: 1rem;
+            max-width: 100%;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: #1a1917;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity var(--transition), transform var(--transition);
+            font-family: 'Ubuntu', sans-serif;
+            margin-top: 1rem;
+            align-self: flex-start;
+        }
+
+        .btn-primary:hover { opacity: 0.92; }
+        .btn-primary:focus-visible {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 3px;
+        }
+
+        .result-box {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-left: 4px solid var(--accent-color);
+            background-color: var(--code-bg);
+            display: none;
+            border-radius: 0 8px 8px 0;
+            width: 100%;
+        }
+
+        /* Catalog Styles */
+        .examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            width: 100%;
+        }
+
+        .example-box {
+            flex: 1;
+            min-width: 250px;
+            background-color: var(--code-bg);
+            padding: 1rem;
+            border-left: 4px solid var(--accent-color);
+            border-radius: 4px;
+        }
+
+        /* Accordions */
+        details {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        summary {
+            padding: 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            outline: none;
+            user-select: none;
+            background-color: var(--hover-bg);
+        }
+        
+        summary:hover {
+            color: var(--accent-color);
+        }
+
+        .diagram-container {
+            padding: 1rem;
+            background-color: #ffffff; /* Mermaid best on white */
+            overflow-x: auto;
+            max-width: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        [data-theme="dark"] .diagram-container {
+            background-color: #1a1a1a;
+        }
+
+        .scroll-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            display: none;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition), transform var(--transition);
+            transform: translateY(8px);
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        /* Mobile Adaptive */
+        @media (max-width: 768px) {
+            .desktop-nav { display: none; }
+            .mobile-only { display: flex; }
+            .examples { flex-direction: column; }
+            .scroll-top { display: inline-flex; }
+            .btn-primary { width: 100%; }
+            main { padding: 0 1rem; margin-top: 1rem; }
+            .form-row select { text-overflow: ellipsis; overflow: hidden; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand-wrap">
+            <span class="brand-carrot" aria-hidden="true">🥕</span>
+            <h1>AuthArchitect</h1>
+        </div>
+
+        <nav class="desktop-nav" aria-label="Навігація по сторінці">
+            <a href="#market">Ринок</a>
+            <a href="#matrix">Матриця</a>
+            <a href="#catalog-section">Каталог</a>
+        </nav>
+
+        <div class="controls">
+            <button type="button" id="theme-toggle" class="icon-btn" aria-label="Перемкнути тему">
+                <span class="material-symbols-rounded" id="theme-icon" aria-hidden="true">dark_mode</span>
+            </button>
+            <button type="button" id="mobile-menu-btn" class="icon-btn mobile-only" aria-label="Меню">
+                <span class="material-symbols-rounded" aria-hidden="true">menu</span>
+            </button>
+        </div>
+    </header>
+
+    <div id="mobile-menu" class="mobile-menu">
+        <a href="#market" class="mobile-link">Ринок (2026)</a>
+        <a href="#matrix" class="mobile-link">Матриця вибору</a>
+        <a href="#catalog-section" class="mobile-link">Каталог методів</a>
+    </div>
+
+    <main>
+        <!-- 1. CHART CONTAINER (Full Width Card) -->
+        <section id="market" class="auth-card">
+            <h2>Ринок: Популярність методів автентифікації (Прогноз 2026)</h2>
+            <p>Орієнтовний розподіл методів у 2026 — включно з патернами сесії після логіну (Session, JWT, API Key). Тренд: менше паролів, більше passkeys і risk-based.</p>
+            <div class="chart-container">
+                <canvas id="marketChart"></canvas>
+            </div>
+        </section>
+
+        <!-- 2. DECISION MATRIX -->
+        <section id="matrix" class="auth-card">
+            <h2>Матриця прийняття рішень (5 Факторів)</h2>
+            <p>Оберіть параметри вашого проєкту для розрахунку оптимальної архітектури автентифікації:</p>
+            
+            <div class="matrix-form">
+                <div class="form-row">
+                    <label>1. Цільова аудиторія (Audience):</label>
+                    <select id="sel-aud">
+                        <option value="b2c">B2C (Масовий користувач)</option>
+                        <option value="b2b">B2B (Корпоративні клієнти)</option>
+                        <option value="admin">Admins / Internal (Внутрішній персонал)</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label>2. Рівень ризику (Risk):</label>
+                    <select id="sel-risk">
+                        <option value="low">Низький (блог, інфо-портал)</option>
+                        <option value="med">Середній (e-commerce, SaaS)</option>
+                        <option value="high">Високий (Fintech, Health-tech, Уряд)</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label>3. Бюджет на впровадження (Budget):</label>
+                    <select id="sel-budget">
+                        <option value="low">Мінімальний / MVP</option>
+                        <option value="med">Середній (стандартна розробка)</option>
+                        <option value="high">Високий (Enterprise-рішення)</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label>4. Пріоритет (UX vs Security):</label>
+                    <select id="sel-ux">
+                        <option value="speed">Швидкість та відсутність тертя (Frictionless UX)</option>
+                        <option value="balanced">Баланс між безпекою та зручністю</option>
+                        <option value="sec">Максимальна безпека (Security First)</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label>5. Платформа (Platform):</label>
+                    <select id="sel-plat">
+                        <option value="web">Тільки Web</option>
+                        <option value="mobile">Тільки Mobile (App)</option>
+                        <option value="omni">Omnichannel (Web + Mobile App)</option>
+                    </select>
+                </div>
+
+                <button type="button" class="btn-primary" id="matrix-submit">Згенерувати рішення</button>
+            </div>
+            
+            <div id="matrix-result" class="result-box"></div>
+        </section>
+
+        <!-- 3. CATALOG -->
+        <div id="catalog-section">
+            <h2 style="margin-top: 3rem; margin-bottom: 1.5rem; text-align: center; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem;">Каталог Архітектурних Рішень</h2>
+
+            <!-- Method 1 -->
+            <section class="auth-card">
+                <h2>1. Традиційна Парольна Автентифікація</h2>
+                <p>Базовий метод на основі знання секрету. Досі популярний через простоту впровадження, але вкрай вразливий до фішингу та витоків баз даних. <strong>Після успішного логіну</strong> зазвичай видають Session cookie або JWT — див. пункти 2–4.</p>
+                
+                <div class="examples">
+                    <div class="example-box">
+                        <h4>🏦 Банківський домен</h4>
+                        <p>Практично виведений з експлуатації як єдиний фактор. Використовується лише в комбінації з 2FA або як резервний метод для відновлення на старих порталах.</p>
+                    </div>
+                    <div class="example-box">
+                        <h4>🌐 Інший домен</h4>
+                        <p>Новинні сайти, невеликі форуми, внутрішні некритичні системи, де втрата акаунта не несе фінансових чи репутаційних ризиків.</p>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>🔄 Sequence Diagram (Процес)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        sequenceDiagram
+                            autonumber
+                            participant U as Користувач
+                            participant C as Клієнт (Браузер)
+                            participant API as Auth API
+                            participant DB as База Даних
+
+                            U->>C: Вводить Логін + Пароль
+                            C->>API: POST /login (username, pass)
+                            API->>API: Хешує (Argon2 / bcrypt)
+                            API->>DB: Запит хешу по username
+                            DB-->>API: Повертає (Hash, Salt)
+                            API->>API: Порівнює хеші
+                            alt Збіг
+                                API-->>C: 200 OK (далі Session або JWT)
+                            else Помилка
+                                API-->>C: 401 Unauthorized
+                            end
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>🏗 Architecture Diagram (Архітектура)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        graph LR
+                            User((Користувач)) --> UI[Web / App Client]
+                            UI --> WAF[WAF / Load Balancer]
+                            WAF --> Auth[Auth Service]
+                            Auth --> Cache[(Redis Session Store)]
+                            Auth --> DB[(PostgreSQL Users/Hashes)]
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <!-- Method 2: Session -->
+            <section class="auth-card">
+                <h2>2. Session + Cookie (Server-side)</h2>
+                <p>Після логіну сервер створює <strong>сесію</strong> і віддає браузеру лише opaque <code>session id</code> у HttpOnly-cookie. Стан живе на бекенді (Redis/DB) — зручний revoke і logout.</p>
+
+                <div class="examples">
+                    <div class="example-box">
+                        <h4>🏦 Банківський домен</h4>
+                        <p><strong>Legacy web-банкінг:</strong> сесія в Redis після MFA; timeout неактивності; примусовий logout усіх пристроїв при зміні пароля.</p>
+                    </div>
+                    <div class="example-box">
+                        <h4>🌐 Інший домен</h4>
+                        <p><strong>Класичний B2B портал</strong> (Django/Rails): <code>SESSIONID</code> cookie, server-side store, CSRF-token у формах.</p>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>🔄 Sequence Diagram (Процес)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        sequenceDiagram
+                            autonumber
+                            participant U as Користувач
+                            participant B as Браузер
+                            participant API as Auth API
+                            participant R as Redis Session Store
+
+                            U->>B: Успішний логін (пароль/MFA)
+                            B->>API: POST /login
+                            API->>R: Створити session (user_id, roles)
+                            R-->>API: session_id
+                            API-->>B: Set-Cookie: SESSIONID (HttpOnly, Secure)
+                            B->>API: GET /dashboard + Cookie
+                            API->>R: Lookup session_id
+                            R-->>API: User context
+                            API-->>B: 200 OK
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>🏗 Architecture Diagram (Архітектура)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        graph LR
+                            Browser[Браузер + Cookie] --> LB[Load Balancer]
+                            LB --> App[Web App / BFF]
+                            App --> Redis[(Redis Sessions)]
+                            App --> DB[(Users DB)]
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <!-- Method 3: JWT -->
+            <section class="auth-card">
+                <h2>3. JWT Bearer (Stateless Token)</h2>
+                <p>Самодостатній підписаний токен з claims (<code>sub</code>, <code>exp</code>, roles). API перевіряє підпис і термін — <strong>без lookup сесії</strong> на кожен запит. Зручно для SPA, mobile API та microservices.</p>
+
+                <div class="examples">
+                    <div class="example-box">
+                        <h4>🏦 Банківський домен</h4>
+                        <p><strong>Mobile banking API:</strong> короткоживучий access JWT + refresh token; окремі scopes для переказів vs перегляду балансу.</p>
+                    </div>
+                    <div class="example-box">
+                        <h4>🌐 Інший домен</h4>
+                        <p><strong>React SPA + REST:</strong> <code>Authorization: Bearer eyJ…</code> після OIDC; gateway валідує JWT перед маршрутизацією.</p>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>🔄 Sequence Diagram (Процес)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        sequenceDiagram
+                            autonumber
+                            participant C as Клієнт (SPA/App)
+                            participant Auth as Auth Service
+                            participant API as Resource API
+
+                            C->>Auth: POST /token (login / refresh)
+                            Auth->>Auth: Підпис JWT (private key)
+                            Auth-->>C: access_token + refresh_token
+                            C->>API: GET /data Authorization Bearer
+                            API->>API: Verify signature + exp + scopes
+                            API-->>C: 200 OK + JSON
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>🏗 Architecture Diagram (Архітектура)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        graph LR
+                            Client[SPA / Mobile] --> GW[API Gateway]
+                            GW --> Auth[Auth / Token Issuer]
+                            GW --> Svc1[Service A]
+                            GW --> Svc2[Service B]
+                            Auth --> Keys[(JWKS / Key Store)]
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <!-- Method 4: API Key -->
+            <section class="auth-card">
+                <h2>4. API Key (Machine / Integration)</h2>
+                <p>Статичний довгоживучий секрет для <strong>machine-to-machine</strong> або B2B-інтеграцій. Простий у onboarding, але потребує rotation, scopes і rate limits — не для людського логіну.</p>
+
+                <div class="examples">
+                    <div class="example-box">
+                        <h4>🏦 Банківський домен</h4>
+                        <p><strong>Open Banking / PSD2:</strong> партнерський <code>X-API-Key</code> або mTLS + client_id для доступу до агрегованих рахунків (окремо від user session).</p>
+                    </div>
+                    <div class="example-box">
+                        <h4>🌐 Інший домен</h4>
+                        <p><strong>Stripe / SendGrid:</strong> secret key у заголовку для server-side викликів; publishable key лише для публічних операцій.</p>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>🔄 Sequence Diagram (Процес)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        sequenceDiagram
+                            autonumber
+                            participant P as Partner System
+                            participant GW as API Gateway
+                            participant S as Backend Service
+                            participant K as Key Registry
+
+                            P->>GW: GET /v1/data X-API-Key sk_live_...
+                            GW->>K: Validate key + scopes + quota
+                            K-->>GW: tenant_id, permissions
+                            GW->>S: Forward + tenant context
+                            S-->>GW: Response
+                            GW-->>P: 200 OK
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>🏗 Architecture Diagram (Архітектура)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        graph LR
+                            Partner[Partner / Cron / Webhook] --> GW[API Gateway]
+                            GW --> KeySvc[Key Validation Service]
+                            KeySvc --> KeyDB[(API Keys DB)]
+                            GW --> Core[Core API]
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <!-- Method 5 -->
+            <section class="auth-card">
+                <h2>5. Багатофакторна Автентифікація (MFA)</h2>
+                <p>Додає другий рівень захисту (SMS, TOTP, Push). Значно підвищує безпеку порівняно з паролями, але SMS-канал залишається вразливим до SIM-свопінгу.</p>
+                
+                <div class="examples">
+                    <div class="example-box">
+                        <h4>🏦 Банківський домен</h4>
+                        <p><strong>Monobank / Приват24:</strong> Підтвердження транзакцій (Step-up Auth) через Push-сповіщення у додатку, або дзвінок від робота на довірений номер.</p>
+                    </div>
+                    <div class="example-box">
+                        <h4>🌐 Інший домен</h4>
+                        <p><strong>AWS / GitHub:</strong> Обов'язкове використання TOTP-додатків (Google Authenticator) для всіх розробників при логіні.</p>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>🔄 Sequence Diagram (Процес)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        sequenceDiagram
+                            autonumber
+                            participant U as Користувач
+                            participant C as Клієнт (UI)
+                            participant S as Auth API
+                            participant SMS as Провайдер SMS/TOTP
+
+                            U->>C: Логін + Пароль
+                            C->>S: Перевірка пароля
+                            S->>SMS: Ініціація 2FA (Генерація коду)
+                            SMS-->>U: Доставка коду (телефон)
+                            S-->>C: Вимога 2FA Challenge
+                            C-->>U: Екран вводу коду
+                            U->>C: Вводить код
+                            C->>S: Відправка коду на валідацію
+                            S-->>C: 200 OK + Access Token
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>🏗 Architecture Diagram (Архітектура)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        graph TD
+                            UI[Клієнтський UI] --> API[API Gateway]
+                            API --> AuthS[Auth Service]
+                            AuthS --> DB[(Identity DB)]
+                            AuthS --> 2FAService[2FA Microservice]
+                            2FAService --> Twilio[Twilio / SMS Gateway]
+                            2FAService --> Redis[(Redis OTP Cache)]
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <!-- Method 6 -->
+            <section class="auth-card">
+                <h2>6. Біометрична Автентифікація (Локальна)</h2>
+                <p>Авторизація на основі FaceID/TouchID. Біометрія не передається на сервер, а перевіряється в захищеному анклаві пристрою, який підписує токен доступу.</p>
+                
+                <div class="examples">
+                    <div class="example-box">
+                        <h4>🏦 Банківський домен</h4>
+                        <p><strong>Revolut / ПУМБ:</strong> Швидкий вхід у мобільний застосунок. Заміняє необхідність вводити PIN-код або пароль при кожному запуску.</p>
+                    </div>
+                    <div class="example-box">
+                        <h4>🌐 Інший домен</h4>
+                        <p><strong>WhatsApp:</strong> Додаткове блокування месенджера. Під час відкриття програми ОС запитує відбиток пальця власника пристрою.</p>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>🔄 Sequence Diagram (Процес)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        sequenceDiagram
+                            autonumber
+                            participant U as Користувач
+                            participant App as Мобільний Додаток
+                            participant Enclave as Secure Enclave (OS)
+                            participant S as Сервер
+
+                            U->>App: Натискає "Увійти за FaceID"
+                            App->>S: Запит Challenge
+                            S-->>App: Challenge String
+                            App->>Enclave: Запит на біометричний підпис
+                            Enclave-->>U: Сенсор сканує обличчя
+                            Enclave->>Enclave: Перевірка еталону (Локально)
+                            Enclave->>Enclave: Підпис Challenge приватним ключем
+                            Enclave-->>App: Signed Payload
+                            App->>S: Відправка підпису
+                            S->>S: Перевірка публічним ключем
+                            S-->>App: Access Token
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>🏗 Architecture Diagram (Архітектура)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        graph LR
+                            subgraph Device [Мобільний пристрій]
+                                App[Native App]
+                                SE[Secure Enclave / TEE]
+                                Sensors[Камера / Сканер відбитку]
+                            end
+                            App <--> API[API Gateway]
+                            API <--> IdentityS[Identity Server]
+                            IdentityS <--> PKDB[(Public Keys DB)]
+                            Sensors --> SE
+                            SE <--> App
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <!-- Method 7 -->
+            <section class="auth-card">
+                <h2>7. SSO / Об'єднана ідентифікація (OAuth 2.0 / OIDC)</h2>
+                <p>Делегування перевірки особи сторонньому довіреному провайдеру (IdP). Зручно для користувачів (менше паролів), але створює єдину точку відмови.</p>
+                
+                <div class="examples">
+                    <div class="example-box">
+                        <h4>🏦 Банківський домен</h4>
+                        <p><strong>BankID (НБУ):</strong> Відкриття рахунку у новому банку через верифікацію існуючим акаунтом ПриватБанку або вхід у державні сервіси (Дія).</p>
+                    </div>
+                    <div class="example-box">
+                        <h4>🌐 Інший домен</h4>
+                        <p><strong>Spotify / Figma:</strong> Можливість створити акаунт та увійти через Google, Apple або Facebook (Social Login) за 1 клік.</p>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>🔄 Sequence Diagram (Процес)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        sequenceDiagram
+                            autonumber
+                            participant U as Користувач
+                            participant C as Наш Додаток
+                            participant IdP as Identity Provider (Google)
+                            
+                            U->>C: Натискає "Увійти через Google"
+                            C-->>U: Redirect на IdP
+                            U->>IdP: Вводить пароль від Google
+                            IdP->>U: Згода на доступ (Consent)
+                            U->>IdP: OK
+                            IdP-->>C: Redirect назад з Auth Code
+                            C->>IdP: POST (Auth Code + Client Secret)
+                            IdP-->>C: Access Token + ID Token
+                            C->>C: Створює локальну сесію
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>🏗 Architecture Diagram (Архітектура)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        graph TD
+                            User((Користувач)) --> Browser[Браузер]
+                            Browser --> Client[Client App / Frontend]
+                            Client --> BFF[Backend-for-Frontend]
+                            BFF <--> ExternalIdP[Google / Apple IdP]
+                            BFF --> InternalDB[(Users DB)]
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <!-- Method 8 -->
+            <section class="auth-card">
+                <h2>8. Passkeys (WebAuthn / FIDO2)</h2>
+                <p>Новий індустріальний стандарт безпарольного входу. Стійкий до фішингу. Ключі (Passkeys) синхронізуються через екосистеми (Apple, Google) або зберігаються на апаратних токенах (YubiKey).</p>
+                
+                <div class="examples">
+                    <div class="example-box">
+                        <h4>🏦 Банківський домен</h4>
+                        <p><strong>PayPal:</strong> Вхід у гаманець без пароля. Користувач використовує сканер відбитку на ноутбуці або FaceID на телефоні, і ключ автоматично підписує запит сервісу.</p>
+                    </div>
+                    <div class="example-box">
+                        <h4>🌐 Інший домен</h4>
+                        <p><strong>Google / GitHub:</strong> Повна відмова від пароля налаштовується в профілі безпеки. Забезпечує найвищий рівень захисту від крадіжки облікових даних.</p>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>🔄 Sequence Diagram (Процес)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        sequenceDiagram
+                            autonumber
+                            participant B as Браузер
+                            participant Auth as Authenticator (ОС/Токен)
+                            participant RP as Relying Party (Сервер)
+
+                            B->>RP: Запит на вхід (username)
+                            RP-->>B: Challenge + RP ID
+                            B->>Auth: navigator.credentials.get()
+                            Auth-->>B: Вимагає Біометрію/PIN у юзера
+                            Auth->>Auth: Підписує Challenge приватним ключем
+                            Auth-->>B: Public Key Credential (Assertion)
+                            B->>RP: Відправка Assertion
+                            RP->>RP: Перевірка підпису (WebAuthn Library)
+                            RP-->>B: 200 OK (Вхід успішний)
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>🏗 Architecture Diagram (Архітектура)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        graph TD
+                            Authn[Platform Authenticator / YubiKey] <--> Browser[WebAuthn API]
+                            Browser <--> WAF[WAF]
+                            WAF <--> FidoSrv[FIDO2 / WebAuthn Server]
+                            FidoSrv <--> Core[Core Identity API]
+                            FidoSrv <--> DB[(DB: Public Keys, User Handle)]
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <!-- Method 9 -->
+            <section class="auth-card">
+                <h2>9. Поведінкова біометрія (Risk-Based Auth)</h2>
+                <p>Безперервна невидима перевірка (Continuous Auth). Аналізує, як користувач тримає телефон, друкує або рухає мишкою, формуючи Trust Score. Використовується як доповнення до інших факторів.</p>
+                
+                <div class="examples">
+                    <div class="example-box">
+                        <h4>🏦 Банківський домен</h4>
+                        <p><strong>Barclays:</strong> Аналізує патерни навігації в онлайн-банкінгу. Якщо швидкість рухів миші або патерн набору тексту не збігається з профілем, блокує великі перекази.</p>
+                    </div>
+                    <div class="example-box">
+                        <h4>🌐 Інший домен</h4>
+                        <p><strong>Stripe Radar:</strong> Аналіз сотень сигналів під час чекауту (час заповнення форми, копіювання даних, геолокація) для блокування ботів та кардерів.</p>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>🔄 Sequence Diagram (Процес)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        sequenceDiagram
+                            autonumber
+                            participant C as Клієнт (SDK)
+                            participant S as API Сервер
+                            participant ML as Risk/ML Двигун
+
+                            C->>C: Трекінг (миша, гіроскоп, ритм клавіатури)
+                            C->>S: Відправка телеметрії (Background)
+                            S->>ML: Оцінка ризику (User_ID, Telemetry)
+                            ML->>ML: Порівняння з Baseline моделлю
+                            ML-->>S: Trust Score (напр. 20%)
+                            alt Score < 50% (Аномалія)
+                                S-->>C: Виклик Step-up Auth (MFA)
+                            else Score > 80% (Легітимно)
+                                S-->>C: Продовження сесії непомітно
+                            end
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>🏗 Architecture Diagram (Архітектура)</summary>
+                    <div class="diagram-container">
+                        <div class="mermaid">
+                        graph TD
+                            Client["Web / Mobile + SDK"] --> EventHub["Kafka / Event Hub"]
+                            EventHub --> StreamProcessing["Stream Processor (Flink)"]
+                            StreamProcessing --> ML["Machine Learning Model"]
+                            ML <--> ProfileDB[("User Baseline DB")]
+                            ML --> RiskAPI["Risk Score API"]
+                            RiskAPI --> CoreAuth["Core Auth Service"]
+                            CoreAuth --> Client
+                        </div>
+                    </div>
+                </details>
+            </section>
+        </div>
+    </main>
+
+    <button type="button" id="scroll-top" class="icon-btn scroll-top" aria-label="Нагору">
+        <span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_up</span>
+    </button>
+
+    <script>
+        (function () {
+            'use strict';
+
+            var THEME_KEY = 'auth-architect-theme';
+
+            function currentTheme() {
+                return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+            }
+
+            function chartLegendColor(theme) {
+                return theme === 'dark' ? '#e4e3e0' : '#1a1917';
+            }
+
+            function syncThemeChrome(theme) {
+                var icon = document.getElementById('theme-icon');
+                if (icon) icon.textContent = theme === 'dark' ? 'dark_mode' : 'light_mode';
+                updateChartTheme(theme);
+            }
+
+            function setTheme(theme) {
+                if (theme !== 'light' && theme !== 'dark') theme = 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+                try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+                syncThemeChrome(theme);
+                rethemeOpenMermaid(theme);
+            }
+
+            function initTheme() {
+                var saved = null;
+                try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
+                setTheme(saved === 'light' || saved === 'dark' ? saved : 'dark');
+            }
+
+            function mermaidTheme(theme) {
+                return theme === 'dark' ? 'dark' : 'default';
+            }
+
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: mermaidTheme(currentTheme()),
+                fontFamily: 'Ubuntu, sans-serif'
+            });
+
+            async function renderMermaidIn(root) {
+                var nodes = root.querySelectorAll('.mermaid:not([data-processed])');
+                if (!nodes.length) return;
+                await mermaid.run({ nodes: nodes, suppressErrors: true });
+            }
+
+            function rethemeOpenMermaid(theme) {
+                mermaid.initialize({ startOnLoad: false, theme: mermaidTheme(theme), fontFamily: 'Ubuntu, sans-serif' });
+            }
+
+            document.querySelectorAll('details').forEach(function (d) {
+                d.addEventListener('toggle', function () {
+                    if (d.open) renderMermaidIn(d);
+                });
+            });
+
+            var themeBtn = document.getElementById('theme-toggle');
+            themeBtn.addEventListener('click', function () {
+                setTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+            });
+
+            var mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            var mobileMenu = document.getElementById('mobile-menu');
+            var mobileLinks = document.querySelectorAll('.mobile-link');
+
+            mobileMenuBtn.addEventListener('click', function () {
+                mobileMenu.classList.toggle('active');
+                var icon = mobileMenuBtn.querySelector('.material-symbols-rounded');
+                icon.textContent = mobileMenu.classList.contains('active') ? 'close' : 'menu';
+            });
+
+            mobileLinks.forEach(function (link) {
+                link.addEventListener('click', function () {
+                    mobileMenu.classList.remove('active');
+                    mobileMenuBtn.querySelector('.material-symbols-rounded').textContent = 'menu';
+                });
+            });
+
+            var scrollTopBtn = document.getElementById('scroll-top');
+            function updateScrollTop() {
+                var show = window.innerWidth <= 768 && window.scrollY > 300;
+                scrollTopBtn.classList.toggle('visible', show);
+            }
+            window.addEventListener('scroll', updateScrollTop);
+            window.addEventListener('resize', updateScrollTop);
+            scrollTopBtn.addEventListener('click', function () {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            var marketChart;
+            function initChart() {
+                var ctx = document.getElementById('marketChart').getContext('2d');
+                var theme = currentTheme();
+                marketChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [
+                            'Паролі (спад)', 'Session / Cookie', 'JWT Bearer', 'API Key',
+                            'MFA (SMS/OTP)', 'Біометрія (Mobile)', 'SSO / OIDC', 'Passkeys (Ріст)', 'Risk-Based'
+                        ],
+                        datasets: [{
+                            data: [22, 8, 7, 5, 21, 17, 10, 8, 2],
+                            backgroundColor: [
+                                '#E74C3C', '#5DADE2', '#3498DB', '#95A5A6',
+                                '#1ABC9C', '#2ECC71', '#9B59B6', '#F2B666', '#E67E22'
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { color: chartLegendColor(theme), font: { family: 'Ubuntu' } }
+                            }
+                        }
+                    }
+                });
+                document.getElementById('marketChart').parentNode.style.height = '360px';
+            }
+
+            function updateChartTheme(theme) {
+                if (!marketChart) return;
+                marketChart.options.plugins.legend.labels.color = chartLegendColor(theme);
+                marketChart.update();
+            }
+
+            function calculateMatrix() {
+                var aud = document.getElementById('sel-aud').value;
+                var risk = document.getElementById('sel-risk').value;
+                var budget = document.getElementById('sel-budget').value;
+                var ux = document.getElementById('sel-ux').value;
+                var plat = document.getElementById('sel-plat').value;
+                var resBox = document.getElementById('matrix-result');
+
+                var recommendation = '';
+                var details = '';
+
+                if (aud === 'admin') {
+                    recommendation = 'Апаратні Passkeys (YubiKey) + SSO + Поведінковий моніторинг';
+                    details = 'Для внутрішнього персоналу UX відходить на другий план. Обов\'язкова апаратна FIDO2 автентифікація для захисту від цільового фішингу (MFA Bypass) + Zero Trust.';
+                } else if (risk === 'high' && budget === 'high') {
+                    recommendation = 'Passkeys (Primary) + JWT/session hybrid + Поведінкова біометрія';
+                    details = 'Enterprise-fintech стандарт 2026: passkeys для входу, короткоживучі JWT для API, фоновий risk-score у сесії.';
+                } else if (risk === 'high' && budget !== 'high') {
+                    recommendation = 'MFA (TOTP / Push) + Пароль → Session або JWT';
+                    details = 'Бюджетний high-risk: без SMS. Web — HttpOnly session cookie; mobile/API — JWT з refresh.';
+                } else if (aud === 'b2b' && plat === 'web') {
+                    recommendation = 'Пароль/MFA → Session Cookie (HttpOnly) + окремі API Keys для інтеграцій';
+                    details = 'Класичний B2B портал: server-side session у Redis. Machine-доступ партнерів — окремі scoped API keys, не user cookie.';
+                } else if (aud === 'b2b' && (plat === 'mobile' || plat === 'omni')) {
+                    recommendation = 'OIDC/пароль → JWT (access + refresh) + API Keys для B2B webhooks';
+                    details = 'Omnichannel B2B: JWT для клієнтів і mobile; довгоживучі keys лише для server-to-server з rotation.';
+                } else if (aud === 'b2c' && ux === 'speed' && plat === 'mobile') {
+                    recommendation = 'Локальна біометрія (FaceID/TouchID) + JWT у secure storage';
+                    details = 'Максимальна конверсія: один логін, далі біометрія розблоковує локально збережений refresh token.';
+                } else if (aud === 'b2c' && risk === 'low') {
+                    recommendation = 'Social SSO (Google/Apple) + Passkeys Ready';
+                    details = 'Швидкий onboarding у 1 клік. Опціонально passkey замість пароля для тих, хто не хоче соцмережі.';
+                } else {
+                    recommendation = 'Пароль + Session (Web) або JWT (SPA) + опціональний MFA';
+                    details = 'Стандартний B2B SaaS: cookie-сесія для classic web, JWT для SPA/API; MFA за політикою організації.';
+                }
+
+                resBox.innerHTML =
+                    '<h4 style="margin:0 0 10px 0; font-size:1.1rem;">💡 Рекомендована архітектура</h4>' +
+                    '<p style="margin:0 0 8px 0; font-weight:700; color:var(--accent-color);">' + recommendation + '</p>' +
+                    '<p style="margin:0; font-size:0.95rem; color:var(--text-soft);">' + details + '</p>';
+                resBox.style.display = 'block';
+                resBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            document.getElementById('matrix-submit').addEventListener('click', calculateMatrix);
+
+            document.addEventListener('DOMContentLoaded', function () {
+                initTheme();
+                initChart();
+                updateScrollTop();
+            });
+        })();
+    </script>
+</body>
+</html>
