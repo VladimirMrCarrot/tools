@@ -15,3 +15,5 @@ Interactive UML relationship map on two examples (forest / bank account), UA/EN,
 - self-check: a pool of 18 situations (three per relationship), eight per round in random order with shuffled answers, best round kept in localStorage, weak spots link to the reference
 
 Images are WebP, 900 px wide (`cwebp -q 82 -resize 900 0`); the bank and the plant / photosynthesis photos come from Pexels (Pexels licence, no attribution required).
+
+Regression checklist for future changes: `REGRESSION.md` (quick console check plus a manual pass at 1400 / 905 / 890 / 640 / 390 px).
