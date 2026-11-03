@@ -609,7 +609,7 @@
     }
 
     /* Interface box: UML stereotype, dashed border, no photo */
-    .p-interface { top: 65px; left: 120px; border-style: dashed; justify-content: center; min-height: 100px; }
+    .p-interface { top: 65px; left: 120px; border-style: dashed; }
     .p-parent { top: 65px; left: 760px; border-color: var(--tree-dark); }
     .p-interface .iface-tag {
       display: block;
@@ -868,9 +868,7 @@
         --mobile-dock-clearance: calc(20px + var(--switch-h) + 20px + env(safe-area-inset-bottom, 0px));
       }
 
-      body {
-        overflow-x: hidden;
-      }
+      /* no overflow on body: it would turn body into a scroll container and break the sticky section bar */
 
       /* Dock: theme / lang / brand — fixed bottom; keep in header DOM for syncChrome & pin click guard */
       .header-actions {
@@ -1188,14 +1186,38 @@
       }
     }
 
-    /* ===== Section chips under the diagram ===== */
+    /* ===== Section chips: sticky bar under the diagram ===== */
     .section-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1500;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 8px;
       width: 100%;
-      padding: 4px 0 2px;
+      padding: 8px clamp(14px, 3vw, 28px);
+      background: color-mix(in srgb, var(--bg-page) 92%, var(--bg-elevated));
+      border-bottom: 1px solid transparent;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+    .section-nav.is-stuck {
+      border-bottom-color: var(--border-subtle);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+    }
+    [data-theme="dark"] .section-nav.is-stuck { box-shadow: 0 4px 22px rgba(0, 0, 0, 0.35); }
+    .section-nav a.is-active {
+      border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+      background: color-mix(in srgb, var(--bg-elevated) 80%, var(--accent));
+      color: var(--text);
+    }
+    .section-nav .nav-caret { display: none; font-size: 18px; margin-left: -2px; }
+    @media (max-width: 900px) {
+      .section-nav { gap: 6px; padding: 8px 12px; }
+      /* stuck and collapsed: only the current section stays, tap it to unfold the rest */
+      .section-nav.is-stuck:not(.is-open) a:not(.is-active) { display: none; }
+      .section-nav.is-stuck a.is-active .nav-caret { display: inline-block; }
+      .section-nav.is-stuck.is-open a.is-active .nav-caret { transform: rotate(180deg); }
     }
     .section-nav a {
       display: inline-flex;
@@ -1223,9 +1245,25 @@
       margin-inline: auto;
       padding: clamp(22px, 4vw, 40px) clamp(14px, 3vw, 28px) 8px;
       box-sizing: border-box;
-      scroll-margin-top: 12px;
+      scroll-margin-top: 62px;
     }
     .ref + .ref { border-top: 1px solid var(--border-subtle); }
+    /* phones: the cheat sheet lives inside the relationship cards (tap a symbol) */
+    @media (max-width: 900px) {
+      #cheatsheet { display: none; }
+    }
+    .decide-steps {
+      margin: 18px 0 0;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 12px 16px;
+      max-width: 80ch;
+    }
+    .decide-steps summary { cursor: pointer; font-weight: 500; }
+    .decide-steps ol { margin: 10px 0 2px; padding-left: 22px; font-size: 0.92rem; }
+    .decide-steps li { margin: 0 0 8px; }
+    .decide-steps li b { font-weight: 600; }
     .ref h2 {
       margin: 0 0 6px;
       font-size: clamp(1.25rem, 2.4vw, 1.6rem);
@@ -1246,7 +1284,7 @@
       border: 1px solid var(--border-subtle);
       border-radius: 5px;
       padding: 1px 5px;
-      white-space: nowrap;
+      overflow-wrap: anywhere;
     }
     .ref pre {
       margin: 0;
@@ -1261,6 +1299,10 @@
       color: var(--text);
     }
     .ref pre code { background: none; border: 0; padding: 0; white-space: pre; font-size: inherit; }
+    @media (max-width: 640px) {
+      .ref pre { font-size: 0.78rem; overflow-x: hidden; }
+      .ref pre code { white-space: pre-wrap; overflow-wrap: anywhere; }
+    }
     .note {
       border-left: 4px solid var(--accent);
       background: color-mix(in srgb, var(--bg-elevated) 86%, var(--accent));
@@ -1340,18 +1382,6 @@
     .rel-card .test b { color: var(--accent-hover); }
     [data-theme="light"] .rel-card .test b { color: #a9711f; }
 
-    /* wizard */
-    .wizard {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: 16px;
-      padding: 18px 18px 16px;
-      max-width: 640px;
-    }
-    .wizard .wz-step { font-size: 0.78rem; color: var(--text-soft); margin-bottom: 6px; letter-spacing: 0.03em; text-transform: uppercase; }
-    .wizard .wz-q { font-size: 1.08rem; font-weight: 500; margin: 0 0 6px; }
-    .wizard .wz-hint { font-size: 0.86rem; color: var(--text-soft); margin: 0 0 14px; }
-    .wizard .wz-actions { display: flex; gap: 10px; flex-wrap: wrap; }
     .btn {
       appearance: none;
       border: 1px solid var(--border-subtle);
@@ -1369,30 +1399,42 @@
     .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .btn-primary { background: var(--accent); color: #1a1917; border-color: transparent; }
     .btn-primary:hover { background: var(--accent-hover); color: #1a1917; }
-    .wizard .wz-result {
-      border-left: 4px solid var(--accent);
-      background: color-mix(in srgb, var(--bg-page) 80%, var(--accent));
-      border-radius: 10px;
-      padding: 12px 14px;
-      margin-bottom: 12px;
-    }
-    .wizard .wz-result h3 { margin: 0 0 4px; font-size: 1.1rem; }
-    .wizard .wz-result p { margin: 0 0 6px; font-size: 0.92rem; }
-    .wizard .wz-trail { font-size: 0.8rem; color: var(--text-soft); margin: 0 0 12px; }
 
     /* tables */
-    .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--bg-elevated); }
-    table.ref-table { border-collapse: collapse; width: 100%; font-size: 0.9rem; min-width: 560px; }
-    .ref-table th, .ref-table td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
-    .ref-table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-soft); font-weight: 600; }
+    .tbl-wrap { border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--bg-elevated); min-width: 0; }
+    table.ref-table { border-collapse: collapse; width: 100%; font-size: 0.9rem; table-layout: auto; }
+    .ref-table th, .ref-table td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: top; overflow-wrap: break-word; }
+    .ref-table td:first-child { white-space: nowrap; }
+    .ref-table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-soft); font-weight: 600; overflow-wrap: normal; }
     .ref-table tr:last-child td { border-bottom: 0; }
     .ref-table td.mono { font-family: 'Ubuntu Mono', ui-monospace, monospace; white-space: nowrap; }
+    .ref-table td::before { display: none; }
+    /* narrow screens: each row becomes a small card, header text moves into the cell */
+    @media (max-width: 640px) {
+      .ref-table thead { display: none; }
+      .ref-table, .ref-table tbody, .ref-table tr, .ref-table td { display: block; width: 100%; }
+      .ref-table tr { padding: 10px 12px; border-bottom: 1px solid var(--border-subtle); }
+      .ref-table tr:last-child { border-bottom: 0; }
+      .ref-table td { border: 0; padding: 3px 0; }
+      .ref-table td.mono, .ref-table td:first-child { white-space: normal; font-size: 0.95rem; }
+      .ref-table td::before {
+        display: block;
+        content: attr(data-l-ua);
+        font-size: 0.68rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--text-soft);
+        font-family: 'Ubuntu', sans-serif;
+        margin-bottom: 1px;
+      }
+      html[data-lang="en"] .ref-table td::before { content: attr(data-l-en); }
+    }
 
-    .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; align-items: start; }
+    .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 14px; align-items: start; }
     .two-col > * { min-width: 0; }
 
     /* code block with copy */
-    .code-block { position: relative; }
+    .code-block { position: relative; display: flex; flex-direction: column; min-width: 0; }
     .code-block .copy-btn {
       position: absolute;
       top: 8px;
@@ -1400,6 +1442,9 @@
       font-size: 0.78rem;
       padding: 5px 10px;
       border-radius: 8px;
+    }
+    @media (max-width: 640px) {
+      .code-block .copy-btn { position: static; align-self: flex-end; margin-bottom: 6px; }
     }
 
     /* quiz */
@@ -1431,8 +1476,89 @@
     .quiz-card .q-opt.is-correct { background: color-mix(in srgb, #2e7d32 22%, var(--bg-page)); border-color: #2e7d32; opacity: 1; }
     .quiz-card .q-opt.is-wrong { background: color-mix(in srgb, #c62828 22%, var(--bg-page)); border-color: #c62828; opacity: 1; }
     .quiz-card .q-expl { margin: 10px 0 0; font-size: 0.88rem; color: var(--text-soft); display: none; }
+    .quiz-card .q-expl:focus { outline: none; }
     .quiz-card.answered .q-expl { display: block; }
     .quiz-score { font-size: 0.95rem; font-weight: 500; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .quiz-summary {
+      margin-top: 14px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-left: 4px solid var(--accent);
+      border-radius: 14px;
+      padding: 14px 16px;
+      max-width: 760px;
+    }
+    .quiz-summary h3 { margin: 0 0 6px; font-size: 1.05rem; }
+    .quiz-summary p { margin: 0 0 8px; font-size: 0.92rem; color: var(--text-soft); }
+    .quiz-summary .weak { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 12px; }
+    .quiz-summary .weak .btn { font-size: 0.85rem; padding: 6px 12px; }
+    .quiz-summary .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .quiz-progress { font-size: 0.85rem; color: var(--text-soft); margin: 0 0 12px; }
+    .rel-card.is-flash { box-shadow: 0 0 0 3px var(--accent); transition: box-shadow 300ms ease; }
+    .rel-card { scroll-margin-top: 70px; }
+
+    /* mobile card: mini class boxes with operations, link to the full reference */
+    .ov-ops {
+      margin: 0 0 12px;
+      font-family: 'Ubuntu Mono', ui-monospace, monospace;
+      font-size: 0.86rem;
+      color: var(--text-soft);
+      overflow-wrap: anywhere;
+    }
+    .ov-ops b { color: var(--text); font-family: 'Ubuntu', sans-serif; font-weight: 500; }
+    .ov-pair {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0 0 14px;
+      min-width: 0;
+    }
+    .ov-pair .mc {
+      flex: 1 1 0;
+      min-width: 0;
+      border: 2px solid var(--line-color);
+      border-radius: 10px;
+      padding: 8px 9px;
+      background: var(--bg-page);
+      text-align: center;
+    }
+    .ov-pair .mc.mc-iface { border-style: dashed; }
+    .ov-pair .mc .mc-stereo { display: block; font-size: 0.66rem; color: var(--text-soft); }
+    .ov-pair .mc b { display: block; font-size: 0.9rem; font-weight: 500; line-height: 1.2; }
+    .ov-pair .mc b.mc-abstract { font-style: italic; }
+    .ov-pair .mc .mc-ops {
+      display: block;
+      margin-top: 5px;
+      padding-top: 5px;
+      border-top: 1px solid var(--border-subtle);
+      font-family: 'Ubuntu Mono', ui-monospace, monospace;
+      font-size: 0.66rem;
+      line-height: 1.3;
+      color: var(--text-soft);
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
+    .ov-pair .mc-link { flex: 0 0 84px; width: 84px; height: 44px; color: var(--line-color); }
+    .ov-pair .mc-link line, .ov-pair .mc-link path, .ov-pair .mc-link polygon { stroke: currentColor; }
+    .ov-pair .mc-link text { font-family: 'Ubuntu', sans-serif; font-size: 11px; font-weight: 700; fill: var(--line-color); }
+    .ov-more {
+      margin-top: 14px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      background: var(--bg-page);
+    }
+    .ov-more summary {
+      cursor: pointer;
+      padding: 11px 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ov-more summary .material-symbols-rounded { font-size: 20px; color: var(--accent); }
+    .ov-more .rel-card { border: 0; border-top: 1px solid var(--border-subtle); border-radius: 0 0 12px 12px; background: transparent; }
+    .ov-more .rel-card h3 { display: none; }
+    .ov-more-body:empty { display: none; }
   </style>
 </head>
 <body>
@@ -1454,16 +1580,20 @@
             <span data-en><strong>Desktop:</strong> hover a block or link icon, then click to pin the hint. Dismiss: click outside the diagram, the dimmed backdrop, or press Esc.</span>
           </p>
           <p class="help-block">
-            <span data-ua><strong>Телефон:</strong> натисни значок навколо «Дерево». Мова тексту — перемикач UA/EN.</span>
-            <span data-en><strong>Mobile:</strong> tap an icon around Tree. Card text follows the UA/EN toggle.</span>
+            <span data-ua><strong>Телефон:</strong> натисни значок навколо «Дерево»: у картці є схема з методами, приклад і повне пояснення з довідника.</span>
+            <span data-en><strong>Mobile:</strong> tap an icon around Tree: the card has a mini diagram with operations, an example and the full reference entry.</span>
           </p>
           <p class="help-block">
             <span data-ua><strong>Приклад:</strong> перемикач «Ліс / Банк» показує ті самі шість звʼязків на абстрактному лісі або на банківському рахунку.</span>
             <span data-en><strong>Example:</strong> the Forest / Bank toggle shows the same six relationships on an abstract forest or on a bank account.</span>
           </p>
           <p class="help-block">
-            <span data-ua><strong>Нижче:</strong> довідник шести звʼязків, майстер «який звʼязок?», кратність, PlantUML, відображення в БД і самоперевірка.</span>
-            <span data-en><strong>Below:</strong> cheat sheet of six relationships, a “which one?” wizard, multiplicity, PlantUML, database mapping and a self-check quiz.</span>
+            <span data-ua><strong>Нижче:</strong> довідник шести звʼязків, кратність, PlantUML, відображення в БД і самоперевірка. Панель розділів лишається вгорі під час прокрутки.</span>
+            <span data-en><strong>Below:</strong> cheat sheet of six relationships, multiplicity, PlantUML, database mapping and a self-check quiz. The section bar stays at the top while you scroll.</span>
+          </p>
+          <p class="help-block">
+            <span data-ua><strong>Попередня версія:</strong> <a href="v1/" style="color:var(--accent)">v1</a> (перша схема без довідника), для порівняння.</span>
+            <span data-en><strong>Previous version:</strong> <a href="v1/" style="color:var(--accent)">v1</a> (the first diagram without the reference), for comparison.</span>
           </p>
         </div>
       </div>
@@ -1484,7 +1614,7 @@
     </div>
   </header>
 
-  <main>
+  <main id="top">
     <div class="diagram-scroll">
       <div class="diagram-stage">
       <div class="diagram-container" aria-label="UML tree diagram">
@@ -1502,7 +1632,7 @@
       </button>
 
       <button type="button" class="entity hide-on-mobile p-interface hint-dock-below" data-interact="interface" data-dom="forest" aria-label="Фотосинтезуючий (інтерфейс)">
-        <svg class="iface-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c0-7 4-13 14-14-1 10-6 14-14 14z"/><path d="M4 20c3-5 7-8 11-10"/></svg>
+        <img src="photosynthesis.webp" alt="" width="900" height="600" loading="lazy" data-alt-ua="Листок проти сонця: фотосинтез" data-alt-en="A leaf against the sun: photosynthesis">
         <b><span class="iface-tag">«interface»</span><span data-ua>Фотосинтезуючий</span><span data-en>Photosynthetic</span></b>
         <span class="ops" aria-hidden="true"><span data-ua>+ фотосинтезувати()</span><span data-en>+ photosynthesize()</span></span>
         <div class="desktop-hint">
@@ -1514,7 +1644,7 @@
       </button>
 
       <button type="button" class="entity hide-on-mobile p-parent hint-dock-below" data-interact="plant" data-dom="forest" aria-label="Рослина (абстрактний клас)">
-        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">potted_plant</span></span>
+        <img src="plant.webp" alt="" width="900" height="600" loading="lazy" data-alt-ua="Молода рослина в ґрунті" data-alt-en="A young plant in soil">
         <b><span data-ua>Рослина</span><span data-en>Plant</span></b><i><span data-ua>Абстрактний клас, предок</span><span data-en>Abstract class, parent</span></i>
         <span class="ops" aria-hidden="true"><span data-ua>+ рости()</span><span data-en>+ grow()</span></span>
         <div class="desktop-hint">
@@ -1584,7 +1714,7 @@
 
       <!-- ===== Bank scene (same positions, same six relationships) ===== -->
       <button type="button" class="entity hide-on-mobile p-oak hint-dock-below" data-interact="b-deposit" data-dom="bank" aria-label="Депозитний рахунок (клас-нащадок)">
-        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">savings</span></span>
+        <img src="deposit.webp" alt="" width="900" height="600" loading="lazy" data-alt-ua="Скарбничка з монетами: депозит" data-alt-en="A piggy bank with coins: deposit">
         <b><span data-ua>Депозитний рахунок</span><span data-en>Deposit account</span></b><i><span data-ua>Клас-нащадок</span><span data-en>Subclass</span></i>
         <span class="ops" aria-hidden="true"><span data-ua>+ нарахуватиВідсотки()</span><span data-en>+ accrueInterest()</span></span>
         <div class="desktop-hint">
@@ -1596,7 +1726,7 @@
       </button>
 
       <button type="button" class="entity hide-on-mobile p-interface hint-dock-below" data-interact="b-blockable" data-dom="bank" aria-label="Можна заблокувати (інтерфейс)">
-        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">lock</span></span>
+        <img src="blockable.webp" alt="" width="900" height="600" loading="lazy" data-alt-ua="Замкнений навісний замок" data-alt-en="A closed padlock">
         <b><span class="iface-tag">«interface»</span><span data-ua>Можна заблокувати</span><span data-en>Blockable</span></b>
         <span class="ops" aria-hidden="true"><span data-ua>+ заблокувати() + розблокувати()</span><span data-en>+ block() + unblock()</span></span>
         <div class="desktop-hint">
@@ -1608,7 +1738,7 @@
       </button>
 
       <button type="button" class="entity hide-on-mobile p-parent hint-dock-below" data-interact="b-product" data-dom="bank" aria-label="Банківський продукт (абстрактний клас)">
-        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">category</span></span>
+        <img src="product.webp" alt="" width="900" height="599" loading="lazy" data-alt-ua="Фасад банку з колонами" data-alt-en="A bank facade with columns">
         <b><span data-ua>Банківський продукт</span><span data-en>Bank product</span></b><i><span data-ua>Абстрактний клас, предок</span><span data-en>Abstract class, parent</span></i>
         <span class="ops" aria-hidden="true"><span data-ua>+ відкрити() + закрити()</span><span data-en>+ open() + close()</span></span>
         <div class="desktop-hint">
@@ -1620,7 +1750,7 @@
       </button>
 
       <button type="button" class="entity p-tree hint-dock-below" data-interact="b-account" data-dom="bank" aria-label="Рахунок (абстрактний клас)">
-        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">account_balance</span></span>
+        <img src="account.webp" alt="" width="900" height="675" loading="lazy" data-alt-ua="Фінансова виписка з цифрами" data-alt-en="A financial statement with numbers">
         <b><span data-ua>Рахунок</span><span data-en>Account</span></b><i><span data-ua>Абстрактний клас</span><span data-en>Abstract class</span></i>
         <span class="ops" aria-hidden="true"><span data-ua>+ зарахувати() + списати()</span><span data-en>+ credit() + debit()</span></span>
         <div class="desktop-hint">
@@ -1632,7 +1762,7 @@
       </button>
 
       <button type="button" class="entity hide-on-mobile p-bark hint-dock-below" data-interact="b-entry" data-dom="bank" aria-label="Операція по рахунку (композиція)">
-        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">receipt_long</span></span>
+        <img src="entry.webp" alt="" width="900" height="601" loading="lazy" data-alt-ua="Паперовий чек: операція" data-alt-en="A paper receipt: an entry">
         <b><span data-ua>Операція</span><span data-en>Account entry</span></b><i><span data-ua>Частина (композиція)</span><span data-en>Part (composition)</span></i>
         <span class="ops" aria-hidden="true"><span data-ua>дата, сума, призначення</span><span data-en>date, amount, purpose</span></span>
         <div class="desktop-hint">
@@ -1644,7 +1774,7 @@
       </button>
 
       <button type="button" class="entity hide-on-mobile p-nest hint-dock-below" data-interact="b-card" data-dom="bank" aria-label="Картка (агрегація)">
-        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">credit_card</span></span>
+        <img src="card.webp" alt="" width="900" height="600" loading="lazy" data-alt-ua="Платіжна картка" data-alt-en="A payment card">
         <b><span data-ua>Картка</span><span data-en>Card</span></b><i><span data-ua>Частина (агрегація)</span><span data-en>Part (aggregation)</span></i>
         <span class="ops" aria-hidden="true"><span data-ua>маска, строк дії</span><span data-en>mask, expiry</span></span>
         <div class="desktop-hint">
@@ -1656,7 +1786,7 @@
       </button>
 
       <button type="button" class="entity hide-on-mobile p-mushroom" data-interact="b-customer" data-dom="bank" aria-label="Клієнт (асоціація)">
-        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">person</span></span>
+        <img src="customer.webp" alt="" width="900" height="600" loading="lazy" data-alt-ua="Клієнт у відділенні банку" data-alt-en="A customer at a bank branch">
         <b><span data-ua>Клієнт</span><span data-en>Customer</span></b><i><span data-ua>Сусід (асоціація)</span><span data-en>Neighbor (association)</span></i>
         <span class="ops" aria-hidden="true"><span data-ua>ПІБ, РНОКПП</span><span data-en>name, tax id</span></span>
         <div class="desktop-hint">
@@ -1668,7 +1798,7 @@
       </button>
 
       <button type="button" class="entity hide-on-mobile p-sun" data-interact="b-controller" data-dom="bank" aria-label="Контролер платежів (залежність)">
-        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">hub</span></span>
+        <img src="controller.webp" alt="" width="900" height="601" loading="lazy" data-alt-ua="POS-термінал приймає платіж" data-alt-en="A POS terminal taking a payment">
         <b><span data-ua>Контролер платежів</span><span data-en>Payment controller</span></b><i><span data-ua>Залежить від рахунку</span><span data-en>Depends on account</span></i>
         <span class="ops" aria-hidden="true"><span data-ua>+ обробити(платіж)</span><span data-en>+ handle(payment)</span></span>
         <div class="desktop-hint">
@@ -1829,15 +1959,16 @@
       </div>
     </div>
 
-    <nav class="section-nav" aria-label="Розділи сторінки">
-      <a href="#cheatsheet"><span class="material-symbols-rounded" aria-hidden="true">menu_book</span><span data-ua>Довідник</span><span data-en>Cheat sheet</span></a>
-      <a href="#decide"><span class="material-symbols-rounded" aria-hidden="true">alt_route</span><span data-ua>Який звʼязок?</span><span data-en>Which one?</span></a>
-      <a href="#multiplicity"><span class="material-symbols-rounded" aria-hidden="true">numbers</span><span data-ua>Кратність</span><span data-en>Multiplicity</span></a>
-      <a href="#plantuml"><span class="material-symbols-rounded" aria-hidden="true">code</span>PlantUML</a>
-      <a href="#database"><span class="material-symbols-rounded" aria-hidden="true">database</span><span data-ua>У базі даних</span><span data-en>In a database</span></a>
-      <a href="#selfcheck"><span class="material-symbols-rounded" aria-hidden="true">quiz</span><span data-ua>Самоперевірка</span><span data-en>Self-check</span></a>
-    </nav>
   </main>
+
+  <nav class="section-nav" id="section-nav" aria-label="Розділи сторінки">
+    <a href="#top" data-section="top"><span class="material-symbols-rounded" aria-hidden="true">account_tree</span><span data-ua>Діаграма</span><span data-en>Diagram</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
+    <a href="#cheatsheet" data-section="cheatsheet" class="hide-on-mobile"><span class="material-symbols-rounded" aria-hidden="true">menu_book</span><span data-ua>Довідник</span><span data-en>Cheat sheet</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
+    <a href="#multiplicity" data-section="multiplicity"><span class="material-symbols-rounded" aria-hidden="true">numbers</span><span data-ua>Кратність</span><span data-en>Multiplicity</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
+    <a href="#plantuml" data-section="plantuml"><span class="material-symbols-rounded" aria-hidden="true">code</span>PlantUML<span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
+    <a href="#database" data-section="database"><span class="material-symbols-rounded" aria-hidden="true">database</span><span data-ua>У базі даних</span><span data-en>In a database</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
+    <a href="#selfcheck" data-section="selfcheck"><span class="material-symbols-rounded" aria-hidden="true">quiz</span><span data-ua>Самоперевірка</span><span data-en>Self-check</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
+  </nav>
 
   <!-- ===================== CHEAT SHEET ===================== -->
   <section class="ref" id="cheatsheet">
@@ -1849,7 +1980,7 @@
 
     <div class="rel-grid">
 
-      <article class="rel-card">
+      <article class="rel-card" data-rel="inheritance">
         <svg class="notation" viewBox="0 0 300 56" aria-hidden="true">
           <rect x="4" y="14" width="88" height="28" rx="6" stroke-width="1.6"/>
           <text x="48" y="32" text-anchor="middle"><tspan data-ua>Дуб</tspan><tspan data-en>Oak</tspan></text>
@@ -1873,7 +2004,7 @@
         </dl>
       </article>
 
-      <article class="rel-card">
+      <article class="rel-card" data-rel="realization">
         <svg class="notation" viewBox="0 0 300 56" aria-hidden="true">
           <rect x="4" y="14" width="88" height="28" rx="6" stroke-width="1.6"/>
           <text x="48" y="32" text-anchor="middle"><tspan data-ua>Дерево</tspan><tspan data-en>Tree</tspan></text>
@@ -1897,7 +2028,7 @@
         </dl>
       </article>
 
-      <article class="rel-card">
+      <article class="rel-card" data-rel="composition">
         <svg class="notation" viewBox="0 0 300 56" aria-hidden="true">
           <rect x="4" y="14" width="88" height="28" rx="6" stroke-width="1.6"/>
           <text x="48" y="32" text-anchor="middle"><tspan data-ua>Дерево</tspan><tspan data-en>Tree</tspan></text>
@@ -1923,7 +2054,7 @@
         </dl>
       </article>
 
-      <article class="rel-card">
+      <article class="rel-card" data-rel="aggregation">
         <svg class="notation" viewBox="0 0 300 56" aria-hidden="true">
           <rect x="4" y="14" width="88" height="28" rx="6" stroke-width="1.6"/>
           <text x="48" y="32" text-anchor="middle"><tspan data-ua>Дерево</tspan><tspan data-en>Tree</tspan></text>
@@ -1949,7 +2080,7 @@
         </dl>
       </article>
 
-      <article class="rel-card">
+      <article class="rel-card" data-rel="association">
         <svg class="notation" viewBox="0 0 300 56" aria-hidden="true">
           <rect x="4" y="14" width="88" height="28" rx="6" stroke-width="1.6"/>
           <text x="48" y="32" text-anchor="middle"><tspan data-ua>Дерево</tspan><tspan data-en>Tree</tspan></text>
@@ -1973,7 +2104,7 @@
         </dl>
       </article>
 
-      <article class="rel-card">
+      <article class="rel-card" data-rel="dependency">
         <svg class="notation" viewBox="0 0 300 56" aria-hidden="true">
           <rect x="4" y="14" width="88" height="28" rx="6" stroke-width="1.6"/>
           <text x="48" y="32" text-anchor="middle"><tspan data-ua>Дерево</tspan><tspan data-en>Tree</tspan></text>
@@ -2000,20 +2131,20 @@
 
     </div>
 
+    <details class="decide-steps">
+      <summary><span data-ua>Не знаєте, який звʼязок? Чотири питання по черзі</span><span data-en>Not sure which one? Four questions in order</span></summary>
+      <ol>
+        <li><span data-ua><b>A є різновидом B?</b> Так: успадкування. Якщо B лише контракт без власної реалізації (інтерфейс): реалізація.</span><span data-en><b>Is A a kind of B?</b> Yes: inheritance. If B is only a contract with no implementation of its own (an interface): realization.</span></li>
+        <li><span data-ua><b>A є частиною B?</b> Так, і без B частина зникає та належить лише йому: композиція. Так, але частина живе сама і може бути в іншому цілому: агрегація.</span><span data-en><b>Is A a part of B?</b> Yes, and the part vanishes without B and belongs to it alone: composition. Yes, but the part lives on its own and may sit in another whole: aggregation.</span></li>
+        <li><span data-ua><b>A довго зберігає посилання на B</b> (поле, атрибут, FK)? Так: асоціація, додайте кратність.</span><span data-en><b>Does A keep a lasting reference to B</b> (field, attribute, FK)? Yes: association, add multiplicity.</span></li>
+        <li><span data-ua><b>A потребує B лише на час дії</b> (параметр, локальна змінна, виклик)? Так: залежність. Ні: на діаграмі класів звʼязку немає.</span><span data-en><b>Does A need B only during an action</b> (parameter, local variable, call)? Yes: dependency. No: no line on the class diagram.</span></li>
+      </ol>
+    </details>
+
     <p class="note">
       <span data-ua><strong>Клас чи обʼєкт?</strong> Усі шість звʼязків малюють між <em>класами</em> (діаграма класів). «Дуб» тут клас, а конкретний дуб у парку це обʼєкт, його звʼязок із класом називають instance-of і на діаграмі класів не показують.</span>
       <span data-en><strong>Class or object?</strong> All six relationships are drawn between <em>classes</em> (class diagram). Oak here is a class; a specific oak in a park is an object, its link to the class is instance-of and is not shown on a class diagram.</span>
     </p>
-  </section>
-
-  <!-- ===================== WIZARD ===================== -->
-  <section class="ref" id="decide">
-    <h2><span data-ua>Який звʼязок? Чотири питання</span><span data-en>Which relationship? Four questions</span></h2>
-    <p class="lead">
-      <span data-ua>Підставте свої A і B (наприклад, «Замовлення» і «Рядок замовлення») і відповідайте «так» або «ні».</span>
-      <span data-en>Plug in your own A and B (say, Order and OrderLine) and answer yes or no.</span>
-    </p>
-    <div class="wizard" id="wizard" aria-live="polite"></div>
   </section>
 
   <!-- ===================== MULTIPLICITY ===================== -->
@@ -2028,11 +2159,11 @@
         <table class="ref-table">
           <thead><tr><th><span data-ua>Запис</span><span data-en>Notation</span></th><th><span data-ua>Читається</span><span data-en>Reads as</span></th><th><span data-ua>Приклад</span><span data-en>Example</span></th></tr></thead>
           <tbody>
-            <tr><td class="mono">1</td><td><span data-ua>рівно один, обовʼязково</span><span data-en>exactly one, mandatory</span></td><td><span data-ua>Операція належить 1 рахунку</span><span data-en>An entry belongs to 1 account</span></td></tr>
-            <tr><td class="mono">0..1</td><td><span data-ua>нуль або один, необовʼязково</span><span data-en>zero or one, optional</span></td><td><span data-ua>Гніздо сидить на 0..1 дереві</span><span data-en>A nest sits on 0..1 tree</span></td></tr>
-            <tr><td class="mono">*  <span data-ua>або</span><span data-en>or</span> 0..*</td><td><span data-ua>скільки завгодно, можна жодного</span><span data-en>any number, possibly none</span></td><td><span data-ua>Клієнт має * замовлень</span><span data-en>A customer has * orders</span></td></tr>
-            <tr><td class="mono">1..*</td><td><span data-ua>хоча б один</span><span data-en>at least one</span></td><td><span data-ua>Замовлення має 1..* рядків</span><span data-en>An order has 1..* lines</span></td></tr>
-            <tr><td class="mono">2..4</td><td><span data-ua>діапазон</span><span data-en>a range</span></td><td><span data-ua>Картка має 2..4 власників</span><span data-en>A card has 2..4 holders</span></td></tr>
+            <tr><td data-l-ua="Запис" data-l-en="Notation" class="mono">1</td><td data-l-ua="Читається" data-l-en="Reads as"><span data-ua>рівно один, обовʼязково</span><span data-en>exactly one, mandatory</span></td><td data-l-ua="Приклад" data-l-en="Example"><span data-ua>Операція належить 1 рахунку</span><span data-en>An entry belongs to 1 account</span></td></tr>
+            <tr><td data-l-ua="Запис" data-l-en="Notation" class="mono">0..1</td><td data-l-ua="Читається" data-l-en="Reads as"><span data-ua>нуль або один, необовʼязково</span><span data-en>zero or one, optional</span></td><td data-l-ua="Приклад" data-l-en="Example"><span data-ua>Гніздо сидить на 0..1 дереві</span><span data-en>A nest sits on 0..1 tree</span></td></tr>
+            <tr><td data-l-ua="Запис" data-l-en="Notation" class="mono">*  <span data-ua>або</span><span data-en>or</span> 0..*</td><td data-l-ua="Читається" data-l-en="Reads as"><span data-ua>скільки завгодно, можна жодного</span><span data-en>any number, possibly none</span></td><td data-l-ua="Приклад" data-l-en="Example"><span data-ua>Клієнт має * замовлень</span><span data-en>A customer has * orders</span></td></tr>
+            <tr><td data-l-ua="Запис" data-l-en="Notation" class="mono">1..*</td><td data-l-ua="Читається" data-l-en="Reads as"><span data-ua>хоча б один</span><span data-en>at least one</span></td><td data-l-ua="Приклад" data-l-en="Example"><span data-ua>Замовлення має 1..* рядків</span><span data-en>An order has 1..* lines</span></td></tr>
+            <tr><td data-l-ua="Запис" data-l-en="Notation" class="mono">2..4</td><td data-l-ua="Читається" data-l-en="Reads as"><span data-ua>діапазон</span><span data-en>a range</span></td><td data-l-ua="Приклад" data-l-en="Example"><span data-ua>Картка має 2..4 власників</span><span data-en>A card has 2..4 holders</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -2041,10 +2172,10 @@
           <table class="ref-table">
             <thead><tr><th><span data-ua>Елемент</span><span data-en>Element</span></th><th><span data-ua>Що означає</span><span data-en>What it means</span></th></tr></thead>
             <tbody>
-              <tr><td class="mono">A ──▸ B</td><td><span data-ua>Навігованість: A знає про B (має поле b), B про A не знає</span><span data-en>Navigability: A knows B (has field b), B does not know A</span></td></tr>
-              <tr><td class="mono">A ─── B</td><td><span data-ua>Напрямок не вказано або звʼязок двосторонній</span><span data-en>Direction unspecified or bidirectional</span></td></tr>
-              <tr><td class="mono">A ─ owner ─ B</td><td><span data-ua>Назва ролі біля кінця: як B називає A</span><span data-en>Role name at an end: what B calls A</span></td></tr>
-              <tr><td class="mono">A ─ feeds ▸ ─ B</td><td><span data-ua>Назва звʼязку з напрямком читання</span><span data-en>Association name with a reading direction</span></td></tr>
+              <tr><td data-l-ua="Елемент" data-l-en="Element" class="mono">A ──▸ B</td><td data-l-ua="Що означає" data-l-en="What it means"><span data-ua>Навігованість: A знає про B (має поле b), B про A не знає</span><span data-en>Navigability: A knows B (has field b), B does not know A</span></td></tr>
+              <tr><td data-l-ua="Елемент" data-l-en="Element" class="mono">A ─── B</td><td data-l-ua="Що означає" data-l-en="What it means"><span data-ua>Напрямок не вказано або звʼязок двосторонній</span><span data-en>Direction unspecified or bidirectional</span></td></tr>
+              <tr><td data-l-ua="Елемент" data-l-en="Element" class="mono">A ─ owner ─ B</td><td data-l-ua="Що означає" data-l-en="What it means"><span data-ua>Назва ролі біля кінця: як B називає A</span><span data-en>Role name at an end: what B calls A</span></td></tr>
+              <tr><td data-l-ua="Елемент" data-l-en="Element" class="mono">A ─ feeds ▸ ─ B</td><td data-l-ua="Що означає" data-l-en="What it means"><span data-ua>Назва звʼязку з напрямком читання</span><span data-en>Association name with a reading direction</span></td></tr>
             </tbody>
           </table>
         </div>
@@ -2140,13 +2271,13 @@ Controller ..> Account : залежність &lt;&lt;use&gt;&gt;
         <table class="ref-table">
           <thead><tr><th><span data-ua>Звʼязок</span><span data-en>Relationship</span></th><th>PlantUML</th><th><span data-ua>Запамʼятати</span><span data-en>Mnemonic</span></th></tr></thead>
           <tbody>
-            <tr><td><span data-ua>Успадкування</span><span data-en>Inheritance</span></td><td class="mono">A --|&gt; B</td><td><span data-ua>трикутник <code>|&gt;</code> дивиться на предка</span><span data-en>triangle <code>|&gt;</code> points at the parent</span></td></tr>
-            <tr><td><span data-ua>Реалізація</span><span data-en>Realization</span></td><td class="mono">A ..|&gt; B</td><td><span data-ua>те саме, але крапки</span><span data-en>same, but dotted</span></td></tr>
-            <tr><td><span data-ua>Композиція</span><span data-en>Composition</span></td><td class="mono">A *-- B</td><td><span data-ua><code>*</code> зафарбований ромб біля цілого A</span><span data-en><code>*</code> filled diamond at whole A</span></td></tr>
-            <tr><td><span data-ua>Агрегація</span><span data-en>Aggregation</span></td><td class="mono">A o-- B</td><td><span data-ua><code>o</code> порожній ромб біля цілого A</span><span data-en><code>o</code> hollow diamond at whole A</span></td></tr>
-            <tr><td><span data-ua>Асоціація</span><span data-en>Association</span></td><td class="mono">A "1" -- "*" B</td><td><span data-ua>кратність у лапках біля кінців</span><span data-en>multiplicity in quotes at the ends</span></td></tr>
-            <tr><td><span data-ua>Напрямлена асоціація</span><span data-en>Directed association</span></td><td class="mono">A --&gt; B</td><td><span data-ua>A знає B</span><span data-en>A knows B</span></td></tr>
-            <tr><td><span data-ua>Залежність</span><span data-en>Dependency</span></td><td class="mono">A ..&gt; B</td><td><span data-ua>крапки і проста стрілка</span><span data-en>dots and a plain arrow</span></td></tr>
+            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Успадкування</span><span data-en>Inheritance</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A --|&gt; B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>трикутник <code>|&gt;</code> дивиться на предка</span><span data-en>triangle <code>|&gt;</code> points at the parent</span></td></tr>
+            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Реалізація</span><span data-en>Realization</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A ..|&gt; B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>те саме, але крапки</span><span data-en>same, but dotted</span></td></tr>
+            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Композиція</span><span data-en>Composition</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A *-- B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua><code>*</code> зафарбований ромб біля цілого A</span><span data-en><code>*</code> filled diamond at whole A</span></td></tr>
+            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Агрегація</span><span data-en>Aggregation</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A o-- B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua><code>o</code> порожній ромб біля цілого A</span><span data-en><code>o</code> hollow diamond at whole A</span></td></tr>
+            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Асоціація</span><span data-en>Association</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A "1" -- "*" B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>кратність у лапках біля кінців</span><span data-en>multiplicity in quotes at the ends</span></td></tr>
+            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Напрямлена асоціація</span><span data-en>Directed association</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A --&gt; B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>A знає B</span><span data-en>A knows B</span></td></tr>
+            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Залежність</span><span data-en>Dependency</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A ..&gt; B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>крапки і проста стрілка</span><span data-en>dots and a plain arrow</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -2165,13 +2296,13 @@ Controller ..> Account : залежність &lt;&lt;use&gt;&gt;
         <table class="ref-table">
           <thead><tr><th>UML</th><th><span data-ua>У схемі БД</span><span data-en>In the DB schema</span></th></tr></thead>
           <tbody>
-            <tr><td><span data-ua>Асоціація 1 — *</span><span data-en>Association 1 — *</span></td><td><span data-ua>FK на боці «багато»: <code>orders.customer_id</code></span><span data-en>FK on the “many” side: <code>orders.customer_id</code></span></td></tr>
-            <tr><td><span data-ua>Асоціація 1 — 0..1</span><span data-en>Association 1 — 0..1</span></td><td><span data-ua>FK з <code>UNIQUE</code> на боці 0..1 або спільний PK</span><span data-en>FK with <code>UNIQUE</code> on the 0..1 side, or a shared PK</span></td></tr>
-            <tr><td><span data-ua>Асоціація * — *</span><span data-en>Association * — *</span></td><td><span data-ua>проміжна таблиця з двома FK і складеним PK</span><span data-en>a join table with two FKs and a composite PK</span></td></tr>
-            <tr><td><span data-ua>Композиція</span><span data-en>Composition</span></td><td><span data-ua>FK <code>NOT NULL</code> + <code>ON DELETE CASCADE</code>: частина зникає з цілим</span><span data-en>FK <code>NOT NULL</code> + <code>ON DELETE CASCADE</code>: the part goes with the whole</span></td></tr>
-            <tr><td><span data-ua>Агрегація</span><span data-en>Aggregation</span></td><td><span data-ua>FK <code>NULL</code> + <code>ON DELETE SET NULL</code>: частина лишається</span><span data-en>FK <code>NULL</code> + <code>ON DELETE SET NULL</code>: the part stays</span></td></tr>
-            <tr><td><span data-ua>Успадкування</span><span data-en>Inheritance</span></td><td><span data-ua>одна таблиця з колонкою-дискримінатором, або таблиця на підклас з FK на батьківську, або таблиця на кожен конкретний клас</span><span data-en>single table with a discriminator column, or a table per subclass with an FK to the parent, or a table per concrete class</span></td></tr>
-            <tr><td><span data-ua>Реалізація, залежність</span><span data-en>Realization, dependency</span></td><td><span data-ua>у схемі даних не відображаються: це про код і контракти</span><span data-en>not reflected in the data schema: these are about code and contracts</span></td></tr>
+            <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Асоціація 1 — *</span><span data-en>Association 1 — *</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>FK на боці «багато»: <code>orders.customer_id</code></span><span data-en>FK on the “many” side: <code>orders.customer_id</code></span></td></tr>
+            <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Асоціація 1 — 0..1</span><span data-en>Association 1 — 0..1</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>FK з <code>UNIQUE</code> на боці 0..1 або спільний PK</span><span data-en>FK with <code>UNIQUE</code> on the 0..1 side, or a shared PK</span></td></tr>
+            <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Асоціація * — *</span><span data-en>Association * — *</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>проміжна таблиця з двома FK і складеним PK</span><span data-en>a join table with two FKs and a composite PK</span></td></tr>
+            <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Композиція</span><span data-en>Composition</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>FK <code>NOT NULL</code> + <code>ON DELETE CASCADE</code>: частина зникає з цілим</span><span data-en>FK <code>NOT NULL</code> + <code>ON DELETE CASCADE</code>: the part goes with the whole</span></td></tr>
+            <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Агрегація</span><span data-en>Aggregation</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>FK <code>NULL</code> + <code>ON DELETE SET NULL</code>: частина лишається</span><span data-en>FK <code>NULL</code> + <code>ON DELETE SET NULL</code>: the part stays</span></td></tr>
+            <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Успадкування</span><span data-en>Inheritance</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>одна таблиця з колонкою-дискримінатором, або таблиця на підклас з FK на батьківську, або таблиця на кожен конкретний клас</span><span data-en>single table with a discriminator column, or a table per subclass with an FK to the parent, or a table per concrete class</span></td></tr>
+            <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Реалізація, залежність</span><span data-en>Realization, dependency</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>у схемі даних не відображаються: це про код і контракти</span><span data-en>not reflected in the data schema: these are about code and contracts</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -2179,23 +2310,25 @@ Controller ..> Account : залежність &lt;&lt;use&gt;&gt;
         <button type="button" class="btn copy-btn" data-copy="sql-src"><span data-ua>Копіювати</span><span data-en>Copy</span></button>
 <pre><code id="sql-src">-- Композиція: рядок не живе без замовлення
 CREATE TABLE order_line (
-  id        BIGINT PRIMARY KEY,
-  order_id  BIGINT NOT NULL
-            REFERENCES orders(id) ON DELETE CASCADE,
-  qty       INT NOT NULL
+  id       BIGINT PRIMARY KEY,
+  order_id BIGINT NOT NULL
+    REFERENCES orders(id) ON DELETE CASCADE,
+  qty      INT NOT NULL
 );
 
 -- Агрегація: гніздо переживе дерево
 CREATE TABLE nest (
-  id       BIGINT PRIMARY KEY,
-  tree_id  BIGINT NULL
-           REFERENCES tree(id) ON DELETE SET NULL
+  id      BIGINT PRIMARY KEY,
+  tree_id BIGINT NULL
+    REFERENCES tree(id) ON DELETE SET NULL
 );
 
 -- Асоціація * — *: проміжна таблиця
 CREATE TABLE tree_mushroom (
-  tree_id      BIGINT NOT NULL REFERENCES tree(id),
-  mushroom_id  BIGINT NOT NULL REFERENCES mushroom(id),
+  tree_id     BIGINT NOT NULL
+    REFERENCES tree(id),
+  mushroom_id BIGINT NOT NULL
+    REFERENCES mushroom(id),
   PRIMARY KEY (tree_id, mushroom_id)
 );</code></pre>
       </div>
@@ -2206,11 +2339,13 @@ CREATE TABLE tree_mushroom (
   <section class="ref ref-footer" id="selfcheck">
     <h2><span data-ua>Самоперевірка</span><span data-en>Self-check</span></h2>
     <p class="lead">
-      <span data-ua>Вісім ситуацій із життя систем. Оберіть звʼязок, пояснення зʼявиться одразу.</span>
-      <span data-en>Eight situations from real systems. Pick the relationship; the explanation appears right away.</span>
+      <span data-ua>Вісім ситуацій із життя систем, щоразу інший набір і порядок: у банку 18 питань, по три на кожен звʼязок. Оберіть звʼязок, пояснення зʼявиться одразу.</span>
+      <span data-en>Eight situations from real systems, a different set and order every round: the pool holds 18 questions, three per relationship. Pick one; the explanation appears right away.</span>
     </p>
+    <p class="quiz-progress" id="quiz-progress"></p>
     <div class="quiz" id="quiz"></div>
     <div class="quiz-score" id="quiz-score" style="margin-top:14px"></div>
+    <div id="quiz-summary"></div>
   </section>
 
 
@@ -2221,12 +2356,18 @@ CREATE TABLE tree_mushroom (
       <h2 id="ovTitle"></h2>
     </div>
     <img id="ovImg" class="ov-img" src="" alt="">
+    <div id="ovPair" class="ov-pair" aria-hidden="true" hidden></div>
+    <p id="ovOps" class="ov-ops" hidden></p>
     <p id="ovEx"></p>
     <div class="def-wrapper">
       <strong data-ua>Що означає звʼязок</strong>
       <strong data-en>What this link means</strong>
       <p id="ovDef"></p>
     </div>
+    <details id="ovMore" class="ov-more" hidden>
+      <summary><span class="material-symbols-rounded" aria-hidden="true">menu_book</span><span data-ua>Повне пояснення з довідника</span><span data-en>Full entry from the cheat sheet</span></summary>
+      <div id="ovMoreBody" class="ov-more-body"></div>
+    </details>
   </div>
 
   <button type="button" class="scroll-top-btn" id="scroll-top-btn" aria-label="Вгору">
@@ -2337,7 +2478,7 @@ CREATE TABLE tree_mushroom (
         },
         interface: {
           sym: '📜',
-          img: null,
+          img: 'photosynthesis.webp',
           symHTML: null,
           uk: {
             title: 'Фотосинтезуючий (інтерфейс)',
@@ -2358,29 +2499,29 @@ CREATE TABLE tree_mushroom (
           uk: {
             title: 'Успадкування',
             ex: 'Спільне для всіх дерев (коріння, листя, фотосинтез) описано в «Дереві»; «Дуб» додає своє: жолуді.',
-            def: '«Це є різновид того» (IS-A). Суцільна лінія з порожнім трикутником біля предка. PlantUML: Дуб --|> Дерево',
+            def: '«Це є різновид того» (IS-A). Суцільна лінія з порожнім трикутником біля предка.',
             alt: 'Приклад успадкування'
           },
           en: {
             title: 'Inheritance',
             ex: 'What all trees share (roots, leaves, photosynthesis) lives in Tree; Oak adds its own: acorns.',
-            def: '“This is a kind of that” (IS-A). Solid line with a hollow triangle at the parent. PlantUML: Oak --|> Tree',
+            def: '“This is a kind of that” (IS-A). Solid line with a hollow triangle at the parent.',
             alt: 'Inheritance example'
           }
         },
         realization: {
           symHTML: HOLLOW_TRI_DASH,
-          img: 'tree.webp',
+          img: 'photosynthesis.webp',
           uk: {
             title: 'Реалізація',
             ex: '«Дерево» обіцяє вміти фотосинтезувати. Як саме, кожен вид вирішує сам.',
-            def: 'Клас виконує контракт інтерфейсу. Пунктир із порожнім трикутником біля інтерфейсу. PlantUML: Дерево ..|> Фотосинтезуючий',
+            def: 'Клас виконує контракт інтерфейсу. Пунктир із порожнім трикутником біля інтерфейсу.',
             alt: 'Приклад реалізації'
           },
           en: {
             title: 'Realization',
             ex: 'Tree promises it can photosynthesize. How exactly is up to each kind.',
-            def: 'A class fulfils an interface contract. Dashed line with a hollow triangle at the interface. PlantUML: Tree ..|> Photosynthetic',
+            def: 'A class fulfils an interface contract. Dashed line with a hollow triangle at the interface.',
             alt: 'Realization example'
           }
         },
@@ -2390,13 +2531,13 @@ CREATE TABLE tree_mushroom (
           uk: {
             title: 'Композиція',
             ex: 'Знищили дерево: його кора припинила існування разом із ним. Окремо вона не живе і іншому дереву не належить.',
-            def: 'Зафарбований ромб біля цілого: частина належить лише одному цілому і живе стільки ж, скільки воно. PlantUML: Дерево *-- Кора',
+            def: 'Зафарбований ромб біля цілого: частина належить лише одному цілому і живе стільки ж, скільки воно.',
             alt: 'Приклад композиції'
           },
           en: {
             title: 'Composition',
             ex: 'Destroy the tree and its bark ceases to exist with it. It neither lives alone nor belongs to another tree.',
-            def: 'Filled diamond at the whole: the part belongs to exactly one whole and shares its lifetime. PlantUML: Tree *-- Bark',
+            def: 'Filled diamond at the whole: the part belongs to exactly one whole and shares its lifetime.',
             alt: 'Composition example'
           }
         },
@@ -2406,13 +2547,13 @@ CREATE TABLE tree_mushroom (
           uk: {
             title: 'Агрегація',
             ex: 'Зрубали дерево: гніздо лишилось гніздом і може опинитись на іншому дереві.',
-            def: 'Порожній ромб біля цілого: частина може існувати окремо і переживати ціле. У UML 2 визначена слабко: у сумніві малюйте асоціацію. PlantUML: Дерево o-- Гніздо',
+            def: 'Порожній ромб біля цілого: частина може існувати окремо і переживати ціле. У UML 2 визначена слабко: у сумніві малюйте асоціацію.',
             alt: 'Приклад агрегації'
           },
           en: {
             title: 'Aggregation',
             ex: 'Cut the tree down: the nest is still a nest and may end up on another tree.',
-            def: 'Hollow diamond at the whole: the part can exist apart and outlive the whole. Loosely defined in UML 2: when in doubt draw an association. PlantUML: Tree o-- Nest',
+            def: 'Hollow diamond at the whole: the part can exist apart and outlive the whole. Loosely defined in UML 2: when in doubt draw an association.',
             alt: 'Aggregation example'
           }
         },
@@ -2422,13 +2563,13 @@ CREATE TABLE tree_mushroom (
           uk: {
             title: 'Асоціація',
             ex: 'Мікориза: дерево і гриб «знають» одне одного і обмінюються через ґрунт. Одне дерево має багато грибів, і навпаки (* до *).',
-            def: 'Суцільна лінія: обʼєкти зберігають посилання один на одного. Може мати напрям, ролі й кратність. PlantUML: Дерево "*" -- "*" Гриб',
+            def: 'Суцільна лінія: обʼєкти зберігають посилання один на одного. Може мати напрям, ролі й кратність.',
             alt: 'Приклад асоціації'
           },
           en: {
             title: 'Association',
             ex: 'Mycorrhiza: tree and mushroom “know” each other and exchange through the soil. One tree, many mushrooms, and vice versa (* to *).',
-            def: 'Solid line: objects keep references to each other. May have direction, roles and multiplicity. PlantUML: Tree "*" -- "*" Mushroom',
+            def: 'Solid line: objects keep references to each other. May have direction, roles and multiplicity.',
             alt: 'Association example'
           }
         },
@@ -2438,68 +2579,144 @@ CREATE TABLE tree_mushroom (
           uk: {
             title: 'Залежність',
             ex: 'Фотосинтезу потрібне світло. Без сонця процес не йде, але сонце не «належить» дереву.',
-            def: 'Пунктирна стрілка до того, від кого залежать: тимчасове використання (параметр, виклик) без збереження посилання. PlantUML: Дерево ..> Сонце',
+            def: 'Пунктирна стрілка до того, від кого залежать: тимчасове використання (параметр, виклик) без збереження посилання.',
             alt: 'Приклад залежності'
           },
           en: {
             title: 'Dependency',
             ex: 'Photosynthesis needs light. No sun, no process, yet the tree does not own the sun.',
-            def: 'Dashed arrow toward what is depended on: temporary use (a parameter, a call) without keeping a reference. PlantUML: Tree ..> Sun',
+            def: 'Dashed arrow toward what is depended on: temporary use (a parameter, a call) without keeping a reference.',
             alt: 'Dependency example'
           }
         }
       };
 
       data.plant = {
-        icon: 'potted_plant', img: null, symHTML: null,
+        img: 'plant.webp', symHTML: null,
         uk: { title: 'Рослина (абстрактний клас)', ex: 'Дуб є деревом, дерево є рослиною. Кожен рівень додає своє, а успадковує все, що вище.', def: 'Предок «Дерева»: ланцюг успадкування можна тягнути вгору.', alt: '' },
         en: { title: 'Plant (abstract class)', ex: 'An oak is a tree, a tree is a plant. Each level adds its own and inherits everything above.', def: 'Parent of Tree: the inheritance chain goes further up.', alt: '' }
       };
 
       var bankData = {
-        'b-account': { icon: 'account_balance', img: null,
+        'b-account': { img: 'account.webp',
           uk: { title: 'Рахунок (абстрактний клас)', ex: 'Спільне для поточного, депозитного, карткового рахунків: номер, валюта, баланс, зарахувати, списати.', def: 'Центр схеми: абстрактний клас, екземплярів не має.', alt: '' },
           en: { title: 'Account (abstract class)', ex: 'Shared by current, deposit and card accounts: number, currency, balance, credit, debit.', def: 'Center of the diagram: abstract class, never instantiated.', alt: '' } },
-        'b-deposit': { icon: 'savings', img: null,
+        'b-deposit': { img: 'deposit.webp',
           uk: { title: 'Депозитний рахунок (клас-нащадок)', ex: 'Має все, що має «Рахунок», плюс своє: ставку і нарахування відсотків.', def: 'Різновид рахунку.', alt: '' },
           en: { title: 'Deposit account (subclass)', ex: 'Has everything Account has plus its own: a rate and interest accrual.', def: 'A kind of account.', alt: '' } },
-        'b-product': { icon: 'category', img: null,
+        'b-product': { img: 'product.webp',
           uk: { title: 'Банківський продукт (абстрактний клас)', ex: 'Рахунок, кредит, картка: усе це продукти з відкриттям, закриттям і тарифом.', def: 'Предок «Рахунку».', alt: '' },
           en: { title: 'Bank product (abstract class)', ex: 'Account, loan, card: all products with opening, closing and a tariff.', def: 'Parent of Account.', alt: '' } },
-        'b-blockable': { icon: 'lock', img: null,
+        'b-blockable': { img: 'blockable.webp',
           uk: { title: 'Можна заблокувати (інтерфейс)', ex: 'Його реалізують рахунок, картка, депозит. Фінмоніторинг працює з будь-чим «Можна заблокувати».', def: 'Інтерфейс: обіцянка поведінки без реалізації.', alt: '' },
           en: { title: 'Blockable (interface)', ex: 'Realized by account, card, deposit. Financial monitoring works with anything Blockable.', def: 'Interface: a promise of behavior without implementation.', alt: '' } },
-        'b-entry': { icon: 'receipt_long', img: null,
+        'b-entry': { img: 'entry.webp',
           uk: { title: 'Операція по рахунку', ex: 'Операція ніколи не належить двом рахункам. Закрили рахунок: операції архівуються разом із ним.', def: 'Частина, що живе лише всередині свого рахунку (композиція).', alt: '' },
           en: { title: 'Account entry', ex: 'An entry never belongs to two accounts. Close the account and its entries are archived with it.', def: 'A part that lives only inside its account (composition).', alt: '' } },
-        'b-card': { icon: 'credit_card', img: null,
+        'b-card': { img: 'card.webp',
           uk: { title: 'Картка', ex: 'Картку можна перевʼязати до іншого рахунку або перевипустити. Закриття рахунку не знищує її.', def: 'Привʼязана до рахунку, але живе своїм життям (агрегація).', alt: '' },
           en: { title: 'Card', ex: 'A card can be re-linked to another account or reissued. Closing the account does not destroy it.', def: 'Linked to an account, yet has a life of its own (aggregation).', alt: '' } },
-        'b-customer': { icon: 'person', img: null,
+        'b-customer': { img: 'customer.webp',
           uk: { title: 'Клієнт', ex: 'Клієнт має 1..* рахунків, рахунок належить 1 клієнту. Обидва зберігають посилання один на одного.', def: 'Самостійний клас, повʼязаний з рахунком (асоціація).', alt: '' },
           en: { title: 'Customer', ex: 'A customer has 1..* accounts, an account belongs to 1 customer. Both keep references.', def: 'An independent class linked to the account (association).', alt: '' } },
-        'b-controller': { icon: 'hub', img: null,
+        'b-controller': { img: 'controller.webp',
           uk: { title: 'Контролер платежів', ex: 'У «обробити(платіж)» дістає рахунок, викликає списати() і забуває про нього.', def: 'Використовує рахунок на час однієї дії (залежність).', alt: '' },
           en: { title: 'Payment controller', ex: 'In handle(payment) it fetches the account, calls debit() and forgets it.', def: 'Uses an account for the duration of one action (dependency).', alt: '' } },
-        inheritance: { symHTML: HOLLOW_TRI, img: null, icon: 'savings',
-          uk: { title: 'Успадкування', ex: 'Спільне для всіх рахунків у «Рахунку»; «Депозитний рахунок» додає ставку і відсотки. Рахунок у свою чергу є банківським продуктом.', def: '«Це є різновид того» (IS-A). Трикутник біля предка. PlantUML: Deposit --|> Account', alt: '' },
-          en: { title: 'Inheritance', ex: 'What all accounts share lives in Account; Deposit account adds a rate and interest. Account in turn is a bank product.', def: '“This is a kind of that” (IS-A). Triangle at the parent. PlantUML: Deposit --|> Account', alt: '' } },
-        realization: { symHTML: HOLLOW_TRI_DASH, img: null, icon: 'lock',
-          uk: { title: 'Реалізація', ex: '«Рахунок» виконує контракт «Можна заблокувати». Нащадки теж, і фінмоніторинг працює через контракт, не знаючи реалізації.', def: 'Клас виконує контракт інтерфейсу. Пунктир із порожнім трикутником біля інтерфейсу. PlantUML: Account ..|> Blockable', alt: '' },
-          en: { title: 'Realization', ex: 'Account fulfils the Blockable contract. Subclasses do too, and monitoring works through the contract without knowing the implementation.', def: 'A class fulfils an interface contract. Dashed line, hollow triangle at the interface. PlantUML: Account ..|> Blockable', alt: '' } },
-        composition: { symHTML: '<div class="sym-diamond-f" style="width:18px; height:18px;"></div>', img: null, icon: 'receipt_long',
-          uk: { title: 'Композиція', ex: 'Закрили рахунок: операції архівуються разом із ним. Операція ніколи не належить двом рахункам.', def: 'Зафарбований ромб біля цілого. У БД: FK NOT NULL + ON DELETE CASCADE. PlantUML: Account "1" *-- "*" Entry', alt: '' },
-          en: { title: 'Composition', ex: 'Close the account and its entries are archived with it. An entry never belongs to two accounts.', def: 'Filled diamond at the whole. In a DB: FK NOT NULL + ON DELETE CASCADE. PlantUML: Account "1" *-- "*" Entry', alt: '' } },
-        aggregation: { symHTML: '<div class="sym-diamond-e" style="width:18px; height:18px; border-width:3px;"></div>', img: null, icon: 'credit_card',
-          uk: { title: 'Агрегація', ex: 'Картку перевʼязали до іншого рахунку або перевипустили: вона лишилась карткою.', def: 'Порожній ромб біля цілого. У БД: FK NULL + ON DELETE SET NULL. PlantUML: Account "0..1" o-- "0..*" Card', alt: '' },
-          en: { title: 'Aggregation', ex: 'Re-link the card to another account or reissue it: it is still a card.', def: 'Hollow diamond at the whole. In a DB: FK NULL + ON DELETE SET NULL. PlantUML: Account "0..1" o-- "0..*" Card', alt: '' } },
-        association: { symHTML: '<div style="font-size:24px; font-weight:bold; color:var(--line-color);">/</div>', img: null, icon: 'person',
-          uk: { title: 'Асоціація', ex: 'Клієнт має 1..* рахунків, рахунок належить 1 клієнту. Обидва зберігають посилання один на одного.', def: 'Суцільна лінія з кратністю. У БД: FK customer_id у таблиці рахунків. PlantUML: Customer "1" -- "1..*" Account', alt: '' },
-          en: { title: 'Association', ex: 'A customer has 1..* accounts, an account belongs to 1 customer. Both keep references.', def: 'Solid line with multiplicity. In a DB: FK customer_id in the accounts table. PlantUML: Customer "1" -- "1..*" Account', alt: '' } },
-        dependency: { symHTML: DASH_ARROW, img: null, icon: 'hub',
-          uk: { title: 'Залежність', ex: 'Контролер платежів у обробити(платіж) отримує рахунок, викликає списати() і не зберігає його.', def: 'Пунктирна стрілка від залежного (контролер) до постачальника (рахунок). PlantUML: Controller ..> Account', alt: '' },
-          en: { title: 'Dependency', ex: 'In handle(payment) the controller gets an account, calls debit() and keeps no reference.', def: 'Dashed arrow from the dependent (controller) to the supplier (account). PlantUML: Controller ..> Account', alt: '' } }
+        inheritance: { symHTML: HOLLOW_TRI, img: 'deposit.webp',
+          uk: { title: 'Успадкування', ex: 'Спільне для всіх рахунків у «Рахунку»; «Депозитний рахунок» додає ставку і відсотки. Рахунок у свою чергу є банківським продуктом.', def: '«Це є різновид того» (IS-A). Трикутник біля предка.', alt: '' },
+          en: { title: 'Inheritance', ex: 'What all accounts share lives in Account; Deposit account adds a rate and interest. Account in turn is a bank product.', def: '“This is a kind of that” (IS-A). Triangle at the parent.', alt: '' } },
+        realization: { symHTML: HOLLOW_TRI_DASH, img: 'blockable.webp',
+          uk: { title: 'Реалізація', ex: '«Рахунок» виконує контракт «Можна заблокувати». Нащадки теж, і фінмоніторинг працює через контракт, не знаючи реалізації.', def: 'Клас виконує контракт інтерфейсу. Пунктир із порожнім трикутником біля інтерфейсу.', alt: '' },
+          en: { title: 'Realization', ex: 'Account fulfils the Blockable contract. Subclasses do too, and monitoring works through the contract without knowing the implementation.', def: 'A class fulfils an interface contract. Dashed line, hollow triangle at the interface.', alt: '' } },
+        composition: { symHTML: '<div class="sym-diamond-f" style="width:18px; height:18px;"></div>', img: 'entry.webp',
+          uk: { title: 'Композиція', ex: 'Закрили рахунок: операції архівуються разом із ним. Операція ніколи не належить двом рахункам.', def: 'Зафарбований ромб біля цілого. У БД: FK NOT NULL + ON DELETE CASCADE.', alt: '' },
+          en: { title: 'Composition', ex: 'Close the account and its entries are archived with it. An entry never belongs to two accounts.', def: 'Filled diamond at the whole. In a DB: FK NOT NULL + ON DELETE CASCADE.', alt: '' } },
+        aggregation: { symHTML: '<div class="sym-diamond-e" style="width:18px; height:18px; border-width:3px;"></div>', img: 'card.webp',
+          uk: { title: 'Агрегація', ex: 'Картку перевʼязали до іншого рахунку або перевипустили: вона лишилась карткою.', def: 'Порожній ромб біля цілого. У БД: FK NULL + ON DELETE SET NULL.', alt: '' },
+          en: { title: 'Aggregation', ex: 'Re-link the card to another account or reissue it: it is still a card.', def: 'Hollow diamond at the whole. In a DB: FK NULL + ON DELETE SET NULL.', alt: '' } },
+        association: { symHTML: '<div style="font-size:24px; font-weight:bold; color:var(--line-color);">/</div>', img: 'customer.webp',
+          uk: { title: 'Асоціація', ex: 'Клієнт має 1..* рахунків, рахунок належить 1 клієнту. Обидва зберігають посилання один на одного.', def: 'Суцільна лінія з кратністю. У БД: FK customer_id у таблиці рахунків.', alt: '' },
+          en: { title: 'Association', ex: 'A customer has 1..* accounts, an account belongs to 1 customer. Both keep references.', def: 'Solid line with multiplicity. In a DB: FK customer_id in the accounts table.', alt: '' } },
+        dependency: { symHTML: DASH_ARROW, img: 'controller.webp',
+          uk: { title: 'Залежність', ex: 'Контролер платежів у обробити(платіж) отримує рахунок, викликає списати() і не зберігає його.', def: 'Пунктирна стрілка від залежного (контролер) до постачальника (рахунок).', alt: '' },
+          en: { title: 'Dependency', ex: 'In handle(payment) the controller gets an account, calls debit() and keeps no reference.', def: 'Dashed arrow from the dependent (controller) to the supplier (account).', alt: '' } }
       };
+
+      /* Names and operations of each class (mini class boxes in the mobile card) */
+      var META = {
+        plant: { name: { uk: 'Рослина', en: 'Plant' }, abstract: true, ops: { uk: ['+ рости()'], en: ['+ grow()'] } },
+        tree: { name: { uk: 'Дерево', en: 'Tree' }, abstract: true, ops: { uk: ['+ фотосинтезувати()', '+ скидатиЛистя()'], en: ['+ photosynthesize()', '+ shedLeaves()'] } },
+        oak: { name: { uk: 'Дуб', en: 'Oak' }, ops: { uk: ['+ родитиЖолуді()'], en: ['+ bearAcorns()'] } },
+        interface: { name: { uk: 'Фотосинтезуючий', en: 'Photosynthetic' }, iface: true, ops: { uk: ['+ фотосинтезувати()'], en: ['+ photosynthesize()'] } },
+        bark: { name: { uk: 'Кора', en: 'Bark' }, ops: { uk: ['товщина, колір'], en: ['thickness, color'] } },
+        nest: { name: { uk: 'Гніздо', en: 'Nest' }, ops: { uk: ['+ прихиститиПташенят()'], en: ['+ shelterChicks()'] } },
+        mushroom: { name: { uk: 'Гриб', en: 'Mushroom' }, ops: { uk: ['+ віддатиМінерали()'], en: ['+ giveMinerals()'] } },
+        sun: { name: { uk: 'Сонце', en: 'Sun' }, ops: { uk: ['+ світити()'], en: ['+ shine()'] } },
+        'b-product': { name: { uk: 'Банківський продукт', en: 'Bank product' }, abstract: true, ops: { uk: ['+ відкрити()', '+ закрити()'], en: ['+ open()', '+ close()'] } },
+        'b-account': { name: { uk: 'Рахунок', en: 'Account' }, abstract: true, ops: { uk: ['+ зарахувати(сума)', '+ списати(сума)'], en: ['+ credit(amount)', '+ debit(amount)'] } },
+        'b-deposit': { name: { uk: 'Депозитний рахунок', en: 'Deposit account' }, ops: { uk: ['+ нарахуватиВідсотки()'], en: ['+ accrueInterest()'] } },
+        'b-blockable': { name: { uk: 'Можна заблокувати', en: 'Blockable' }, iface: true, ops: { uk: ['+ заблокувати()', '+ розблокувати()'], en: ['+ block()', '+ unblock()'] } },
+        'b-entry': { name: { uk: 'Операція', en: 'Account entry' }, ops: { uk: ['дата, сума, призначення'], en: ['date, amount, purpose'] } },
+        'b-card': { name: { uk: 'Картка', en: 'Card' }, ops: { uk: ['маска, строк дії', '+ перевипустити()'], en: ['mask, expiry', '+ reissue()'] } },
+        'b-customer': { name: { uk: 'Клієнт', en: 'Customer' }, ops: { uk: ['ПІБ, РНОКПП'], en: ['name, tax id'] } },
+        'b-controller': { name: { uk: 'Контролер платежів', en: 'Payment controller' }, ops: { uk: ['+ обробити(платіж)'], en: ['+ handle(payment)'] } }
+      };
+      /* Which two classes a relationship card shows, per example: a is the dependent / child / whole side */
+      var PAIRS = {
+        forest: {
+          inheritance: { a: 'oak', b: 'tree' },
+          realization: { a: 'tree', b: 'interface' },
+          composition: { a: 'tree', b: 'bark', ma: '1', mb: '1' },
+          aggregation: { a: 'tree', b: 'nest', ma: '0..1', mb: '0..*' },
+          association: { a: 'tree', b: 'mushroom', ma: '*', mb: '*' },
+          dependency: { a: 'tree', b: 'sun' }
+        },
+        bank: {
+          inheritance: { a: 'b-deposit', b: 'b-account' },
+          realization: { a: 'b-account', b: 'b-blockable' },
+          composition: { a: 'b-account', b: 'b-entry', ma: '1', mb: '*' },
+          aggregation: { a: 'b-account', b: 'b-card', ma: '0..1', mb: '0..*' },
+          association: { a: 'b-customer', b: 'b-account', ma: '1', mb: '1..*' },
+          dependency: { a: 'b-controller', b: 'b-account' }
+        }
+      };
+
+      function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+      function miniClass(k) {
+        var m = META[k];
+        if (!m) return '';
+        var L = currentLang();
+        var ops = (m.ops && m.ops[L]) || [];
+        return '<div class="mc' + (m.iface ? ' mc-iface' : '') + '">' +
+          (m.iface ? '<span class="mc-stereo">«interface»</span>' : '') +
+          '<b' + (m.abstract ? ' class="mc-abstract"' : '') + '>' + esc(m.name[L]) + '</b>' +
+          (ops.length ? '<span class="mc-ops">' + ops.map(esc).join('<br>') + '</span>' : '') +
+          '</div>';
+      }
+
+      function miniLink(type, p) {
+        var mult = '';
+        if (p.ma) mult += '<text x="24" y="13">' + esc(p.ma) + '</text>';
+        if (p.mb) mult += '<text x="78" y="13" text-anchor="end">' + esc(p.mb) + '</text>';
+        var body = '';
+        var surf = 'var(--bg-elevated)';
+        switch (type) {
+          case 'inheritance':
+            body = '<line x1="2" y1="22" x2="64" y2="22" stroke-width="2"/><polygon points="64,13 80,22 64,31" fill="' + surf + '" stroke-width="2" stroke-linejoin="round"/>'; break;
+          case 'realization':
+            body = '<line x1="2" y1="22" x2="64" y2="22" stroke-width="2" stroke-dasharray="6,4"/><polygon points="64,13 80,22 64,31" fill="' + surf + '" stroke-width="2" stroke-linejoin="round"/>'; break;
+          case 'composition':
+            body = '<polygon points="2,22 13,15 24,22 13,29" fill="currentColor" stroke-width="2" stroke-linejoin="round"/><line x1="24" y1="22" x2="82" y2="22" stroke-width="2"/>' + mult; break;
+          case 'aggregation':
+            body = '<polygon points="2,22 13,15 24,22 13,29" fill="' + surf + '" stroke-width="2" stroke-linejoin="round"/><line x1="24" y1="22" x2="82" y2="22" stroke-width="2"/>' + mult; break;
+          case 'association':
+            body = '<line x1="2" y1="22" x2="82" y2="22" stroke-width="2"/>' + mult; break;
+          case 'dependency':
+            body = '<line x1="2" y1="22" x2="66" y2="22" stroke-width="2" stroke-dasharray="6,4"/><path d="M66,13 L80,22 L66,31" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'; break;
+        }
+        return '<svg class="mc-link" viewBox="0 0 84 44" aria-hidden="true">' + body + '</svg>';
+      }
 
       function currentDomain() {
         return document.documentElement.getAttribute('data-domain') === 'bank' ? 'bank' : 'forest';
@@ -2839,6 +3056,43 @@ CREATE TABLE tree_mushroom (
           img.hidden = true;
         }
 
+        var L = currentLang();
+        var pairEl = document.getElementById('ovPair');
+        var opsEl = document.getElementById('ovOps');
+        var moreEl = document.getElementById('ovMore');
+        var moreBody = document.getElementById('ovMoreBody');
+        var pair = PAIRS[currentDomain()][key];
+        if (pair) {
+          pairEl.innerHTML = miniClass(pair.a) + miniLink(key, pair) + miniClass(pair.b);
+          pairEl.hidden = false;
+          opsEl.hidden = true;
+          var card = document.querySelector('.rel-card[data-rel="' + key + '"]');
+          moreBody.innerHTML = '';
+          if (card) {
+            var clone = card.cloneNode(true);
+            clone.removeAttribute('data-rel');
+            moreBody.appendChild(clone);
+            moreEl.open = false;
+            moreEl.hidden = false;
+          } else {
+            moreEl.hidden = true;
+          }
+        } else {
+          pairEl.innerHTML = '';
+          pairEl.hidden = true;
+          moreBody.innerHTML = '';
+          moreEl.hidden = true;
+          var meta = META[key];
+          var ops = meta && meta.ops && meta.ops[L];
+          if (ops && ops.length) {
+            opsEl.innerHTML = '<b>' + (L === 'en' ? 'Operations: ' : 'Операції: ') + '</b>' + ops.map(esc).join('&nbsp;&nbsp;');
+            opsEl.hidden = false;
+          } else {
+            opsEl.innerHTML = '';
+            opsEl.hidden = true;
+          }
+        }
+
         overlay.setAttribute('data-open-key', key);
         overlay.classList.add('is-open');
         overlay.style.display = 'flex';
@@ -3015,137 +3269,193 @@ CREATE TABLE tree_mushroom (
         none: { uk: 'Звʼязку немає', en: 'No relationship', puml: '' }
       };
 
-      var WIZ = {
-        q1: {
-          uk: { q: 'A є різновидом B?', hint: 'Дуб є деревом. Картковий платіж є платежем.' },
-          en: { q: 'Is A a kind of B?', hint: 'An oak is a tree. A card payment is a payment.' },
-          yes: 'q1b', no: 'q2'
-        },
-        q1b: {
-          uk: { q: 'B лише описує контракт (що вміє), без власної реалізації?', hint: 'Інтерфейс «Можна скасувати», «Фотосинтезуючий». Якщо B має свої поля і поведінку, це клас.' },
-          en: { q: 'Is B only a contract (what it can do) with no implementation of its own?', hint: 'Interface Cancellable, Photosynthetic. If B has its own fields and behavior, it is a class.' },
-          yes: 'r:realization', no: 'r:inheritance'
-        },
-        q2: {
-          uk: { q: 'A є частиною B?', hint: 'Кора є частиною дерева. Рядок є частиною замовлення.' },
-          en: { q: 'Is A a part of B?', hint: 'Bark is part of a tree. A line is part of an order.' },
-          yes: 'q2b', no: 'q3'
-        },
-        q2b: {
-          uk: { q: 'Знищили B: A зникає разом із ним і належить лише цьому B?', hint: 'Видалили замовлення: рядки зникли. Гніздо ж переживе дерево.' },
-          en: { q: 'Destroy B: does A vanish with it and belong to this B only?', hint: 'Delete the order: its lines vanish. A nest, though, outlives the tree.' },
-          yes: 'r:composition', no: 'r:aggregation'
-        },
-        q3: {
-          uk: { q: 'A довго зберігає посилання на B (поле, атрибут, FK)?', hint: 'Замовлення зберігає клієнта. Дерево «знає» свої гриби через ґрунт.' },
-          en: { q: 'Does A keep a lasting reference to B (field, attribute, FK)?', hint: 'An order stores its customer. The tree “knows” its mushrooms through the soil.' },
-          yes: 'r:association', no: 'q4'
-        },
-        q4: {
-          uk: { q: 'A потребує B лише на час дії: параметр, локальна змінна, виклик?', hint: 'Сервіс звітів викликає PDF-експортер і забуває про нього. Дерево користується сонцем для фотосинтезу.' },
-          en: { q: 'Does A need B only during an action: a parameter, a local variable, a call?', hint: 'The report service calls the PDF exporter and forgets it. The tree uses the sun for photosynthesis.' },
-          yes: 'r:dependency', no: 'r:none'
-        }
-      };
+      /* ===================== Section bar: scrollspy, sticky, collapsed on phones ===================== */
 
-      var WIZ_RESULT = {
-        inheritance: { uk: 'Суцільна лінія від A до B, порожній трикутник біля B (предка).', en: 'Solid line from A to B, hollow triangle at B (the parent).' },
-        realization: { uk: 'Пунктир від A до B, порожній трикутник біля інтерфейсу B.', en: 'Dashed line from A to B, hollow triangle at interface B.' },
-        composition: { uk: 'Зафарбований ромб біля цілого B. Кратність біля B дорівнює 1.', en: 'Filled diamond at whole B. Multiplicity at B is 1.' },
-        aggregation: { uk: 'Порожній ромб біля цілого B. У сумніві малюйте звичайну асоціацію.', en: 'Hollow diamond at whole B. When in doubt draw a plain association.' },
-        association: { uk: 'Суцільна лінія. Додайте кратність на обох кінцях і, за потреби, стрілку навігації.', en: 'Solid line. Add multiplicity on both ends and, if needed, a navigability arrow.' },
-        dependency: { uk: 'Пунктирна стрілка від A до B. Зміна B може зламати A.', en: 'Dashed arrow from A to B. A change in B may break A.' },
-        none: { uk: 'На діаграмі класів такий звʼязок не малюють. Можливо, A і B повʼязані через третій клас.', en: 'No line on the class diagram. A and B may be linked through a third class.' }
-      };
+      var sectionNav = document.getElementById('section-nav');
+      var navLinks = sectionNav ? Array.prototype.slice.call(sectionNav.querySelectorAll('a[data-section]')) : [];
+      var navSections = navLinks.map(function (a) { return document.getElementById(a.getAttribute('data-section')); });
+      var navActive = null;
+      var navTicking = false;
 
-      var wizardEl = document.getElementById('wizard');
-      var wizState = { node: 'q1', trail: [] };
-
-      function renderWizard() {
-        if (!wizardEl) return;
-        var L = currentLang();
-        var html = '';
-        if (wizState.node.indexOf('r:') === 0) {
-          var key = wizState.node.slice(2);
-          var name = REL_NAME[key][L];
-          html += '<div class="wz-result"><h3>' + name + '</h3><p>' + WIZ_RESULT[key][L] + '</p>';
-          if (REL_NAME[key].puml) html += '<p><code>' + REL_NAME[key].puml.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</code></p>';
-          html += '</div>';
-          if (wizState.trail.length) {
-            html += '<p class="wz-trail">' + (L === 'en' ? 'Path: ' : 'Шлях: ') + wizState.trail.map(function (t) {
-              return WIZ[t.node][L].q + ' → ' + (t.answer === 'yes' ? (L === 'en' ? 'yes' : 'так') : (L === 'en' ? 'no' : 'ні'));
-            }).join(' · ') + '</p>';
-          }
-          html += '<div class="wz-actions"><button type="button" class="btn btn-primary" data-wz="restart">' + (L === 'en' ? 'Start over' : 'Спочатку') + '</button></div>';
-        } else {
-          var node = WIZ[wizState.node];
-          html += '<div class="wz-step">' + (L === 'en' ? 'Question ' : 'Питання ') + (wizState.trail.length + 1) + '</div>';
-          html += '<p class="wz-q">' + node[L].q + '</p>';
-          html += '<p class="wz-hint">' + node[L].hint + '</p>';
-          html += '<div class="wz-actions">' +
-            '<button type="button" class="btn btn-primary" data-wz="yes">' + (L === 'en' ? 'Yes' : 'Так') + '</button>' +
-            '<button type="button" class="btn" data-wz="no">' + (L === 'en' ? 'No' : 'Ні') + '</button>' +
-            (wizState.trail.length ? '<button type="button" class="btn" data-wz="back">' + (L === 'en' ? 'Back' : 'Назад') + '</button>' : '') +
-            '</div>';
-        }
-        wizardEl.innerHTML = html;
-      }
-
-      if (wizardEl) {
-        wizardEl.addEventListener('click', function (e) {
-          var b = e.target.closest('[data-wz]');
-          if (!b) return;
-          var a = b.getAttribute('data-wz');
-          if (a === 'restart') { wizState = { node: 'q1', trail: [] }; }
-          else if (a === 'back') { var last = wizState.trail.pop(); if (last) wizState.node = last.node; }
-          else { wizState.trail.push({ node: wizState.node, answer: a }); wizState.node = WIZ[wizState.node][a]; }
-          renderWizard();
-          var first = wizardEl.querySelector('button');
-          if (first) first.focus();
+      function navSetActive(id) {
+        if (id === navActive) return;
+        navActive = id;
+        navLinks.forEach(function (a) {
+          var on = a.getAttribute('data-section') === id;
+          a.classList.toggle('is-active', on);
+          if (on) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
         });
       }
 
-      var QUIZ = [
-        { a: 'composition',
-          uk: { q: 'Видалили замовлення, і всі його рядки зникли з бази. Рядок ніколи не належить двом замовленням.', x: 'Частина не живе без цілого і належить лише йому: композиція. У БД це FK NOT NULL з ON DELETE CASCADE.' },
-          en: { q: 'An order was deleted and all its lines vanished from the database. A line never belongs to two orders.', x: 'The part cannot live without the whole and belongs to it alone: composition. In a DB: FK NOT NULL with ON DELETE CASCADE.' } },
-        { a: 'aggregation',
-          uk: { q: 'Гравець входить до команди, але після розформування команди лишається гравцем і може перейти в іншу.', x: 'Частина переживає ціле і може бути в іншому цілому: агрегація. Багато команд тут малюють просто асоціацію, і це теж правильно.' },
-          en: { q: 'A player belongs to a team, but after the team is disbanded he is still a player and can join another.', x: 'The part outlives the whole and can sit in another whole: aggregation. Many teams draw a plain association here, which is also fine.' } },
+      function navUpdate() {
+        navTicking = false;
+        if (!sectionNav) return;
+        var stuck = sectionNav.getBoundingClientRect().top <= 0 && window.scrollY > 10;
+        sectionNav.classList.toggle('is-stuck', stuck);
+        if (!stuck) sectionNav.classList.remove('is-open');
+        var navH = sectionNav.offsetHeight;
+        var line = navH + 40;
+        var cur = 'top';
+        navSections.forEach(function (sec, i) {
+          if (!sec) return;
+          if (mqMobile() && sec.id === 'cheatsheet') return;
+          var r = sec.getBoundingClientRect();
+          if (r.top <= line) cur = navLinks[i].getAttribute('data-section');
+        });
+        navSetActive(cur);
+      }
+
+      function navSchedule() {
+        if (navTicking) return;
+        navTicking = true;
+        window.requestAnimationFrame(navUpdate);
+      }
+
+      if (sectionNav) {
+        sectionNav.addEventListener('click', function (e) {
+          var a = e.target.closest('a[data-section]');
+          if (!a) return;
+          if (mqMobile() && sectionNav.classList.contains('is-stuck')) {
+            if (!sectionNav.classList.contains('is-open')) {
+              e.preventDefault();
+              sectionNav.classList.add('is-open');
+              return;
+            }
+            sectionNav.classList.remove('is-open');
+          }
+          if (a.getAttribute('data-section') === 'top') {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+        document.addEventListener('click', function (e) {
+          if (sectionNav.classList.contains('is-open') && !sectionNav.contains(e.target)) sectionNav.classList.remove('is-open');
+        });
+        window.addEventListener('scroll', navSchedule, { passive: true });
+        window.addEventListener('resize', navSchedule);
+        navUpdate();
+      }
+
+      function navLocalize() {
+        if (!sectionNav) return;
+        sectionNav.setAttribute('aria-label', currentLang() === 'en' ? 'Page sections' : 'Розділи сторінки');
+      }
+
+      /* ===================== Self-check: pool of 18, a fresh round each time ===================== */
+
+      var QUIZ_POOL = [
         { a: 'inheritance',
           uk: { q: 'Депозитний рахунок має все, що має будь-який рахунок, плюс відсоткову ставку.', x: '«Є різновидом» плюс спільні властивості від предка: успадкування. Трикутник біля «Рахунку».' },
           en: { q: 'A deposit account has everything any account has, plus an interest rate.', x: '“Is a kind of” plus shared properties from the parent: inheritance. Triangle at Account.' } },
+        { a: 'inheritance',
+          uk: { q: '«Картковий платіж» і «Платіж СЕП» обидва є платежами: мають суму, валюту і статус, відрізняються лише способом проведення.', x: 'Обидва є різновидами «Платежу» і беруть спільне від нього: успадкування. Два нащадки одного предка.' },
+          en: { q: 'CardPayment and WirePayment are both payments: they have an amount, a currency and a status, and differ only in how they are executed.', x: 'Both are kinds of Payment and take what is shared from it: inheritance. Two children of one parent.' } },
+        { a: 'inheritance',
+          uk: { q: '«Менеджер» має всі поля «Працівника» і додає список підлеглих. Обʼєкт «Менеджер» можна передати всюди, де очікують «Працівника».', x: 'Підстановка замість предка і розширення його полів: успадкування. Трикутник біля «Працівника».' },
+          en: { q: 'Manager has all the fields of Employee and adds a list of reports. A Manager object can be passed wherever an Employee is expected.', x: 'Substitutable for the parent and extends its fields: inheritance. Triangle at Employee.' } },
         { a: 'realization',
           uk: { q: 'Клас «Платіж» зобовʼязується мати метод «скасувати», як того вимагає контракт «Можна скасувати». Сам контракт коду не містить.', x: 'Контракт без реалізації, який клас виконує: реалізація. Пунктир із порожнім трикутником біля інтерфейсу.' },
           en: { q: 'Class Payment commits to having a cancel() method as required by the Cancellable contract. The contract itself holds no code.', x: 'A contract without implementation that the class fulfils: realization. Dashed line with a hollow triangle at the interface.' } },
+        { a: 'realization',
+          uk: { q: '«Канал сповіщень» описаний лише як набір операцій: надіслати(), статус(). Email-канал і SMS-канал кожен по-своєму їх виконують.', x: 'Два класи виконують один контракт без спільного коду: реалізація інтерфейсу. Клієнт працює з «Каналом», не знаючи, який саме.' },
+          en: { q: 'NotificationChannel is described only as a set of operations: send(), status(). EmailChannel and SmsChannel each carry them out their own way.', x: 'Two classes fulfil one contract with no shared code: realization of an interface. A client works with Channel without knowing which one.' } },
+        { a: 'realization',
+          uk: { q: 'Модуль експорту приймає будь-що, що «вміє перетворитись у CSV». Звіт, виписка і список клієнтів кожен реалізують це перетворення самостійно.', x: 'Контракт «вміє перетворитись у CSV» без реалізації, класи його виконують: реалізація. Нащадок звіту теж буде «вміти CSV».' },
+          en: { q: 'The export module accepts anything that “can turn itself into CSV”. Report, Statement and CustomerList each implement that conversion themselves.', x: 'A contract “can turn into CSV” with no implementation, classes fulfil it: realization. A subclass of Report will “do CSV” as well.' } },
+        { a: 'composition',
+          uk: { q: 'Видалили замовлення, і всі його рядки зникли з бази. Рядок ніколи не належить двом замовленням.', x: 'Частина не живе без цілого і належить лише йому: композиція. У БД це FK NOT NULL з ON DELETE CASCADE.' },
+          en: { q: 'An order was deleted and all its lines vanished from the database. A line never belongs to two orders.', x: 'The part cannot live without the whole and belongs to it alone: composition. In a DB: FK NOT NULL with ON DELETE CASCADE.' } },
+        { a: 'composition',
+          uk: { q: 'Закрили банківський рахунок: усі операції по ньому архівуються разом із ним і без рахунку не мають сенсу.', x: 'Операція існує лише в межах свого рахунку: композиція. Кратність біля рахунку дорівнює 1.' },
+          en: { q: 'A bank account was closed: all its entries are archived with it and make no sense without the account.', x: 'An entry exists only within its account: composition. Multiplicity at the account is 1.' } },
+        { a: 'composition',
+          uk: { q: 'Поля заявки існують лише всередині цієї заявки: видалили чернетку, і її поля зникли. Жодне поле не належить двом заявкам.', x: 'Спільне життя і єдиний власник: композиція. Зафарбований ромб біля «Заявки».' },
+          en: { q: 'The fields of an application exist only inside that application: delete the draft and its fields are gone. No field belongs to two applications.', x: 'Shared lifetime and a single owner: composition. Filled diamond at Application.' } },
+        { a: 'aggregation',
+          uk: { q: 'Гравець входить до команди, але після розформування команди лишається гравцем і може перейти в іншу.', x: 'Частина переживає ціле і може бути в іншому цілому: агрегація. Багато команд тут малюють просто асоціацію, і це теж правильно.' },
+          en: { q: 'A player belongs to a team, but after the team is disbanded they are still a player and can join another.', x: 'The part outlives the whole and can sit in another whole: aggregation. Many teams draw a plain association here, which is also fine.' } },
+        { a: 'aggregation',
+          uk: { q: 'Трек входить до плейлиста, але після видалення плейлиста лишається в бібліотеці і може бути в інших плейлистах.', x: 'Ціле зібране з частин, що живуть самі і можуть належати кільком цілим: агрегація. Порожній ромб біля «Плейлиста».' },
+          en: { q: 'A track is in a playlist, but after the playlist is deleted it stays in the library and may be in other playlists.', x: 'A whole assembled from parts that live on their own and may belong to several wholes: aggregation. Hollow diamond at Playlist.' } },
+        { a: 'aggregation',
+          uk: { q: 'Працівник входить до відділу. Відділ розформували: працівника перевели в інший, запис про нього не зник.', x: 'Частина переживає ціле: агрегація. У БД: FK department_id NULL + ON DELETE SET NULL.' },
+          en: { q: 'An employee belongs to a department. The department was dissolved: the employee was moved to another, their record did not vanish.', x: 'The part outlives the whole: aggregation. In a DB: FK department_id NULL + ON DELETE SET NULL.' } },
         { a: 'association',
           uk: { q: 'Клієнт зберігає список своїх замовлень, а замовлення зберігає посилання на клієнта. Жодне не є частиною іншого.', x: 'Довготривалі посилання без відношення частина-ціле: асоціація з кратністю 1 — *.' },
           en: { q: 'A customer keeps a list of their orders, and an order keeps a reference to the customer. Neither is part of the other.', x: 'Lasting references without part-whole: association with multiplicity 1 — *.' } },
-        { a: 'dependency',
-          uk: { q: 'Сервіс звітів в одному методі створює PDF-експортер, викликає його і не зберігає посилання.', x: 'Тимчасове використання без поля: залежність. Пунктирна стрілка від сервісу до експортера.' },
-          en: { q: 'In one method the report service creates a PDF exporter, calls it and keeps no reference.', x: 'Temporary use without a field: dependency. Dashed arrow from the service to the exporter.' } },
         { a: 'association',
           uk: { q: 'Викладач читає кілька курсів, і кожен курс можуть читати кілька викладачів.', x: 'Багато до багатьох без володіння: асоціація * — *. У БД це проміжна таблиця.' },
           en: { q: 'A teacher teaches several courses, and each course can be taught by several teachers.', x: 'Many-to-many without ownership: association * — *. In a DB: a join table.' } },
-        { a: 'composition',
-          uk: { q: 'Закрили банківський рахунок: усі операції по ньому архівуються разом із ним і без рахунку не мають сенсу.', x: 'Операція існує лише в межах свого рахунку: композиція. Кратність біля рахунку дорівнює 1.' },
-          en: { q: 'A bank account was closed: all its entries are archived with it and make no sense without the account.', x: 'An entry exists only within its account: composition. Multiplicity at the account is 1.' } }
+        { a: 'association',
+          uk: { q: 'Користувач має не більше одного профілю, профіль належить рівно одному користувачу. Профіль можна видалити, користувач лишиться.', x: 'Посилання в обидва боки без частина-ціле: асоціація 1 — 0..1. У БД: FK з UNIQUE на боці профілю.' },
+          en: { q: 'A user has at most one profile, a profile belongs to exactly one user. The profile can be deleted and the user remains.', x: 'References both ways without part-whole: association 1 — 0..1. In a DB: FK with UNIQUE on the profile side.' } },
+        { a: 'dependency',
+          uk: { q: 'Сервіс звітів в одному методі створює PDF-експортер, викликає його і не зберігає посилання.', x: 'Тимчасове використання без поля: залежність. Пунктирна стрілка від сервісу до експортера.' },
+          en: { q: 'In one method the report service creates a PDF exporter, calls it and keeps no reference.', x: 'Temporary use without a field: dependency. Dashed arrow from the service to the exporter.' } },
+        { a: 'dependency',
+          uk: { q: 'Контролер платежів отримує рахунок параметром методу, викликає списати() і не зберігає рахунок у полі.', x: 'Параметр методу, а не поле: залежність. Стрілка від контролера до рахунку, бо залежить контролер.' },
+          en: { q: 'The payment controller receives an account as a method parameter, calls debit() and keeps no account in a field.', x: 'A method parameter, not a field: dependency. Arrow from the controller to the account, since the controller is the dependent one.' } },
+        { a: 'dependency',
+          uk: { q: 'Перевірка адреси під час валідації звертається до довідника міст через виклик, але поля з довідником не має.', x: 'Використання на час однієї дії без збереження: залежність. Зміна довідника може зламати перевірку.' },
+          en: { q: 'Address validation calls the city directory while checking, but holds no field with the directory.', x: 'Use during one action with nothing stored: dependency. A change in the directory may break the validation.' } }
       ];
       var QUIZ_ORDER = ['inheritance', 'realization', 'composition', 'aggregation', 'association', 'dependency'];
+      var QUIZ_ROUND_SIZE = 8;
+      var QUIZ_BEST_KEY = 'uml-tree-quiz-best';
       var quizEl = document.getElementById('quiz');
       var quizScoreEl = document.getElementById('quiz-score');
+      var quizProgressEl = document.getElementById('quiz-progress');
+      var quizSummaryEl = document.getElementById('quiz-summary');
+      var quizRound = [];
       var quizAnswers = {};
+
+      function shuffle(arr) {
+        var a = arr.slice();
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = a[i]; a[i] = a[j]; a[j] = t;
+        }
+        return a;
+      }
+
+      /* one question per relationship, then two more from the rest; order and answer chips shuffled */
+      function buildQuizRound() {
+        var byType = {};
+        QUIZ_POOL.forEach(function (q, i) { (byType[q.a] = byType[q.a] || []).push(i); });
+        var picked = [];
+        QUIZ_ORDER.forEach(function (k) {
+          var ids = shuffle(byType[k] || []);
+          if (ids.length) picked.push(ids[0]);
+        });
+        var rest = shuffle(QUIZ_POOL.map(function (q, i) { return i; }).filter(function (i) { return picked.indexOf(i) === -1; }));
+        while (picked.length < QUIZ_ROUND_SIZE && rest.length) picked.push(rest.shift());
+        quizRound = shuffle(picked).map(function (i) { return { idx: i, opts: shuffle(QUIZ_ORDER) }; });
+        quizAnswers = {};
+      }
+
+      function quizBest() {
+        var v = null;
+        try { v = localStorage.getItem(QUIZ_BEST_KEY); } catch (e) {}
+        var n = parseInt(v, 10);
+        return isNaN(n) ? null : n;
+      }
+
+      function relLinkLabel(k, L) {
+        return REL_NAME[k][L];
+      }
 
       function renderQuiz() {
         if (!quizEl) return;
+        if (!quizRound.length) buildQuizRound();
         var L = currentLang();
         var html = '';
-        QUIZ.forEach(function (item, i) {
+        quizRound.forEach(function (r, i) {
+          var item = QUIZ_POOL[r.idx];
           var given = quizAnswers[i];
           html += '<div class="quiz-card' + (given ? ' answered' : '') + '" data-qi="' + i + '">';
-          html += '<div class="q-num">' + (L === 'en' ? 'Situation ' : 'Ситуація ') + (i + 1) + ' / ' + QUIZ.length + '</div>';
+          html += '<div class="q-num">' + (L === 'en' ? 'Situation ' : 'Ситуація ') + (i + 1) + ' / ' + quizRound.length + '</div>';
           html += '<p class="q-text">' + item[L].q + '</p><div class="q-opts">';
-          QUIZ_ORDER.forEach(function (k) {
+          r.opts.forEach(function (k) {
             var cls = 'q-opt';
             if (given) {
               if (k === item.a) cls += ' is-correct';
@@ -3156,15 +3466,61 @@ CREATE TABLE tree_mushroom (
           html += '</div><p class="q-expl">' + (given ? ((given === item.a) ? (L === 'en' ? '✔ Correct. ' : '✔ Правильно. ') : (L === 'en' ? '✘ Not quite. ' : '✘ Не зовсім. ')) : '') + item[L].x + '</p></div>';
         });
         quizEl.innerHTML = html;
+
         var answered = Object.keys(quizAnswers).length;
         var correct = 0;
-        Object.keys(quizAnswers).forEach(function (i) { if (quizAnswers[i] === QUIZ[i].a) correct++; });
+        var wrongTypes = {};
+        Object.keys(quizAnswers).forEach(function (i) {
+          var item = QUIZ_POOL[quizRound[i].idx];
+          if (quizAnswers[i] === item.a) correct++; else wrongTypes[item.a] = true;
+        });
+        var best = quizBest();
+        if (quizProgressEl) {
+          quizProgressEl.textContent = (L === 'en' ? 'Answered ' : 'Відповідей ') + answered + ' / ' + quizRound.length +
+            (best !== null ? (L === 'en' ? ' · best round: ' : ' · найкращий раунд: ') + best + ' / ' + QUIZ_ROUND_SIZE : '');
+        }
         if (quizScoreEl) {
           quizScoreEl.innerHTML = answered
-            ? ('<span>' + (L === 'en' ? 'Score: ' : 'Результат: ') + correct + ' / ' + answered + (answered < QUIZ.length ? (L === 'en' ? ' answered' : ' відповідей') : '') + '</span>' +
-               '<button type="button" class="btn" id="quiz-reset">' + (L === 'en' ? 'Reset' : 'Скинути') + '</button>')
+            ? ('<span>' + (L === 'en' ? 'Score: ' : 'Результат: ') + correct + ' / ' + answered + (answered < quizRound.length ? (L === 'en' ? ' answered' : ' відповідей') : '') + '</span>' +
+               '<button type="button" class="btn" id="quiz-reset">' + (L === 'en' ? 'New round' : 'Новий раунд') + '</button>')
             : '';
         }
+        if (quizSummaryEl) {
+          if (answered === quizRound.length) {
+            if (best === null || correct > best) {
+              try { localStorage.setItem(QUIZ_BEST_KEY, String(correct)); } catch (e) {}
+            }
+            var weak = Object.keys(wrongTypes);
+            var sh = '<div class="quiz-summary"><h3>' + (L === 'en' ? 'Round finished: ' : 'Раунд завершено: ') + correct + ' / ' + quizRound.length + '</h3>';
+            if (weak.length) {
+              sh += '<p>' + (L === 'en' ? 'Worth revisiting (opens the reference card):' : 'Варто повторити (відкриває картку довідника):') + '</p><div class="weak">';
+              weak.forEach(function (k) { sh += '<button type="button" class="btn" data-qlink="' + k + '">' + relLinkLabel(k, L) + '</button>'; });
+              sh += '</div>';
+            } else {
+              sh += '<p>' + (L === 'en' ? 'All six relationships recognized. Try another round: the questions will differ.' : 'Усі шість звʼязків розпізнано. Спробуйте ще раунд: питання будуть інші.') + '</p>';
+            }
+            sh += '<div class="actions"><button type="button" class="btn btn-primary" data-qreset="1">' + (L === 'en' ? 'New round' : 'Новий раунд') + '</button></div></div>';
+            quizSummaryEl.innerHTML = sh;
+          } else {
+            quizSummaryEl.innerHTML = '';
+          }
+        }
+      }
+
+      function quizReset() {
+        buildQuizRound();
+        renderQuiz();
+        var sec = document.getElementById('selfcheck');
+        if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function openReference(k) {
+        if (mqMobile()) { openOverlay(k); return; }
+        var card = document.querySelector('.rel-card[data-rel="' + k + '"]');
+        if (!card) return;
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('is-flash');
+        setTimeout(function () { card.classList.remove('is-flash'); }, 1800);
       }
 
       if (quizEl) {
@@ -3175,25 +3531,26 @@ CREATE TABLE tree_mushroom (
           var i = card.getAttribute('data-qi');
           quizAnswers[i] = b.getAttribute('data-qa');
           renderQuiz();
-          var next = quizEl.querySelector('[data-qi="' + (parseInt(i, 10) + 1) + '"] .q-opt');
           var expl = quizEl.querySelector('[data-qi="' + i + '"] .q-expl');
-          if (expl) expl.setAttribute('tabindex', '-1');
-          if (expl) expl.focus({ preventScroll: true });
-          void next;
+          if (expl) { expl.setAttribute('tabindex', '-1'); expl.focus({ preventScroll: true }); }
         });
       }
       if (quizScoreEl) {
         quizScoreEl.addEventListener('click', function (e) {
-          if (!e.target.closest('#quiz-reset')) return;
-          quizAnswers = {};
-          renderQuiz();
-          quizEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (e.target.closest('#quiz-reset')) quizReset();
+        });
+      }
+      if (quizSummaryEl) {
+        quizSummaryEl.addEventListener('click', function (e) {
+          var l = e.target.closest('[data-qlink]');
+          if (l) { openReference(l.getAttribute('data-qlink')); return; }
+          if (e.target.closest('[data-qreset]')) quizReset();
         });
       }
 
       function renderDynamicSections() {
-        renderWizard();
         renderQuiz();
+        navLocalize();
       }
 
       document.querySelectorAll('[data-copy]').forEach(function (btn) {
