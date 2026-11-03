@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="uk" data-theme="dark" data-lang="uk">
+<html lang="uk" data-theme="dark" data-lang="uk" data-domain="forest">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>UML типи звʼязків — екосистема дерева | tools</title>
-  <meta name="description" content="Інтерактивна схема типів звʼязків UML на прикладі лісу: успадкування, композиція, агрегація, асоціація, залежність.">
+  <meta name="description" content="Інтерактивна схема типів звʼязків UML на прикладі лісу: успадкування, реалізація, композиція, агрегація, асоціація, залежність. Довідник, кратність, PlantUML, відображення в БД і самоперевірка.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root[data-theme="light"] {
       --bg-page: #f4f3ef;
@@ -73,6 +74,8 @@
 
     html[data-lang="uk"] [data-en] { display: none !important; }
     html[data-lang="en"] [data-ua] { display: none !important; }
+    html[data-domain="forest"] [data-dom="bank"] { display: none !important; }
+    html[data-domain="bank"] [data-dom="forest"] { display: none !important; }
 
     body {
       margin: 0;
@@ -92,7 +95,7 @@
       body {
         --header-est: 108px;
         --framed-w: calc(88vw - 32px);
-        --framed-h: calc((100dvh - var(--header-est) - 36px) * 0.88);
+        --framed-h: calc((100dvh - var(--header-est) - 84px) * 0.88);
         --d-scale: min(
           2.35,
           var(--framed-w) / 1000,
@@ -436,10 +439,36 @@
 
     .entity img {
       width: 100%;
-      height: 45px;
+      height: 36px;
       object-fit: cover;
       border-radius: 6px;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
+    }
+    .entity .icon-box {
+      width: 100%;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      background: color-mix(in srgb, var(--diagram-surface) 80%, var(--line-color));
+      color: var(--tree-dark);
+    }
+    .entity .icon-box .material-symbols-rounded { font-size: 28px; }
+    .entity .ops {
+      display: block;
+      width: 100%;
+      margin-top: 3px;
+      padding-top: 3px;
+      border-top: 1px solid var(--border-subtle);
+      font-family: 'Ubuntu Mono', ui-monospace, monospace;
+      font-size: 0.58rem;
+      line-height: 1.25;
+      color: var(--text-soft);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: left;
     }
 
     .entity b {
@@ -507,8 +536,21 @@
       height: 0;
       border-left: 18px solid transparent;
       border-right: 18px solid transparent;
-      border-bottom: 30px solid var(--line-color);
+      border-top: 30px solid var(--line-color);
     }
+    /* UML generalization is a HOLLOW triangle: inner fill in diagram surface color */
+    .sym-arrow::after {
+      content: '';
+      position: absolute;
+      left: -11px;
+      top: -28px;
+      width: 0;
+      height: 0;
+      border-left: 11px solid transparent;
+      border-right: 11px solid transparent;
+      border-top: 19px solid var(--diagram-surface);
+    }
+    .sym-arrow { position: relative; }
 
     .sym-diamond-f { width: 28px; height: 28px; background: var(--line-color); transform: rotate(45deg); }
     .sym-diamond-e {
@@ -532,11 +574,57 @@
       border: 2px solid var(--border-subtle);
     }
 
-    .t-inheritance { top: 167px; left: 482px; }
+    .t-inheritance { top: 245px; left: 482px; }
+    .t-inheritance2 { top: 154px; left: 730px; width: 36px; height: 36px; }
+    .t-inheritance2 svg { width: 36px; height: 36px; overflow: visible; }
+    .t-realization { top: 155px; left: 255px; width: 36px; height: 36px; }
+    .t-realization svg { width: 36px; height: 36px; overflow: visible; }
     .t-composition { top: 311px; left: 396px; }
     .t-aggregation { top: 311px; left: 576px; }
-    .t-association { top: 407px; left: 370px; }
-    .t-dependency { top: 407px; left: 570px; }
+    .t-association { top: 425px; left: 370px; }
+    .t-dependency { top: 425px; left: 570px; }
+
+    /* Lines layer: one SVG in diagram coordinates (1000x700) */
+    .lines-layer {
+      position: absolute;
+      inset: 0;
+      width: 1000px;
+      height: 700px;
+      z-index: 5;
+      pointer-events: none;
+      overflow: visible;
+      color: var(--line-color);
+    }
+    .lines-layer line, .lines-layer path { stroke: currentColor; }
+    .lines-layer .mult {
+      font-family: 'Ubuntu', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      fill: var(--line-color);
+    }
+    .lines-layer .role {
+      font-family: 'Ubuntu', sans-serif;
+      font-size: 11px;
+      fill: var(--text-soft);
+    }
+
+    /* Interface box: UML stereotype, dashed border, no photo */
+    .p-interface { top: 65px; left: 120px; border-style: dashed; justify-content: center; min-height: 100px; }
+    .p-parent { top: 65px; left: 760px; border-color: var(--tree-dark); }
+    .p-interface .iface-tag {
+      display: block;
+      font-size: 0.68rem;
+      color: var(--text-soft);
+      letter-spacing: 0.02em;
+      margin-bottom: 2px;
+    }
+    .p-interface .iface-icon {
+      width: 34px;
+      height: 34px;
+      margin-bottom: 6px;
+      color: var(--tree-dark);
+    }
+    .p-interface b { white-space: normal; line-height: 1.15; }
 
     .desktop-hint {
       position: absolute;
@@ -762,6 +850,9 @@
         object-fit: cover;
         border-radius: 8px;
       }
+      .entity.entity--pin-expanded .icon-box { height: 96px; margin-bottom: 10px; }
+      .entity.entity--pin-expanded .icon-box .material-symbols-rounded { font-size: 64px; }
+      .entity.entity--pin-expanded .ops { white-space: normal; font-size: 0.72rem; }
 
       .sym.sym--pin-active {
         z-index: 3200 !important;
@@ -883,7 +974,7 @@
         margin-inline: auto;
       }
 
-      .hide-on-mobile, .static-line, .sym { display: none !important; }
+      .hide-on-mobile, .static-line, .lines-layer, .sym { display: none !important; }
 
       .p-tree {
         top: 50%;
@@ -921,17 +1012,30 @@
       .mobile-trigger .sym-arrow {
         border-left: 10px solid transparent;
         border-right: 10px solid transparent;
-        border-bottom: 18px solid var(--line-color);
       }
 
       .mobile-trigger .sym-diamond-f { width: 18px; height: 18px; }
       .mobile-trigger .sym-diamond-e { width: 18px; height: 18px; border-width: 3px; }
 
-      .mt-1 { transform: translateY(-135px); }
-      .mt-2 { transform: translateX(-135px); }
-      .mt-3 { transform: translateX(135px); }
-      .mt-4 { transform: translate(-80px, 120px); }
-      .mt-5 { transform: translate(80px, 120px); }
+      /* flat-top hexagon, radius 135: matches desktop placement roughly */
+      .mt-1 { transform: translate(67px, -117px); }   /* inheritance: upper-right */
+      .mt-6 { transform: translate(-67px, -117px); }  /* realization: upper-left */
+      .mt-2 { transform: translateX(-135px); }        /* composition: left */
+      .mt-3 { transform: translateX(135px); }         /* aggregation: right */
+      .mt-4 { transform: translate(-67px, 117px); }   /* association: lower-left */
+      .mt-5 { transform: translate(67px, 117px); }    /* dependency: lower-right */
+
+      .mobile-trigger .sym-arrow {
+        border-top: 18px solid var(--line-color);
+        border-bottom: 0;
+      }
+      .mobile-trigger .sym-arrow::after {
+        left: -6px; top: -17px;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 11px solid var(--bg-elevated);
+      }
+      .mobile-trigger svg { color: var(--line-color); }
     }
 
     .overlay {
@@ -1083,6 +1187,252 @@
         z-index: 2060;
       }
     }
+
+    /* ===== Section chips under the diagram ===== */
+    .section-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 4px 0 2px;
+    }
+    .section-nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: var(--switch-h);
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-elevated);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: border-color 160ms ease, color 160ms ease;
+    }
+    .section-nav a:hover { border-color: color-mix(in srgb, var(--accent) 45%, transparent); color: var(--accent); }
+    .section-nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .section-nav .material-symbols-rounded { font-size: 18px; }
+
+    /* ===== Reference sections ===== */
+    .ref {
+      width: 100%;
+      max-width: 1040px;
+      margin-inline: auto;
+      padding: clamp(22px, 4vw, 40px) clamp(14px, 3vw, 28px) 8px;
+      box-sizing: border-box;
+      scroll-margin-top: 12px;
+    }
+    .ref + .ref { border-top: 1px solid var(--border-subtle); }
+    .ref h2 {
+      margin: 0 0 6px;
+      font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .ref .lead {
+      margin: 0 0 18px;
+      color: var(--text-soft);
+      max-width: 72ch;
+      font-size: 0.95rem;
+    }
+    .ref p { max-width: 72ch; }
+    .ref code, .ref kbd {
+      font-family: 'Ubuntu Mono', ui-monospace, Menlo, monospace;
+      font-size: 0.9em;
+      background: color-mix(in srgb, var(--bg-elevated) 70%, var(--accent) 8%);
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
+      padding: 1px 5px;
+      white-space: nowrap;
+    }
+    .ref pre {
+      margin: 0;
+      padding: 14px 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: 'Ubuntu Mono', ui-monospace, Menlo, monospace;
+      font-size: 0.86rem;
+      line-height: 1.5;
+      color: var(--text);
+    }
+    .ref pre code { background: none; border: 0; padding: 0; white-space: pre; font-size: inherit; }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: color-mix(in srgb, var(--bg-elevated) 86%, var(--accent));
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      margin: 14px 0 0;
+      max-width: 80ch;
+    }
+    .note strong { color: var(--text); }
+    .ref-footer { padding-bottom: 40px; }
+    @media (max-width: 900px) {
+      .ref-footer { padding-bottom: calc(24px + var(--mobile-dock-clearance)); }
+    }
+
+    /* cheat sheet cards */
+    .rel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 14px;
+    }
+    .rel-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 14px 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+    .rel-card .notation {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      color: var(--line-color);
+      font-family: 'Ubuntu', sans-serif;
+    }
+    .rel-card .notation rect { stroke: currentColor; fill: var(--diagram-surface); }
+    .rel-card .notation rect.iface { stroke-dasharray: 4 3; }
+    .rel-card .notation text { fill: var(--text); font-size: 11px; }
+    .rel-card .notation .mult { font-weight: 700; fill: var(--line-color); font-size: 12px; }
+    .rel-card .notation .stereo { fill: var(--text-soft); font-size: 9px; }
+    .rel-card .notation .cap { fill: var(--text-soft); font-size: 9.5px; }
+    .rel-card h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .rel-card h3 .en-name { font-size: 0.8rem; color: var(--text-soft); font-weight: 400; }
+    .rel-card .strength {
+      display: inline-block;
+      font-size: 0.7rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      padding: 1px 8px;
+      align-self: flex-start;
+    }
+    .rel-card dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 0.88rem; }
+    .rel-card dt { color: var(--text-soft); font-weight: 500; white-space: nowrap; }
+    .rel-card dd { margin: 0; min-width: 0; }
+    .rel-card .test {
+      font-size: 0.88rem;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--bg-page) 70%, var(--accent) 10%);
+    }
+    .rel-card .test b { color: var(--accent-hover); }
+    [data-theme="light"] .rel-card .test b { color: #a9711f; }
+
+    /* wizard */
+    .wizard {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 18px 18px 16px;
+      max-width: 640px;
+    }
+    .wizard .wz-step { font-size: 0.78rem; color: var(--text-soft); margin-bottom: 6px; letter-spacing: 0.03em; text-transform: uppercase; }
+    .wizard .wz-q { font-size: 1.08rem; font-weight: 500; margin: 0 0 6px; }
+    .wizard .wz-hint { font-size: 0.86rem; color: var(--text-soft); margin: 0 0 14px; }
+    .wizard .wz-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-page);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 500;
+      padding: 9px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .btn-primary { background: var(--accent); color: #1a1917; border-color: transparent; }
+    .btn-primary:hover { background: var(--accent-hover); color: #1a1917; }
+    .wizard .wz-result {
+      border-left: 4px solid var(--accent);
+      background: color-mix(in srgb, var(--bg-page) 80%, var(--accent));
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+    }
+    .wizard .wz-result h3 { margin: 0 0 4px; font-size: 1.1rem; }
+    .wizard .wz-result p { margin: 0 0 6px; font-size: 0.92rem; }
+    .wizard .wz-trail { font-size: 0.8rem; color: var(--text-soft); margin: 0 0 12px; }
+
+    /* tables */
+    .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--bg-elevated); }
+    table.ref-table { border-collapse: collapse; width: 100%; font-size: 0.9rem; min-width: 560px; }
+    .ref-table th, .ref-table td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: top; }
+    .ref-table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-soft); font-weight: 600; }
+    .ref-table tr:last-child td { border-bottom: 0; }
+    .ref-table td.mono { font-family: 'Ubuntu Mono', ui-monospace, monospace; white-space: nowrap; }
+
+    .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; align-items: start; }
+    .two-col > * { min-width: 0; }
+
+    /* code block with copy */
+    .code-block { position: relative; }
+    .code-block .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 0.78rem;
+      padding: 5px 10px;
+      border-radius: 8px;
+    }
+
+    /* quiz */
+    .quiz { display: grid; gap: 12px; max-width: 760px; }
+    .quiz-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    .quiz-card .q-num { font-size: 0.75rem; color: var(--text-soft); letter-spacing: 0.04em; text-transform: uppercase; }
+    .quiz-card .q-text { margin: 4px 0 10px; font-size: 1rem; font-weight: 500; }
+    .quiz-card .q-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+    .quiz-card .q-opt {
+      appearance: none;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-page);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.88rem;
+      padding: 7px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+    }
+    .quiz-card .q-opt:hover { border-color: var(--accent); }
+    .quiz-card .q-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .quiz-card .q-opt[disabled] { cursor: default; opacity: 0.6; }
+    .quiz-card .q-opt.is-correct { background: color-mix(in srgb, #2e7d32 22%, var(--bg-page)); border-color: #2e7d32; opacity: 1; }
+    .quiz-card .q-opt.is-wrong { background: color-mix(in srgb, #c62828 22%, var(--bg-page)); border-color: #c62828; opacity: 1; }
+    .quiz-card .q-expl { margin: 10px 0 0; font-size: 0.88rem; color: var(--text-soft); display: none; }
+    .quiz-card.answered .q-expl { display: block; }
+    .quiz-score { font-size: 0.95rem; font-weight: 500; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
   </style>
 </head>
 <body>
@@ -1090,8 +1440,8 @@
   <header class="page-header">
     <div class="header-row">
       <h1>
-        <span data-ua>Архітектурні звʼязки: екосистема дерева</span>
-        <span data-en>UML relationships: tree ecosystem</span>
+        <span data-dom="forest"><span data-ua>Архітектурні звʼязки: екосистема дерева</span><span data-en>UML relationships: tree ecosystem</span></span>
+        <span data-dom="bank"><span data-ua>Архітектурні звʼязки: банківський рахунок</span><span data-en>UML relationships: bank account</span></span>
       </h1>
       <div class="header-toolbar">
         <div class="md-help-anchor" id="md-help-anchor">
@@ -1107,9 +1457,21 @@
             <span data-ua><strong>Телефон:</strong> натисни значок навколо «Дерево». Мова тексту — перемикач UA/EN.</span>
             <span data-en><strong>Mobile:</strong> tap an icon around Tree. Card text follows the UA/EN toggle.</span>
           </p>
+          <p class="help-block">
+            <span data-ua><strong>Приклад:</strong> перемикач «Ліс / Банк» показує ті самі шість звʼязків на абстрактному лісі або на банківському рахунку.</span>
+            <span data-en><strong>Example:</strong> the Forest / Bank toggle shows the same six relationships on an abstract forest or on a bank account.</span>
+          </p>
+          <p class="help-block">
+            <span data-ua><strong>Нижче:</strong> довідник шести звʼязків, майстер «який звʼязок?», кратність, PlantUML, відображення в БД і самоперевірка.</span>
+            <span data-en><strong>Below:</strong> cheat sheet of six relationships, a “which one?” wizard, multiplicity, PlantUML, database mapping and a self-check quiz.</span>
+          </p>
         </div>
       </div>
       <div class="header-actions">
+        <button type="button" class="toggle-chip" id="toggle-domain" aria-label="Приклад: ліс. Перемкнути на банк">
+          <span class="material-symbols-rounded" id="domain-chip-icon" aria-hidden="true">forest</span>
+          <span id="domain-chip-label" class="lang-label-short"><span data-dom="forest"><span data-ua>Ліс</span><span data-en>Forest</span></span><span data-dom="bank"><span data-ua>Банк</span><span data-en>Bank</span></span></span>
+        </button>
         <button type="button" class="toggle-chip" id="toggle-lang" aria-label="Мова UA. Перемкнути на EN">
           <span class="lang-label-short" id="toggle-lang-label">UA</span>
         </button>
@@ -1127,118 +1489,299 @@
       <div class="diagram-stage">
       <div class="diagram-container" aria-label="UML tree diagram">
 
-      <button type="button" class="entity hide-on-mobile p-oak hint-dock-below" data-interact="oak" aria-label="Дуб (об'єкт)">
-        <img src="oak.jpg" alt="" data-alt-ua="Дуб, приклад об'єкту успадкування для дерева класів" data-alt-en="Oak, example object for class inheritance">
-        <b><span data-ua>Дуб</span><span data-en>Oak</span></b><i><span data-ua>Об'єкт</span><span data-en>The Object</span></i>
+      <button type="button" class="entity hide-on-mobile p-oak hint-dock-below" data-interact="oak" data-dom="forest" aria-label="Дуб (клас-нащадок)">
+        <img src="oak.webp" alt="" width="900" height="600" loading="lazy" data-alt-ua="Дуб, клас-нащадок класу Дерево" data-alt-en="Oak, a subclass of Tree">
+        <b><span data-ua>Дуб</span><span data-en>Oak</span></b><i><span data-ua>Клас-нащадок</span><span data-en>Subclass</span></i>
+        <span class="ops" aria-hidden="true"><span data-ua>+ родитиЖолуді()</span><span data-en>+ bearAcorns()</span></span>
         <div class="desktop-hint">
-          <div class="hint-def" data-ua><b>Дуб</b><br>Конкретний об'єкт у центрі схеми.</div>
-          <div class="hint-def" data-en><b>Oak</b><br>Concrete object at the center.</div>
-          <div class="hint-ex" data-ua>Живий «екземпляр дерева»: усі стрілки в прикладі відходять або приходять до нього.</div>
-          <div class="hint-ex" data-en>The living “tree instance” — in this diagram, most links involve it.</div>
+          <div class="hint-def" data-ua><b>Дуб</b><br>Клас-нащадок: різновид дерева.</div>
+          <div class="hint-def" data-en><b>Oak</b><br>Subclass: a kind of tree.</div>
+          <div class="hint-ex" data-ua>Усе, що є в «Дереві», є і в «Дубі», плюс своє: жолуді. Конкретний дуб біля школи був би вже обʼєктом (екземпляром) цього класу.</div>
+          <div class="hint-ex" data-en>Everything in Tree is in Oak, plus its own: acorns. A specific oak near the school would be an object (instance) of this class.</div>
         </div>
       </button>
 
-      <button type="button" class="entity p-tree hint-dock-below" data-interact="tree" aria-label="Дерево (абстрактний клас)">
-        <img src="tree.png" alt="" data-alt-ua="Абстрактний клас дерев в UML дереві екосистеми" data-alt-en="Abstract Tree class in the UML ecosystem diagram">
-        <b><span data-ua>Дерево</span><span data-en>Tree</span></b><i><span data-ua>Абстрактний клас</span><span data-en>Abstract Class</span></i>
+      <button type="button" class="entity hide-on-mobile p-interface hint-dock-below" data-interact="interface" data-dom="forest" aria-label="Фотосинтезуючий (інтерфейс)">
+        <svg class="iface-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c0-7 4-13 14-14-1 10-6 14-14 14z"/><path d="M4 20c3-5 7-8 11-10"/></svg>
+        <b><span class="iface-tag">«interface»</span><span data-ua>Фотосинтезуючий</span><span data-en>Photosynthetic</span></b>
+        <span class="ops" aria-hidden="true"><span data-ua>+ фотосинтезувати()</span><span data-en>+ photosynthesize()</span></span>
         <div class="desktop-hint">
-          <div class="hint-def" data-ua><b>Дерево</b><br>Узагальнення: «будь-яке дерево».</div>
-          <div class="hint-def" data-en><b>Tree</b><br>Generalization: “any tree”.</div>
-          <div class="hint-ex" data-ua>Спільні риси (коріння, гілки тощо). Дуб показує конкретний вид.</div>
-          <div class="hint-ex" data-en>Shared traits (roots, branches, etc.). Oak shows one concrete kind.</div>
+          <div class="hint-def" data-ua><b>Фотосинтезуючий</b><br>Інтерфейс: контракт «що вміє», без «як саме».</div>
+          <div class="hint-def" data-en><b>Photosynthetic</b><br>Interface: a contract of “what it can do”, not “how”.</div>
+          <div class="hint-ex" data-ua>Дерево реалізує його. Водорості теж могли б, не маючи з деревом спільного предка.</div>
+          <div class="hint-ex" data-en>Tree realizes it. Algae could too, without sharing an ancestor with trees.</div>
         </div>
       </button>
 
-      <button type="button" class="entity hide-on-mobile p-bark hint-dock-below" data-interact="bark" aria-label="Кора (композиція)">
-        <img src="bark.jpg" alt="" data-alt-ua="Кора як складова деревини" data-alt-en="Bark as part of the wood structure">
-        <b><span data-ua>Кора</span><span data-en>Bark</span></b><i><span data-ua>Компонент</span><span data-en>Component</span></i>
+      <button type="button" class="entity hide-on-mobile p-parent hint-dock-below" data-interact="plant" data-dom="forest" aria-label="Рослина (абстрактний клас)">
+        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">potted_plant</span></span>
+        <b><span data-ua>Рослина</span><span data-en>Plant</span></b><i><span data-ua>Абстрактний клас, предок</span><span data-en>Abstract class, parent</span></i>
+        <span class="ops" aria-hidden="true"><span data-ua>+ рости()</span><span data-en>+ grow()</span></span>
         <div class="desktop-hint">
-          <div class="hint-def" data-ua><b>Кора</b><br>Частина дерева (композиція).</div>
-          <div class="hint-def" data-en><b>Bark</b><br>Part of the tree (composition).</div>
-          <div class="hint-ex" data-ua>Не існує окремо від стовбура: дерево зникло — кори теж немає.</div>
-          <div class="hint-ex" data-en>Can’t exist without the trunk; if the tree is gone, so is the bark.</div>
+          <div class="hint-def" data-ua><b>Рослина</b><br>Предок «Дерева»: ланцюг успадкування можна тягнути вгору.</div>
+          <div class="hint-def" data-en><b>Plant</b><br>Parent of Tree: the inheritance chain goes further up.</div>
+          <div class="hint-ex" data-ua>Дуб є деревом, дерево є рослиною, рослина є живим організмом. Кожен рівень додає своє, а успадковує все, що вище.</div>
+          <div class="hint-ex" data-en>An oak is a tree, a tree is a plant, a plant is a living organism. Each level adds its own and inherits everything above.</div>
         </div>
       </button>
 
-      <button type="button" class="entity hide-on-mobile p-nest hint-dock-below" data-interact="nest" aria-label="Гніздо (агрегація)">
-        <img src="nest.jpg" alt="" data-alt-ua="Пташине гніздо на гілках" data-alt-en="Bird nest on branches">
-        <b><span data-ua>Гніздо</span><span data-en>Nest</span></b><i><span data-ua>Агрегат</span><span data-en>Aggregate</span></i>
+      <button type="button" class="entity p-tree hint-dock-below" data-interact="tree" data-dom="forest" aria-label="Дерево (абстрактний клас)">
+        <img src="tree.webp" alt="" width="900" height="675" data-alt-ua="Абстрактний клас Дерево в центрі схеми" data-alt-en="Abstract Tree class at the center of the diagram">
+        <b><span data-ua>Дерево</span><span data-en>Tree</span></b><i><span data-ua>Абстрактний клас</span><span data-en>Abstract class</span></i>
+        <span class="ops" aria-hidden="true"><span data-ua>+ фотосинтезувати() + скидатиЛистя()</span><span data-en>+ photosynthesize() + shedLeaves()</span></span>
         <div class="desktop-hint">
-          <div class="hint-def" data-ua><b>Гніздо</b><br>На дереві, але не «орган дерева» (агрегація).</div>
-          <div class="hint-def" data-en><b>Nest</b><br>On the tree, but not “part of” it (aggregation).</div>
-          <div class="hint-ex" data-ua>Його можна перенести на інше дерево — зв'язок слабший, ніж у кори.</div>
-          <div class="hint-ex" data-en>You can move it to another tree — a weaker link than bark.</div>
+          <div class="hint-def" data-ua><b>Дерево</b><br>Абстрактний клас: «будь-яке дерево», екземплярів не має.</div>
+          <div class="hint-def" data-en><b>Tree</b><br>Abstract class: “any tree”, never instantiated itself.</div>
+          <div class="hint-ex" data-ua>Описує спільне для всіх дерев: коріння, гілки, фотосинтез. Конкретні види (Дуб) успадковують це.</div>
+          <div class="hint-ex" data-en>Holds what all trees share: roots, branches, photosynthesis. Concrete kinds (Oak) inherit it.</div>
         </div>
       </button>
 
-      <button type="button" class="entity hide-on-mobile p-mushroom" data-interact="mushroom" aria-label="Гриб (асоціація)">
-        <img src="mushroom.jpg" alt="" data-alt-ua="Гриби біля стовбура" data-alt-en="Mushrooms near the trunk">
-        <b><span data-ua>Гриб</span><span data-en>Mushroom</span></b><i><span data-ua>Асоціат</span><span data-en>Associate</span></i>
+      <button type="button" class="entity hide-on-mobile p-bark hint-dock-below" data-interact="bark" data-dom="forest" aria-label="Кора (композиція)">
+        <img src="bark.webp" alt="" width="900" height="600" loading="lazy" data-alt-ua="Кора на стовбурі, частина дерева" data-alt-en="Bark on a trunk, part of the tree">
+        <b><span data-ua>Кора</span><span data-en>Bark</span></b><i><span data-ua>Частина (композиція)</span><span data-en>Part (composition)</span></i>
         <div class="desktop-hint">
-          <div class="hint-def" data-ua><b>Гриб</b><br>Сусід у системі (асоціація).</div>
-          <div class="hint-def" data-en><b>Mushroom</b><br>Neighbor in the system (association).</div>
-          <div class="hint-ex" data-ua>Окремий об'єкт; дерево й гриб просто пов'язані, наприклад через ґрунт.</div>
-          <div class="hint-ex" data-en>Separate objects; the tree and mushroom simply interact (e.g. via soil).</div>
+          <div class="hint-def" data-ua><b>Кора</b><br>Частина, що належить лише цьому дереву (композиція).</div>
+          <div class="hint-def" data-en><b>Bark</b><br>A part that belongs to this tree only (composition).</div>
+          <div class="hint-ex" data-ua>Зрубали і спалили дерево: його кора зникла разом із ним. Окремо вона не живе і іншому дереву не належить.</div>
+          <div class="hint-ex" data-en>Cut down and burn the tree: its bark is gone with it. It neither lives on its own nor belongs to another tree.</div>
         </div>
       </button>
 
-      <button type="button" class="entity hide-on-mobile p-sun" data-interact="sun" aria-label="Сонце (залежність)">
-        <img src="sun.jpg" alt="" data-alt-ua="Сонце над лісом" data-alt-en="Sun above the forest">
-        <b><span data-ua>Сонце</span><span data-en>Sun</span></b><i><span data-ua>Залежність</span><span data-en>Dependency</span></i>
+      <button type="button" class="entity hide-on-mobile p-nest hint-dock-below" data-interact="nest" data-dom="forest" aria-label="Гніздо (агрегація)">
+        <img src="nest.webp" alt="" width="900" height="600" loading="lazy" data-alt-ua="Пташине гніздо на гілках" data-alt-en="Bird nest on branches">
+        <b><span data-ua>Гніздо</span><span data-en>Nest</span></b><i><span data-ua>Частина (агрегація)</span><span data-en>Part (aggregation)</span></i>
         <div class="desktop-hint">
-          <div class="hint-def" data-ua><b>Сонце</b><br>Зовнішнє джерело (залежність).</div>
-          <div class="hint-def" data-en><b>Sun</b><br>Outside resource (dependency).</div>
-          <div class="hint-ex" data-ua>Дерево не «має» сонце як кору, але користується ним для процесів — наприклад фотосинтезу.</div>
-          <div class="hint-ex" data-en>The tree doesn’t “own” the sun like bark, but uses it for processes such as photosynthesis.</div>
+          <div class="hint-def" data-ua><b>Гніздо</b><br>Частина, що може існувати без цілого (агрегація).</div>
+          <div class="hint-def" data-en><b>Nest</b><br>A part that can exist without the whole (aggregation).</div>
+          <div class="hint-ex" data-ua>Зрубали дерево: гніздо лишилось гніздом і може опинитись на іншому дереві. Звʼязок слабший, ніж у кори.</div>
+          <div class="hint-ex" data-en>Cut the tree down: the nest is still a nest and may end up on another tree. A weaker link than bark.</div>
         </div>
       </button>
 
-      <div class="static-line l-inheritance" aria-hidden="true"></div>
-      <div class="static-line l-composition" aria-hidden="true"></div>
-      <div class="static-line l-aggregation" aria-hidden="true"></div>
-      <div class="static-line l-association" aria-hidden="true"></div>
+      <button type="button" class="entity hide-on-mobile p-mushroom" data-interact="mushroom" data-dom="forest" aria-label="Гриб (асоціація)">
+        <img src="mushroom.webp" alt="" width="900" height="600" loading="lazy" data-alt-ua="Гриби біля стовбура" data-alt-en="Mushrooms near the trunk">
+        <b><span data-ua>Гриб</span><span data-en>Mushroom</span></b><i><span data-ua>Сусід (асоціація)</span><span data-en>Neighbor (association)</span></i>
+        <div class="desktop-hint">
+          <div class="hint-def" data-ua><b>Гриб</b><br>Самостійний клас, повʼязаний з деревом (асоціація).</div>
+          <div class="hint-def" data-en><b>Mushroom</b><br>An independent class linked to the tree (association).</div>
+          <div class="hint-ex" data-ua>Мікориза: дерево і гриб «знають» одне одного і обмінюються через ґрунт. Одне дерево може мати багато грибів, і навпаки.</div>
+          <div class="hint-ex" data-en>Mycorrhiza: tree and mushroom “know” each other and exchange through the soil. One tree, many mushrooms, and vice versa.</div>
+        </div>
+      </button>
 
-      <svg class="static-line" style="position:absolute; top:360px; left:500px; z-index:5; pointer-events:none; overflow:visible; background:none;" aria-hidden="true">
-        <line x1="0" y1="0" x2="200" y2="225" stroke="currentColor" stroke-width="2" stroke-dasharray="6,4"/>
+      <button type="button" class="entity hide-on-mobile p-sun" data-interact="sun" data-dom="forest" aria-label="Сонце (залежність)">
+        <img src="sun.webp" alt="" width="900" height="567" loading="lazy" data-alt-ua="Сонце над лісом" data-alt-en="Sun above the forest">
+        <b><span data-ua>Сонце</span><span data-en>Sun</span></b><i><span data-ua>Ресурс (залежність)</span><span data-en>Resource (dependency)</span></i>
+        <span class="ops" aria-hidden="true"><span data-ua>+ світити()</span><span data-en>+ shine()</span></span>
+        <div class="desktop-hint">
+          <div class="hint-def" data-ua><b>Сонце</b><br>Те, від чого дерево залежить, але чим не володіє.</div>
+          <div class="hint-def" data-en><b>Sun</b><br>Something the tree depends on but does not own.</div>
+          <div class="hint-ex" data-ua>Дерево «використовує» світло під час фотосинтезу і не зберігає посилання на сонце. Стрілка іде від того, хто залежить, до того, від кого залежать.</div>
+          <div class="hint-ex" data-en>The tree “uses” light during photosynthesis and keeps no reference to the sun. The arrow points from the dependent to what it depends on.</div>
+        </div>
+      </button>
+
+      <!-- ===== Bank scene (same positions, same six relationships) ===== -->
+      <button type="button" class="entity hide-on-mobile p-oak hint-dock-below" data-interact="b-deposit" data-dom="bank" aria-label="Депозитний рахунок (клас-нащадок)">
+        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">savings</span></span>
+        <b><span data-ua>Депозитний рахунок</span><span data-en>Deposit account</span></b><i><span data-ua>Клас-нащадок</span><span data-en>Subclass</span></i>
+        <span class="ops" aria-hidden="true"><span data-ua>+ нарахуватиВідсотки()</span><span data-en>+ accrueInterest()</span></span>
+        <div class="desktop-hint">
+          <div class="hint-def" data-ua><b>Депозитний рахунок</b><br>Різновид рахунку.</div>
+          <div class="hint-def" data-en><b>Deposit account</b><br>A kind of account.</div>
+          <div class="hint-ex" data-ua>Має все, що має «Рахунок» (зарахувати, списати, заблокувати), плюс своє: ставку і нарахування відсотків.</div>
+          <div class="hint-ex" data-en>Has everything Account has (credit, debit, block) plus its own: a rate and interest accrual.</div>
+        </div>
+      </button>
+
+      <button type="button" class="entity hide-on-mobile p-interface hint-dock-below" data-interact="b-blockable" data-dom="bank" aria-label="Можна заблокувати (інтерфейс)">
+        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">lock</span></span>
+        <b><span class="iface-tag">«interface»</span><span data-ua>Можна заблокувати</span><span data-en>Blockable</span></b>
+        <span class="ops" aria-hidden="true"><span data-ua>+ заблокувати() + розблокувати()</span><span data-en>+ block() + unblock()</span></span>
+        <div class="desktop-hint">
+          <div class="hint-def" data-ua><b>Можна заблокувати</b><br>Інтерфейс: обіцянка поведінки без реалізації.</div>
+          <div class="hint-def" data-en><b>Blockable</b><br>Interface: a promise of behavior without implementation.</div>
+          <div class="hint-ex" data-ua>Його реалізують рахунок, картка, депозит. Фінмоніторинг працює з будь-чим «Можна заблокувати», не знаючи, що саме перед ним.</div>
+          <div class="hint-ex" data-en>Realized by account, card, deposit. Financial monitoring works with anything Blockable without knowing what exactly it is.</div>
+        </div>
+      </button>
+
+      <button type="button" class="entity hide-on-mobile p-parent hint-dock-below" data-interact="b-product" data-dom="bank" aria-label="Банківський продукт (абстрактний клас)">
+        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">category</span></span>
+        <b><span data-ua>Банківський продукт</span><span data-en>Bank product</span></b><i><span data-ua>Абстрактний клас, предок</span><span data-en>Abstract class, parent</span></i>
+        <span class="ops" aria-hidden="true"><span data-ua>+ відкрити() + закрити()</span><span data-en>+ open() + close()</span></span>
+        <div class="desktop-hint">
+          <div class="hint-def" data-ua><b>Банківський продукт</b><br>Предок «Рахунку».</div>
+          <div class="hint-def" data-en><b>Bank product</b><br>Parent of Account.</div>
+          <div class="hint-ex" data-ua>Рахунок, кредит, картка: усе це продукти з відкриттям, закриттям і тарифом. Ланцюг: Депозитний рахунок → Рахунок → Банківський продукт.</div>
+          <div class="hint-ex" data-en>Account, loan, card: all products with opening, closing and a tariff. Chain: Deposit account → Account → Bank product.</div>
+        </div>
+      </button>
+
+      <button type="button" class="entity p-tree hint-dock-below" data-interact="b-account" data-dom="bank" aria-label="Рахунок (абстрактний клас)">
+        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">account_balance</span></span>
+        <b><span data-ua>Рахунок</span><span data-en>Account</span></b><i><span data-ua>Абстрактний клас</span><span data-en>Abstract class</span></i>
+        <span class="ops" aria-hidden="true"><span data-ua>+ зарахувати() + списати()</span><span data-en>+ credit() + debit()</span></span>
+        <div class="desktop-hint">
+          <div class="hint-def" data-ua><b>Рахунок</b><br>Центр схеми: абстрактний клас, екземплярів не має.</div>
+          <div class="hint-def" data-en><b>Account</b><br>Center of the diagram: abstract class, never instantiated.</div>
+          <div class="hint-ex" data-ua>Спільне для поточного, депозитного, карткового рахунків: номер, валюта, баланс, зарахувати, списати.</div>
+          <div class="hint-ex" data-en>Shared by current, deposit and card accounts: number, currency, balance, credit, debit.</div>
+        </div>
+      </button>
+
+      <button type="button" class="entity hide-on-mobile p-bark hint-dock-below" data-interact="b-entry" data-dom="bank" aria-label="Операція по рахунку (композиція)">
+        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">receipt_long</span></span>
+        <b><span data-ua>Операція</span><span data-en>Account entry</span></b><i><span data-ua>Частина (композиція)</span><span data-en>Part (composition)</span></i>
+        <span class="ops" aria-hidden="true"><span data-ua>дата, сума, призначення</span><span data-en>date, amount, purpose</span></span>
+        <div class="desktop-hint">
+          <div class="hint-def" data-ua><b>Операція по рахунку</b><br>Частина, що живе лише всередині свого рахунку.</div>
+          <div class="hint-def" data-en><b>Account entry</b><br>A part that lives only inside its account.</div>
+          <div class="hint-ex" data-ua>Операція ніколи не належить двом рахункам. Закрили рахунок: операції архівуються разом із ним.</div>
+          <div class="hint-ex" data-en>An entry never belongs to two accounts. Close the account and its entries are archived with it.</div>
+        </div>
+      </button>
+
+      <button type="button" class="entity hide-on-mobile p-nest hint-dock-below" data-interact="b-card" data-dom="bank" aria-label="Картка (агрегація)">
+        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">credit_card</span></span>
+        <b><span data-ua>Картка</span><span data-en>Card</span></b><i><span data-ua>Частина (агрегація)</span><span data-en>Part (aggregation)</span></i>
+        <span class="ops" aria-hidden="true"><span data-ua>маска, строк дії</span><span data-en>mask, expiry</span></span>
+        <div class="desktop-hint">
+          <div class="hint-def" data-ua><b>Картка</b><br>Привʼязана до рахунку, але живе своїм життям.</div>
+          <div class="hint-def" data-en><b>Card</b><br>Linked to an account, yet has a life of its own.</div>
+          <div class="hint-ex" data-ua>Картку можна перевʼязати до іншого рахунку або перевипустити. Закриття рахунку не знищує її як сутність. Строго кажучи, це межа між агрегацією й асоціацією.</div>
+          <div class="hint-ex" data-en>A card can be re-linked to another account or reissued. Closing the account does not destroy it. Strictly, this sits on the border between aggregation and association.</div>
+        </div>
+      </button>
+
+      <button type="button" class="entity hide-on-mobile p-mushroom" data-interact="b-customer" data-dom="bank" aria-label="Клієнт (асоціація)">
+        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">person</span></span>
+        <b><span data-ua>Клієнт</span><span data-en>Customer</span></b><i><span data-ua>Сусід (асоціація)</span><span data-en>Neighbor (association)</span></i>
+        <span class="ops" aria-hidden="true"><span data-ua>ПІБ, РНОКПП</span><span data-en>name, tax id</span></span>
+        <div class="desktop-hint">
+          <div class="hint-def" data-ua><b>Клієнт</b><br>Самостійний клас, повʼязаний з рахунком.</div>
+          <div class="hint-def" data-en><b>Customer</b><br>An independent class linked to the account.</div>
+          <div class="hint-ex" data-ua>Клієнт має 1..* рахунків, рахунок належить 1 клієнту. Обидва зберігають посилання один на одного, але жоден не є частиною іншого.</div>
+          <div class="hint-ex" data-en>A customer has 1..* accounts, an account belongs to 1 customer. Both keep references, neither is part of the other.</div>
+        </div>
+      </button>
+
+      <button type="button" class="entity hide-on-mobile p-sun" data-interact="b-controller" data-dom="bank" aria-label="Контролер платежів (залежність)">
+        <span class="icon-box" aria-hidden="true"><span class="material-symbols-rounded">hub</span></span>
+        <b><span data-ua>Контролер платежів</span><span data-en>Payment controller</span></b><i><span data-ua>Залежить від рахунку</span><span data-en>Depends on account</span></i>
+        <span class="ops" aria-hidden="true"><span data-ua>+ обробити(платіж)</span><span data-en>+ handle(payment)</span></span>
+        <div class="desktop-hint">
+          <div class="hint-def" data-ua><b>Контролер платежів</b><br>Використовує рахунок на час однієї дії.</div>
+          <div class="hint-def" data-en><b>Payment controller</b><br>Uses an account for the duration of one action.</div>
+          <div class="hint-ex" data-ua>У «обробити(платіж)» дістає рахунок, викликає списати() і забуває про нього. Зберігає не рахунок, а лише залежність від його контракту.</div>
+          <div class="hint-ex" data-en>In handle(payment) it fetches the account, calls debit() and forgets it. It stores no account, only a dependency on its contract.</div>
+        </div>
+      </button>
+
+      <svg class="lines-layer" viewBox="0 0 1000 700" aria-hidden="true">
+        <defs>
+          <marker id="arrowOpen" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="userSpaceOnUse">
+            <path d="M1,1 L12,7 L1,13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+        </defs>
+        <!-- inheritance: Oak (child) -> Tree (parent); hollow triangle at Tree (drawn by .t-inheritance) -->
+        <line x1="500" y1="165" x2="500" y2="248" stroke-width="2"/>
+        <!-- inheritance chain: Tree -> Plant (parent); hollow triangle at Plant (drawn by .t-inheritance2) -->
+        <line x1="560" y1="275" x2="734" y2="180" stroke-width="2"/>
+        <!-- realization: Tree ..|> Photosynthetic; hollow triangle at interface (drawn by .t-realization) -->
+        <line x1="440" y1="275" x2="286" y2="181" stroke-width="2" stroke-dasharray="7,5"/>
+        <!-- composition: Tree (whole, filled diamond) -- Bark -->
+        <line x1="240" y1="325" x2="396" y2="325" stroke-width="2"/>
+        <g data-dom="forest"><text class="mult" x="250" y="316">1</text><text class="mult" x="384" y="316" text-anchor="end">1</text></g>
+        <g data-dom="bank"><text class="mult" x="250" y="316">*</text><text class="mult" x="384" y="316" text-anchor="end">1</text></g>
+        <!-- aggregation: Tree (whole, hollow diamond) -- Nest -->
+        <line x1="610" y1="325" x2="760" y2="325" stroke-width="2"/>
+        <g data-dom="forest"><text class="mult" x="618" y="316">0..1</text><text class="mult" x="752" y="316" text-anchor="end">0..*</text></g>
+        <g data-dom="bank"><text class="mult" x="618" y="316">0..1</text><text class="mult" x="752" y="316" text-anchor="end">0..*</text></g>
+        <!-- association: Tree -- Mushroom, many to many -->
+        <line x1="470" y1="375" x2="330" y2="535" stroke-width="2"/>
+        <g data-dom="forest"><text class="mult" x="478" y="406">*</text><text class="mult" x="318" y="528" text-anchor="end">*</text></g>
+        <g data-dom="bank"><text class="mult" x="478" y="406">1..*</text><text class="mult" x="318" y="528" text-anchor="end">1</text></g>
+        <!-- dependency, forest: Tree ..> Sun, open arrowhead at the Sun end -->
+        <line data-dom="forest" x1="530" y1="375" x2="670" y2="535" stroke-width="2" stroke-dasharray="7,5" marker-end="url(#arrowOpen)"/>
+        <!-- dependency, bank: Controller ..> Account, arrowhead at the Account end -->
+        <line data-dom="bank" x1="670" y1="535" x2="541" y2="388" stroke-width="2" stroke-dasharray="7,5" marker-end="url(#arrowOpen)"/>
       </svg>
 
-      <button type="button" class="sym t-inheritance hint-dock-below" data-interact="inheritance" aria-label="Наслідування">
+      <button type="button" class="sym t-inheritance" data-interact="inheritance" aria-label="Успадкування">
         <div class="sym-arrow" aria-hidden="true"></div>
         <div class="desktop-hint">
-          <div class="hint-def" data-ua><b>Наслідування</b><br>«Це є різновид того» (IS-A).</div>
-          <div class="hint-def" data-en><b>Inheritance</b><br>“This is a kind of that” (IS-A).</div>
-          <div class="hint-ex" data-ua><b>Приклад:</b> дубові коріння й листя доцільніше шукати в спільному описі «дерево».</div>
-          <div class="hint-ex" data-en><b>Example:</b> oak “is a” tree — shared structure lives in the parent, specifics in Oak.</div>
+          <div class="hint-def" data-ua><b>Успадкування</b><br>«Це є різновид того» (IS-A). Порожній трикутник стоїть біля предка.</div>
+          <div class="hint-def" data-en><b>Inheritance</b><br>“This is a kind of that” (IS-A). The hollow triangle sits at the parent.</div>
+          <div class="hint-ex" data-dom="forest" data-ua><b>Приклад:</b> спільне для всіх дерев (коріння, листя, фотосинтез) описано в «Дереві»; «Дуб» додає своє: жолуді.</div>
+          <div class="hint-ex" data-dom="forest" data-en><b>Example:</b> what all trees share (roots, leaves, photosynthesis) lives in Tree; Oak adds its own: acorns.</div>
+          <div class="hint-ex" data-dom="bank" data-ua><b>Приклад:</b> спільне для всіх рахунків (номер, баланс, зарахувати, списати) описано в «Рахунку»; «Депозитний рахунок» додає ставку і нарахування відсотків.</div>
+          <div class="hint-ex" data-dom="bank" data-en><b>Example:</b> what all accounts share (number, balance, credit, debit) lives in Account; Deposit account adds a rate and interest accrual.</div>
+        </div>
+      </button>
+
+      <button type="button" class="sym t-inheritance2 hint-dock-below" data-interact="inheritance" aria-label="Успадкування">
+        <svg viewBox="0 0 36 36" aria-hidden="true">
+          <polygon points="18,2 3,32 33,32" transform="rotate(61.2 18 18)" fill="var(--diagram-surface)" stroke="var(--line-color)" stroke-width="3" stroke-linejoin="round"/>
+        </svg>
+        <div class="desktop-hint">
+          <div class="hint-def" data-ua><b>Успадкування, ще рівень вище</b><br>Ланцюг можна продовжувати: нащадок отримує все від усіх предків.</div>
+          <div class="hint-def" data-en><b>Inheritance, one level up</b><br>The chain continues: a child gets everything from all its ancestors.</div>
+          <div class="hint-ex" data-dom="forest" data-ua><b>Приклад:</b> Дуб → Дерево → Рослина. Дуб уміє рости(), хоч це описано аж у «Рослині».</div>
+          <div class="hint-ex" data-dom="forest" data-en><b>Example:</b> Oak → Tree → Plant. An oak can grow(), even though that is defined up in Plant.</div>
+          <div class="hint-ex" data-dom="bank" data-ua><b>Приклад:</b> Депозитний рахунок → Рахунок → Банківський продукт. Депозит можна закрити(), бо це вміє будь-який продукт.</div>
+          <div class="hint-ex" data-dom="bank" data-en><b>Example:</b> Deposit account → Account → Bank product. A deposit can be closed(), because any product can.</div>
+        </div>
+      </button>
+
+      <button type="button" class="sym t-realization hint-dock-below" data-interact="realization" aria-label="Реалізація">
+        <svg viewBox="0 0 36 36" aria-hidden="true">
+          <polygon points="18,2 3,32 33,32" transform="rotate(-58.6 18 18)" fill="var(--diagram-surface)" stroke="var(--line-color)" stroke-width="3" stroke-linejoin="round"/>
+        </svg>
+        <div class="desktop-hint">
+          <div class="hint-def" data-ua><b>Реалізація</b><br>Пунктир із порожнім трикутником біля інтерфейсу: клас виконує контракт.</div>
+          <div class="hint-def" data-en><b>Realization</b><br>Dashed line with a hollow triangle at the interface: the class fulfils the contract.</div>
+          <div class="hint-ex" data-dom="forest" data-ua><b>Приклад:</b> «Дерево» обіцяє вміти фотосинтезувати. Як саме, кожен вид вирішує сам. Усе, що декларує інтерфейс, мають і нащадки: Дуб теж фотосинтезує.</div>
+          <div class="hint-ex" data-dom="forest" data-en><b>Example:</b> Tree promises it can photosynthesize. How exactly is up to each kind. Whatever the interface declares, subclasses have too: Oak photosynthesizes as well.</div>
+          <div class="hint-ex" data-dom="bank" data-ua><b>Приклад:</b> «Рахунок» виконує контракт «Можна заблокувати». Його нащадки (депозит) теж, і фінмоніторинг працює з ними через контракт, не знаючи реалізації. Клас може реалізувати кілька інтерфейсів.</div>
+          <div class="hint-ex" data-dom="bank" data-en><b>Example:</b> Account fulfils the Blockable contract. Its subclasses (deposit) do too, and financial monitoring works with them through the contract without knowing the implementation. A class may realize several interfaces.</div>
         </div>
       </button>
 
       <button type="button" class="sym t-composition hint-dock-below" data-interact="composition" aria-label="Композиція">
         <div class="sym-diamond-f" aria-hidden="true"></div>
         <div class="desktop-hint">
-          <div class="hint-def" data-ua><b>Композиція</b><br>Повний ромб: частина не відділяється від цілого (PART-OF).</div>
-          <div class="hint-def" data-en><b>Composition</b><br>Filled diamond: the part doesn’t exist without the whole (PART-OF).</div>
-          <div class="hint-ex" data-ua><b>Приклад:</b> кора з дерева не забирається як окреме живе дерево.</div>
-          <div class="hint-ex" data-en><b>Example:</b> bark isn’t a standalone tree without the trunk.</div>
+          <div class="hint-def" data-ua><b>Композиція</b><br>Зафарбований ромб біля цілого: частина належить лише одному цілому і живе стільки ж, скільки воно.</div>
+          <div class="hint-def" data-en><b>Composition</b><br>Filled diamond at the whole: the part belongs to exactly one whole and shares its lifetime.</div>
+          <div class="hint-ex" data-dom="forest" data-ua><b>Приклад:</b> знищили дерево: його кора припинила існування разом із ним. Кратність біля цілого завжди 1.</div>
+          <div class="hint-ex" data-dom="forest" data-en><b>Example:</b> destroy the tree and its bark ceases to exist with it. Multiplicity at the whole is always 1.</div>
+          <div class="hint-ex" data-dom="bank" data-ua><b>Приклад:</b> закрили рахунок: операції по ньому архівуються разом із ним. Операція ніколи не належить двом рахункам. У БД: FK NOT NULL + ON DELETE CASCADE.</div>
+          <div class="hint-ex" data-dom="bank" data-en><b>Example:</b> close the account and its entries are archived with it. An entry never belongs to two accounts. In a DB: FK NOT NULL + ON DELETE CASCADE.</div>
         </div>
       </button>
 
       <button type="button" class="sym t-aggregation hint-dock-below" data-interact="aggregation" aria-label="Агрегація">
         <div class="sym-diamond-e" aria-hidden="true"></div>
         <div class="desktop-hint">
-          <div class="hint-def" data-ua><b>Агрегація</b><br>Порожній ромб: «є у складі», але річ жива сама по собі (HAS-A).</div>
-          <div class="hint-def" data-en><b>Aggregation</b><br>Hollow diamond: “has”, but the part can live on its own (HAS-A).</div>
-          <div class="hint-ex" data-ua><b>Приклад:</b> гніздо зняли — воно лишилося гніздом, просто вже не на цьому дереві.</div>
-          <div class="hint-ex" data-en><b>Example:</b> remove the nest — it’s still a nest, just not on this tree.</div>
+          <div class="hint-def" data-ua><b>Агрегація</b><br>Порожній ромб біля цілого: частина може існувати окремо від цілого і переживати його.</div>
+          <div class="hint-def" data-en><b>Aggregation</b><br>Hollow diamond at the whole: the part can exist apart from the whole and outlive it.</div>
+          <div class="hint-ex" data-dom="forest" data-ua><b>Приклад:</b> гніздо зняли: воно лишилося гніздом. У UML 2 агрегація визначена слабко, тож у сумніві малюйте асоціацію.</div>
+          <div class="hint-ex" data-dom="forest" data-en><b>Example:</b> take the nest down and it is still a nest. UML 2 defines aggregation loosely, so when in doubt draw an association.</div>
+          <div class="hint-ex" data-dom="bank" data-ua><b>Приклад:</b> картку перевʼязали до іншого рахунку або перевипустили: вона лишилась карткою. У БД: FK NULL + ON DELETE SET NULL.</div>
+          <div class="hint-ex" data-dom="bank" data-en><b>Example:</b> re-link the card to another account or reissue it: it is still a card. In a DB: FK NULL + ON DELETE SET NULL.</div>
         </div>
       </button>
 
       <button type="button" class="sym line-badge t-association" data-interact="association" aria-label="Асоціація">
         <span aria-hidden="true">/</span>
         <div class="desktop-hint">
-          <div class="hint-def" data-ua><b>Асоціація</b><br>Простий зв'язок між двома рівноправними об'єктами.</div>
-          <div class="hint-def" data-en><b>Association</b><br>A plain link between two peers.</div>
-          <div class="hint-ex" data-ua><b>Приклад:</b> дерево й гриб зустрілися в одному місці й обмінюються через ґрунт.</div>
-          <div class="hint-ex" data-en><b>Example:</b> tree and mushroom meet in one place and interact through the soil.</div>
+          <div class="hint-def" data-ua><b>Асоціація</b><br>Суцільна лінія: обʼєкти зберігають посилання один на одного. Може мати напрям, ролі й кратність.</div>
+          <div class="hint-def" data-en><b>Association</b><br>Solid line: objects hold references to each other. May have direction, roles and multiplicity.</div>
+          <div class="hint-ex" data-dom="forest" data-ua><b>Приклад:</b> дерево і гриб обмінюються через ґрунт; <code>*</code> з обох боків означає «багато до багатьох».</div>
+          <div class="hint-ex" data-dom="forest" data-en><b>Example:</b> tree and mushroom exchange through the soil; <code>*</code> on both ends means many-to-many.</div>
+          <div class="hint-ex" data-dom="bank" data-ua><b>Приклад:</b> клієнт має 1..* рахунків, рахунок належить 1 клієнту. У БД: FK customer_id у таблиці рахунків.</div>
+          <div class="hint-ex" data-dom="bank" data-en><b>Example:</b> a customer has 1..* accounts, an account belongs to 1 customer. In a DB: FK customer_id in the accounts table.</div>
         </div>
       </button>
 
@@ -1247,15 +1790,23 @@
           <line x1="0" y1="30" x2="30" y2="0" stroke="currentColor" stroke-width="3" stroke-dasharray="5,3"/>
         </svg>
         <div class="desktop-hint">
-          <div class="hint-def" data-ua><b>Залежність</b><br>Пунктирна стрілка: «на хвилинку скористався», без постійного зв'язку.</div>
-          <div class="hint-def" data-en><b>Dependency</b><br>Dashed arrow: “used for a moment”, no lasting ownership.</div>
-          <div class="hint-ex" data-ua><b>Приклад:</b> для фотосинтезу потрібне світло — без сонця процес не йде, але сонце не «належить» дереву.</div>
-          <div class="hint-ex" data-en><b>Example:</b> photosynthesis needs sunlight — no lasting “owns” relationship.</div>
+          <div class="hint-def" data-ua><b>Залежність</b><br>Пунктирна стрілка до того, від кого залежать: тимчасове використання без збереження посилання.</div>
+          <div class="hint-def" data-en><b>Dependency</b><br>Dashed arrow toward what is depended on: temporary use without keeping a reference.</div>
+          <div class="hint-ex" data-dom="forest" data-ua><b>Приклад:</b> фотосинтезу потрібне світло. Без сонця процес не йде, але сонце не «належить» дереву. У коді: параметр методу, локальна змінна, виклик сервісу.</div>
+          <div class="hint-ex" data-dom="forest" data-en><b>Example:</b> photosynthesis needs light. No sun, no process, yet the tree does not own the sun. In code: a method parameter, a local variable, a service call.</div>
+          <div class="hint-ex" data-dom="bank" data-ua><b>Приклад:</b> контролер платежів у обробити(платіж) отримує рахунок, викликає списати() і не зберігає його. Стрілка іде від контролера до рахунку: залежить він.</div>
+          <div class="hint-ex" data-dom="bank" data-en><b>Example:</b> in handle(payment) the payment controller gets an account, calls debit() and keeps no reference. The arrow goes from the controller to the account: it is the dependent one.</div>
         </div>
       </button>
 
-      <button type="button" class="mobile-trigger mt-1" data-interact="inheritance" aria-label="Наслідування (телефон)">
+      <button type="button" class="mobile-trigger mt-1" data-interact="inheritance" aria-label="Успадкування (телефон)">
         <div class="sym-arrow" aria-hidden="true"></div>
+      </button>
+      <button type="button" class="mobile-trigger mt-6" data-interact="realization" aria-label="Реалізація (телефон)">
+        <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+          <polygon points="14,2 4,15 24,15" fill="var(--bg-elevated)" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+          <line x1="14" y1="15" x2="14" y2="27" stroke="currentColor" stroke-width="2.4" stroke-dasharray="3,2.5"/>
+        </svg>
       </button>
       <button type="button" class="mobile-trigger mt-2" data-interact="composition" aria-label="Композиція (телефон)">
         <div class="sym-diamond-f" aria-hidden="true"></div>
@@ -1277,7 +1828,391 @@
       </div>
       </div>
     </div>
+
+    <nav class="section-nav" aria-label="Розділи сторінки">
+      <a href="#cheatsheet"><span class="material-symbols-rounded" aria-hidden="true">menu_book</span><span data-ua>Довідник</span><span data-en>Cheat sheet</span></a>
+      <a href="#decide"><span class="material-symbols-rounded" aria-hidden="true">alt_route</span><span data-ua>Який звʼязок?</span><span data-en>Which one?</span></a>
+      <a href="#multiplicity"><span class="material-symbols-rounded" aria-hidden="true">numbers</span><span data-ua>Кратність</span><span data-en>Multiplicity</span></a>
+      <a href="#plantuml"><span class="material-symbols-rounded" aria-hidden="true">code</span>PlantUML</a>
+      <a href="#database"><span class="material-symbols-rounded" aria-hidden="true">database</span><span data-ua>У базі даних</span><span data-en>In a database</span></a>
+      <a href="#selfcheck"><span class="material-symbols-rounded" aria-hidden="true">quiz</span><span data-ua>Самоперевірка</span><span data-en>Self-check</span></a>
+    </nav>
   </main>
+
+  <!-- ===================== CHEAT SHEET ===================== -->
+  <section class="ref" id="cheatsheet">
+    <h2><span data-ua>Довідник: шість звʼязків на одному екрані</span><span data-en>Cheat sheet: six relationships on one screen</span></h2>
+    <p class="lead">
+      <span data-ua>Кожна картка: нотація (на якому кінці стоїть символ), питання-тест, приклад у лісі та в системі, рядок для PlantUML. Від найміцнішого звʼязку до найслабшого.</span>
+      <span data-en>Each card: notation (which end carries the symbol), a test question, a forest and a software example, a PlantUML line. From the strongest relationship to the weakest.</span>
+    </p>
+
+    <div class="rel-grid">
+
+      <article class="rel-card">
+        <svg class="notation" viewBox="0 0 300 56" aria-hidden="true">
+          <rect x="4" y="14" width="88" height="28" rx="6" stroke-width="1.6"/>
+          <text x="48" y="32" text-anchor="middle"><tspan data-ua>Дуб</tspan><tspan data-en>Oak</tspan></text>
+          <line x1="92" y1="28" x2="188" y2="28" stroke-width="2"/>
+          <polygon points="188,19 206,28 188,37" fill="var(--diagram-surface)" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <rect x="206" y="14" width="90" height="28" rx="6" stroke-width="1.6"/>
+          <text x="251" y="32" text-anchor="middle"><tspan data-ua>Дерево</tspan><tspan data-en>Tree</tspan></text>
+          <text class="cap" x="48" y="52" text-anchor="middle"><tspan data-ua>нащадок</tspan><tspan data-en>child</tspan></text>
+          <text class="cap" x="251" y="52" text-anchor="middle"><tspan data-ua>предок</tspan><tspan data-en>parent</tspan></text>
+        </svg>
+        <h3><span data-ua>Успадкування</span><span data-en>Inheritance</span> <span class="en-name" data-ua>generalization</span><span class="en-name" data-en>generalization</span></h3>
+        <span class="strength"><span data-ua>найміцніший</span><span data-en>strongest</span></span>
+        <div class="test"><b><span data-ua>Тест:</span><span data-en>Test:</span></b> <span data-ua>«A <em>є різновидом</em> B?» Дуб є деревом.</span><span data-en>“Is A <em>a kind of</em> B?” An oak is a tree.</span></div>
+        <dl>
+          <dt><span data-ua>Зміст</span><span data-en>Meaning</span></dt>
+          <dd><span data-ua>Нащадок отримує все від предка і додає своє, ланцюг може бути довгим (Дуб → Дерево → Рослина). UML дозволяє кількох предків, більшість мов лише одного: кілька «батьків» зазвичай дають через інтерфейси.</span><span data-en>The child gets everything from the parent and adds its own; the chain can be long (Oak → Tree → Plant). UML allows several parents, most languages only one: multiple “parents” usually come through interfaces.</span></dd>
+          <dt><span data-ua>У системі</span><span data-en>In software</span></dt>
+          <dd><span data-ua>Картковий платіж є платежем; Депозит є продуктом.</span><span data-en>CardPayment is a Payment; Deposit is a Product.</span></dd>
+          <dt>PlantUML</dt>
+          <dd><code>Oak --|&gt; Tree</code></dd>
+        </dl>
+      </article>
+
+      <article class="rel-card">
+        <svg class="notation" viewBox="0 0 300 56" aria-hidden="true">
+          <rect x="4" y="14" width="88" height="28" rx="6" stroke-width="1.6"/>
+          <text x="48" y="32" text-anchor="middle"><tspan data-ua>Дерево</tspan><tspan data-en>Tree</tspan></text>
+          <line x1="92" y1="28" x2="188" y2="28" stroke-width="2" stroke-dasharray="6,4"/>
+          <polygon points="188,19 206,28 188,37" fill="var(--diagram-surface)" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <rect class="iface" x="206" y="8" width="90" height="40" rx="6" stroke-width="1.6"/>
+          <text class="stereo" x="251" y="22" text-anchor="middle">«interface»</text>
+          <text x="251" y="38" text-anchor="middle"><tspan data-ua>Фотосинтез</tspan><tspan data-en>Photosynth.</tspan></text>
+          <text class="cap" x="48" y="52" text-anchor="middle"><tspan data-ua>клас</tspan><tspan data-en>class</tspan></text>
+        </svg>
+        <h3><span data-ua>Реалізація</span><span data-en>Realization</span> <span class="en-name">implements</span></h3>
+        <span class="strength"><span data-ua>контракт</span><span data-en>contract</span></span>
+        <div class="test"><b><span data-ua>Тест:</span><span data-en>Test:</span></b> <span data-ua>«B лише <em>обіцяє, що вміє</em>, а A це виконує?» Дерево виконує «фотосинтезувати».</span><span data-en>“Does B only <em>promise a capability</em> and A deliver it?” Tree delivers “photosynthesize”.</span></div>
+        <dl>
+          <dt><span data-ua>Зміст</span><span data-en>Meaning</span></dt>
+          <dd><span data-ua>Інтерфейс не має реалізації і екземплярів, лише операції. Клас може реалізувати кілька інтерфейсів, а все, що інтерфейс декларує, мають і нащадки цього класу.</span><span data-en>An interface has no implementation and no instances, only operations. A class may realize several interfaces, and whatever the interface declares its subclasses have too.</span></dd>
+          <dt><span data-ua>У системі</span><span data-en>In software</span></dt>
+          <dd><span data-ua>Платіж реалізує «Можна скасувати»; Сервіс реалізує REST-контракт з OpenAPI.</span><span data-en>Payment implements Cancellable; a service implements the REST contract from OpenAPI.</span></dd>
+          <dt>PlantUML</dt>
+          <dd><code>Tree ..|&gt; Photosynthetic</code></dd>
+        </dl>
+      </article>
+
+      <article class="rel-card">
+        <svg class="notation" viewBox="0 0 300 56" aria-hidden="true">
+          <rect x="4" y="14" width="88" height="28" rx="6" stroke-width="1.6"/>
+          <text x="48" y="32" text-anchor="middle"><tspan data-ua>Дерево</tspan><tspan data-en>Tree</tspan></text>
+          <polygon points="92,28 104,20 116,28 104,36" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <line x1="116" y1="28" x2="206" y2="28" stroke-width="2"/>
+          <text class="mult" x="122" y="22">1</text>
+          <text class="mult" x="200" y="22" text-anchor="end">1..*</text>
+          <rect x="206" y="14" width="90" height="28" rx="6" stroke-width="1.6"/>
+          <text x="251" y="32" text-anchor="middle"><tspan data-ua>Гілка</tspan><tspan data-en>Branch</tspan></text>
+          <text class="cap" x="48" y="52" text-anchor="middle"><tspan data-ua>ціле</tspan><tspan data-en>whole</tspan></text>
+          <text class="cap" x="251" y="52" text-anchor="middle"><tspan data-ua>частина</tspan><tspan data-en>part</tspan></text>
+        </svg>
+        <h3><span data-ua>Композиція</span><span data-en>Composition</span> <span class="en-name">part-of, owns</span></h3>
+        <span class="strength"><span data-ua>міцний: спільне життя</span><span data-en>strong: shared lifetime</span></span>
+        <div class="test"><b><span data-ua>Тест:</span><span data-en>Test:</span></b> <span data-ua>«Знищили ціле: частина <em>зникає</em>? Частина належить <em>лише одному</em> цілому?» Так і так.</span><span data-en>“Destroy the whole: does the part <em>vanish</em>? Does the part belong to <em>exactly one</em> whole?” Yes and yes.</span></div>
+        <dl>
+          <dt><span data-ua>Зміст</span><span data-en>Meaning</span></dt>
+          <dd><span data-ua>Зафарбований ромб біля цілого. Кратність біля цілого завжди 1 (або 0..1).</span><span data-en>Filled diamond at the whole. Multiplicity at the whole is always 1 (or 0..1).</span></dd>
+          <dt><span data-ua>У системі</span><span data-en>In software</span></dt>
+          <dd><span data-ua>Замовлення ◆ Рядок замовлення; Рахунок ◆ Операція по рахунку.</span><span data-en>Order ◆ OrderLine; Account ◆ AccountEntry.</span></dd>
+          <dt>PlantUML</dt>
+          <dd><code>Tree "1" *-- "1..*" Branch</code></dd>
+        </dl>
+      </article>
+
+      <article class="rel-card">
+        <svg class="notation" viewBox="0 0 300 56" aria-hidden="true">
+          <rect x="4" y="14" width="88" height="28" rx="6" stroke-width="1.6"/>
+          <text x="48" y="32" text-anchor="middle"><tspan data-ua>Дерево</tspan><tspan data-en>Tree</tspan></text>
+          <polygon points="92,28 104,20 116,28 104,36" fill="var(--diagram-surface)" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <line x1="116" y1="28" x2="206" y2="28" stroke-width="2"/>
+          <text class="mult" x="122" y="22">0..1</text>
+          <text class="mult" x="200" y="22" text-anchor="end">0..*</text>
+          <rect x="206" y="14" width="90" height="28" rx="6" stroke-width="1.6"/>
+          <text x="251" y="32" text-anchor="middle"><tspan data-ua>Гніздо</tspan><tspan data-en>Nest</tspan></text>
+          <text class="cap" x="48" y="52" text-anchor="middle"><tspan data-ua>ціле</tspan><tspan data-en>whole</tspan></text>
+          <text class="cap" x="251" y="52" text-anchor="middle"><tspan data-ua>частина</tspan><tspan data-en>part</tspan></text>
+        </svg>
+        <h3><span data-ua>Агрегація</span><span data-en>Aggregation</span> <span class="en-name">has-a, shared</span></h3>
+        <span class="strength"><span data-ua>слабкий: частина живе сама</span><span data-en>weak: the part lives on its own</span></span>
+        <div class="test"><b><span data-ua>Тест:</span><span data-en>Test:</span></b> <span data-ua>«Частина <em>переживе</em> ціле або може бути <em>в іншому</em> цілому?» Гніздо переживе дерево.</span><span data-en>“Can the part <em>outlive</em> the whole or sit <em>in another</em> whole?” The nest outlives the tree.</span></div>
+        <dl>
+          <dt><span data-ua>Зміст</span><span data-en>Meaning</span></dt>
+          <dd><span data-ua>Порожній ромб біля цілого. У UML 2 семантика визначена слабко, тому в сумніві малюйте звичайну асоціацію.</span><span data-en>Hollow diamond at the whole. UML 2 leaves the semantics loose, so when in doubt draw a plain association.</span></dd>
+          <dt><span data-ua>У системі</span><span data-en>In software</span></dt>
+          <dd><span data-ua>Команда ◇ Гравець; Відділ ◇ Працівник; Плейлист ◇ Трек.</span><span data-en>Team ◇ Player; Department ◇ Employee; Playlist ◇ Track.</span></dd>
+          <dt>PlantUML</dt>
+          <dd><code>Tree "0..1" o-- "0..*" Nest</code></dd>
+        </dl>
+      </article>
+
+      <article class="rel-card">
+        <svg class="notation" viewBox="0 0 300 56" aria-hidden="true">
+          <rect x="4" y="14" width="88" height="28" rx="6" stroke-width="1.6"/>
+          <text x="48" y="32" text-anchor="middle"><tspan data-ua>Дерево</tspan><tspan data-en>Tree</tspan></text>
+          <line x1="92" y1="28" x2="206" y2="28" stroke-width="2"/>
+          <text class="mult" x="98" y="22">*</text>
+          <text class="mult" x="200" y="22" text-anchor="end">*</text>
+          <text class="cap" x="149" y="44" text-anchor="middle"><tspan data-ua>живить ▸</tspan><tspan data-en>feeds ▸</tspan></text>
+          <rect x="206" y="14" width="90" height="28" rx="6" stroke-width="1.6"/>
+          <text x="251" y="32" text-anchor="middle"><tspan data-ua>Гриб</tspan><tspan data-en>Mushroom</tspan></text>
+        </svg>
+        <h3><span data-ua>Асоціація</span><span data-en>Association</span> <span class="en-name">knows, uses-a</span></h3>
+        <span class="strength"><span data-ua>структурний: зберігає посилання</span><span data-en>structural: keeps a reference</span></span>
+        <div class="test"><b><span data-ua>Тест:</span><span data-en>Test:</span></b> <span data-ua>«A <em>зберігає посилання</em> на B (атрибут, поле, FK) і це не частина-ціле?»</span><span data-en>“Does A <em>keep a reference</em> to B (attribute, field, FK) and it is not part-whole?”</span></div>
+        <dl>
+          <dt><span data-ua>Зміст</span><span data-en>Meaning</span></dt>
+          <dd><span data-ua>Суцільна лінія. Додайте кратність на обох кінцях, назву ролі і, якщо треба, стрілку навігації (хто кого знає).</span><span data-en>Solid line. Add multiplicity on both ends, a role name and, if needed, a navigability arrow (who knows whom).</span></dd>
+          <dt><span data-ua>У системі</span><span data-en>In software</span></dt>
+          <dd><span data-ua>Клієнт 1 — * Замовлення; Викладач * — * Курс; Користувач 1 — 0..1 Профіль.</span><span data-en>Customer 1 — * Order; Teacher * — * Course; User 1 — 0..1 Profile.</span></dd>
+          <dt>PlantUML</dt>
+          <dd><code>Tree "*" -- "*" Mushroom : feeds &gt;</code></dd>
+        </dl>
+      </article>
+
+      <article class="rel-card">
+        <svg class="notation" viewBox="0 0 300 56" aria-hidden="true">
+          <rect x="4" y="14" width="88" height="28" rx="6" stroke-width="1.6"/>
+          <text x="48" y="32" text-anchor="middle"><tspan data-ua>Дерево</tspan><tspan data-en>Tree</tspan></text>
+          <line x1="92" y1="28" x2="200" y2="28" stroke-width="2" stroke-dasharray="6,4"/>
+          <path d="M192,20 L204,28 L192,36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <text class="cap" x="149" y="44" text-anchor="middle">«use»</text>
+          <rect x="206" y="14" width="90" height="28" rx="6" stroke-width="1.6"/>
+          <text x="251" y="32" text-anchor="middle"><tspan data-ua>Сонце</tspan><tspan data-en>Sun</tspan></text>
+          <text class="cap" x="48" y="52" text-anchor="middle"><tspan data-ua>залежить</tspan><tspan data-en>dependent</tspan></text>
+          <text class="cap" x="251" y="52" text-anchor="middle"><tspan data-ua>від кого</tspan><tspan data-en>supplier</tspan></text>
+        </svg>
+        <h3><span data-ua>Залежність</span><span data-en>Dependency</span> <span class="en-name">uses, temporary</span></h3>
+        <span class="strength"><span data-ua>найслабший: без посилання</span><span data-en>weakest: no stored reference</span></span>
+        <div class="test"><b><span data-ua>Тест:</span><span data-en>Test:</span></b> <span data-ua>«A <em>потребує</em> B лише на час дії (параметр, локальна змінна, виклик) і не зберігає його?»</span><span data-en>“Does A <em>need</em> B only during an action (parameter, local variable, call) and not keep it?”</span></div>
+        <dl>
+          <dt><span data-ua>Зміст</span><span data-en>Meaning</span></dt>
+          <dd><span data-ua>Пунктирна стрілка від залежного до постачальника. Зміна B може зламати A.</span><span data-en>Dashed arrow from the dependent to the supplier. A change in B may break A.</span></dd>
+          <dt><span data-ua>У системі</span><span data-en>In software</span></dt>
+          <dd><span data-ua>Контролер платежів ..&gt; Рахунок (отримує параметром, викликає, не зберігає); Контролер ..&gt; «interface» Сервіс: залежність від контракту, а не від реалізації; Сервіс звітів ..&gt; PDF-експортер.</span><span data-en>PaymentController ..&gt; Account (gets it as a parameter, calls, keeps nothing); Controller ..&gt; «interface» Service: depending on the contract, not the implementation; ReportService ..&gt; PdfExporter.</span></dd>
+          <dt>PlantUML</dt>
+          <dd><code>Tree ..&gt; Sun : «use»</code></dd>
+        </dl>
+      </article>
+
+    </div>
+
+    <p class="note">
+      <span data-ua><strong>Клас чи обʼєкт?</strong> Усі шість звʼязків малюють між <em>класами</em> (діаграма класів). «Дуб» тут клас, а конкретний дуб у парку це обʼєкт, його звʼязок із класом називають instance-of і на діаграмі класів не показують.</span>
+      <span data-en><strong>Class or object?</strong> All six relationships are drawn between <em>classes</em> (class diagram). Oak here is a class; a specific oak in a park is an object, its link to the class is instance-of and is not shown on a class diagram.</span>
+    </p>
+  </section>
+
+  <!-- ===================== WIZARD ===================== -->
+  <section class="ref" id="decide">
+    <h2><span data-ua>Який звʼязок? Чотири питання</span><span data-en>Which relationship? Four questions</span></h2>
+    <p class="lead">
+      <span data-ua>Підставте свої A і B (наприклад, «Замовлення» і «Рядок замовлення») і відповідайте «так» або «ні».</span>
+      <span data-en>Plug in your own A and B (say, Order and OrderLine) and answer yes or no.</span>
+    </p>
+    <div class="wizard" id="wizard" aria-live="polite"></div>
+  </section>
+
+  <!-- ===================== MULTIPLICITY ===================== -->
+  <section class="ref" id="multiplicity">
+    <h2><span data-ua>Кратність і напрямок</span><span data-en>Multiplicity and direction</span></h2>
+    <p class="lead">
+      <span data-ua>Кратність пишуть біля кінця лінії і читають «з протилежного кінця»: число біля «Гриба» каже, скільки грибів має одне дерево.</span>
+      <span data-en>Multiplicity sits at a line end and is read “from the other end”: the number next to Mushroom says how many mushrooms one tree has.</span>
+    </p>
+    <div class="two-col">
+      <div class="tbl-wrap">
+        <table class="ref-table">
+          <thead><tr><th><span data-ua>Запис</span><span data-en>Notation</span></th><th><span data-ua>Читається</span><span data-en>Reads as</span></th><th><span data-ua>Приклад</span><span data-en>Example</span></th></tr></thead>
+          <tbody>
+            <tr><td class="mono">1</td><td><span data-ua>рівно один, обовʼязково</span><span data-en>exactly one, mandatory</span></td><td><span data-ua>Операція належить 1 рахунку</span><span data-en>An entry belongs to 1 account</span></td></tr>
+            <tr><td class="mono">0..1</td><td><span data-ua>нуль або один, необовʼязково</span><span data-en>zero or one, optional</span></td><td><span data-ua>Гніздо сидить на 0..1 дереві</span><span data-en>A nest sits on 0..1 tree</span></td></tr>
+            <tr><td class="mono">*  <span data-ua>або</span><span data-en>or</span> 0..*</td><td><span data-ua>скільки завгодно, можна жодного</span><span data-en>any number, possibly none</span></td><td><span data-ua>Клієнт має * замовлень</span><span data-en>A customer has * orders</span></td></tr>
+            <tr><td class="mono">1..*</td><td><span data-ua>хоча б один</span><span data-en>at least one</span></td><td><span data-ua>Замовлення має 1..* рядків</span><span data-en>An order has 1..* lines</span></td></tr>
+            <tr><td class="mono">2..4</td><td><span data-ua>діапазон</span><span data-en>a range</span></td><td><span data-ua>Картка має 2..4 власників</span><span data-en>A card has 2..4 holders</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="tbl-wrap">
+          <table class="ref-table">
+            <thead><tr><th><span data-ua>Елемент</span><span data-en>Element</span></th><th><span data-ua>Що означає</span><span data-en>What it means</span></th></tr></thead>
+            <tbody>
+              <tr><td class="mono">A ──▸ B</td><td><span data-ua>Навігованість: A знає про B (має поле b), B про A не знає</span><span data-en>Navigability: A knows B (has field b), B does not know A</span></td></tr>
+              <tr><td class="mono">A ─── B</td><td><span data-ua>Напрямок не вказано або звʼязок двосторонній</span><span data-en>Direction unspecified or bidirectional</span></td></tr>
+              <tr><td class="mono">A ─ owner ─ B</td><td><span data-ua>Назва ролі біля кінця: як B називає A</span><span data-en>Role name at an end: what B calls A</span></td></tr>
+              <tr><td class="mono">A ─ feeds ▸ ─ B</td><td><span data-ua>Назва звʼязку з напрямком читання</span><span data-en>Association name with a reading direction</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note" style="margin-top:12px">
+          <span data-ua><strong>Правило для BA:</strong> якщо на лінії немає кратності, розробник вигадає її сам. Пишіть її завжди, навіть «1».</span>
+          <span data-en><strong>Rule for BAs:</strong> if a line has no multiplicity, the developer will invent one. Always write it, even “1”.</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PLANTUML ===================== -->
+  <section class="ref" id="plantuml">
+    <h2><span data-ua>Та сама схема в PlantUML</span><span data-en>The same diagram in PlantUML</span></h2>
+    <p class="lead">
+      <span data-ua>Усі шість звʼязків в одному файлі, для поточного прикладу (перемикач «Ліс / Банк» у шапці). Скопіюйте і вставте в будь-який рендерер PlantUML (Confluence-макрос, VS Code, plantuml.com).</span>
+      <span data-en>All six relationships in one file, for the current example (Forest / Bank toggle in the header). Copy it into any PlantUML renderer (Confluence macro, VS Code, plantuml.com).</span>
+    </p>
+    <div class="two-col">
+      <div class="code-block">
+        <button type="button" class="btn copy-btn" data-copy="puml-src" data-dom="forest"><span data-ua>Копіювати</span><span data-en>Copy</span></button>
+        <button type="button" class="btn copy-btn" data-copy="puml-src-bank" data-dom="bank"><span data-ua>Копіювати</span><span data-en>Copy</span></button>
+<div data-dom="forest">
+<pre><code id="puml-src">@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+interface "Фотосинтезуючий" as Photo {
+  +фотосинтезувати()
+}
+abstract class "Рослина" as Plant {
+  +рости()
+}
+abstract class "Дерево" as Tree {
+  +фотосинтезувати()
+  +скидатиЛистя()
+}
+class "Дуб" as Oak {
+  +родитиЖолуді()
+}
+class "Кора" as Bark
+class "Гніздо" as Nest
+class "Гриб" as Mushroom
+class "Сонце" as Sun
+
+Tree --|> Plant : успадкування
+Oak --|> Tree : успадкування
+Tree ..|> Photo : реалізація
+Tree "1" *-- "1" Bark : композиція
+Tree "0..1" o-- "0..*" Nest : агрегація
+Tree "*" -- "*" Mushroom : асоціація
+Tree ..> Sun : залежність &lt;&lt;use&gt;&gt;
+@enduml</code></pre>
+</div>
+<div data-dom="bank">
+<pre><code id="puml-src-bank">@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+interface "Можна заблокувати" as Blockable {
+  +заблокувати()
+  +розблокувати()
+}
+abstract class "Банківський продукт" as Product {
+  +відкрити()
+  +закрити()
+}
+abstract class "Рахунок" as Account {
+  +зарахувати(сума)
+  +списати(сума)
+}
+class "Депозитний рахунок" as Deposit {
+  +нарахуватиВідсотки()
+}
+class "Операція по рахунку" as Entry
+class "Картка" as Card
+class "Клієнт" as Customer
+class "Контролер платежів" as Controller {
+  +обробити(платіж)
+}
+
+Account --|> Product : успадкування
+Deposit --|> Account : успадкування
+Account ..|> Blockable : реалізація
+Account "1" *-- "*" Entry : композиція
+Account "0..1" o-- "0..*" Card : агрегація
+Customer "1" -- "1..*" Account : асоціація
+Controller ..> Account : залежність &lt;&lt;use&gt;&gt;
+@enduml</code></pre>
+</div>
+      </div>
+      <div class="tbl-wrap">
+        <table class="ref-table">
+          <thead><tr><th><span data-ua>Звʼязок</span><span data-en>Relationship</span></th><th>PlantUML</th><th><span data-ua>Запамʼятати</span><span data-en>Mnemonic</span></th></tr></thead>
+          <tbody>
+            <tr><td><span data-ua>Успадкування</span><span data-en>Inheritance</span></td><td class="mono">A --|&gt; B</td><td><span data-ua>трикутник <code>|&gt;</code> дивиться на предка</span><span data-en>triangle <code>|&gt;</code> points at the parent</span></td></tr>
+            <tr><td><span data-ua>Реалізація</span><span data-en>Realization</span></td><td class="mono">A ..|&gt; B</td><td><span data-ua>те саме, але крапки</span><span data-en>same, but dotted</span></td></tr>
+            <tr><td><span data-ua>Композиція</span><span data-en>Composition</span></td><td class="mono">A *-- B</td><td><span data-ua><code>*</code> зафарбований ромб біля цілого A</span><span data-en><code>*</code> filled diamond at whole A</span></td></tr>
+            <tr><td><span data-ua>Агрегація</span><span data-en>Aggregation</span></td><td class="mono">A o-- B</td><td><span data-ua><code>o</code> порожній ромб біля цілого A</span><span data-en><code>o</code> hollow diamond at whole A</span></td></tr>
+            <tr><td><span data-ua>Асоціація</span><span data-en>Association</span></td><td class="mono">A "1" -- "*" B</td><td><span data-ua>кратність у лапках біля кінців</span><span data-en>multiplicity in quotes at the ends</span></td></tr>
+            <tr><td><span data-ua>Напрямлена асоціація</span><span data-en>Directed association</span></td><td class="mono">A --&gt; B</td><td><span data-ua>A знає B</span><span data-en>A knows B</span></td></tr>
+            <tr><td><span data-ua>Залежність</span><span data-en>Dependency</span></td><td class="mono">A ..&gt; B</td><td><span data-ua>крапки і проста стрілка</span><span data-en>dots and a plain arrow</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== DATABASE ===================== -->
+  <section class="ref" id="database">
+    <h2><span data-ua>А як це виглядає в базі даних</span><span data-en>What this looks like in a database</span></h2>
+    <p class="lead">
+      <span data-ua>UML описує класи, таблиці описують дані. Відповідність не один-до-одного, але для аналітика корисна: звʼязок на діаграмі підказує, де лежить зовнішній ключ і що робити при видаленні.</span>
+      <span data-en>UML describes classes, tables describe data. The mapping is not one-to-one, but it helps an analyst: the relationship on the diagram hints where the foreign key lives and what happens on delete.</span>
+    </p>
+    <div class="two-col">
+      <div class="tbl-wrap">
+        <table class="ref-table">
+          <thead><tr><th>UML</th><th><span data-ua>У схемі БД</span><span data-en>In the DB schema</span></th></tr></thead>
+          <tbody>
+            <tr><td><span data-ua>Асоціація 1 — *</span><span data-en>Association 1 — *</span></td><td><span data-ua>FK на боці «багато»: <code>orders.customer_id</code></span><span data-en>FK on the “many” side: <code>orders.customer_id</code></span></td></tr>
+            <tr><td><span data-ua>Асоціація 1 — 0..1</span><span data-en>Association 1 — 0..1</span></td><td><span data-ua>FK з <code>UNIQUE</code> на боці 0..1 або спільний PK</span><span data-en>FK with <code>UNIQUE</code> on the 0..1 side, or a shared PK</span></td></tr>
+            <tr><td><span data-ua>Асоціація * — *</span><span data-en>Association * — *</span></td><td><span data-ua>проміжна таблиця з двома FK і складеним PK</span><span data-en>a join table with two FKs and a composite PK</span></td></tr>
+            <tr><td><span data-ua>Композиція</span><span data-en>Composition</span></td><td><span data-ua>FK <code>NOT NULL</code> + <code>ON DELETE CASCADE</code>: частина зникає з цілим</span><span data-en>FK <code>NOT NULL</code> + <code>ON DELETE CASCADE</code>: the part goes with the whole</span></td></tr>
+            <tr><td><span data-ua>Агрегація</span><span data-en>Aggregation</span></td><td><span data-ua>FK <code>NULL</code> + <code>ON DELETE SET NULL</code>: частина лишається</span><span data-en>FK <code>NULL</code> + <code>ON DELETE SET NULL</code>: the part stays</span></td></tr>
+            <tr><td><span data-ua>Успадкування</span><span data-en>Inheritance</span></td><td><span data-ua>одна таблиця з колонкою-дискримінатором, або таблиця на підклас з FK на батьківську, або таблиця на кожен конкретний клас</span><span data-en>single table with a discriminator column, or a table per subclass with an FK to the parent, or a table per concrete class</span></td></tr>
+            <tr><td><span data-ua>Реалізація, залежність</span><span data-en>Realization, dependency</span></td><td><span data-ua>у схемі даних не відображаються: це про код і контракти</span><span data-en>not reflected in the data schema: these are about code and contracts</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="code-block">
+        <button type="button" class="btn copy-btn" data-copy="sql-src"><span data-ua>Копіювати</span><span data-en>Copy</span></button>
+<pre><code id="sql-src">-- Композиція: рядок не живе без замовлення
+CREATE TABLE order_line (
+  id        BIGINT PRIMARY KEY,
+  order_id  BIGINT NOT NULL
+            REFERENCES orders(id) ON DELETE CASCADE,
+  qty       INT NOT NULL
+);
+
+-- Агрегація: гніздо переживе дерево
+CREATE TABLE nest (
+  id       BIGINT PRIMARY KEY,
+  tree_id  BIGINT NULL
+           REFERENCES tree(id) ON DELETE SET NULL
+);
+
+-- Асоціація * — *: проміжна таблиця
+CREATE TABLE tree_mushroom (
+  tree_id      BIGINT NOT NULL REFERENCES tree(id),
+  mushroom_id  BIGINT NOT NULL REFERENCES mushroom(id),
+  PRIMARY KEY (tree_id, mushroom_id)
+);</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== QUIZ ===================== -->
+  <section class="ref ref-footer" id="selfcheck">
+    <h2><span data-ua>Самоперевірка</span><span data-en>Self-check</span></h2>
+    <p class="lead">
+      <span data-ua>Вісім ситуацій із життя систем. Оберіть звʼязок, пояснення зʼявиться одразу.</span>
+      <span data-en>Eight situations from real systems. Pick the relationship; the explanation appears right away.</span>
+    </p>
+    <div class="quiz" id="quiz"></div>
+    <div class="quiz-score" id="quiz-score" style="margin-top:14px"></div>
+  </section>
+
 
   <div id="mOverlay" class="overlay" role="dialog" aria-modal="true" aria-labelledby="ovTitle" aria-hidden="true">
     <button type="button" class="overlay-close" id="overlayClose" aria-label="Закрити">×</button>
@@ -1313,10 +2248,11 @@
 
       var THEME_KEY = 'uml-tree-theme';
       var LANG_KEY = 'uml-tree-lang';
+      var DOMAIN_KEY = 'uml-tree-domain';
 
       var DOC_TITLE = {
-        uk: 'UML типи звʼязків — екосистема дерева | tools',
-        en: 'UML relationship types — tree ecosystem | tools'
+        uk: 'UML типи звʼязків: екосистема дерева | tools',
+        en: 'UML relationship types: tree ecosystem | tools'
       };
 
       var DOC_META_DESC = {
@@ -1330,140 +2266,244 @@
       };
 
       var ARIA_INTERACT = {
-        oak: { uk: 'Дуб (обʼєкт)', en: 'Oak (object)' },
+        oak: { uk: 'Дуб (клас-нащадок)', en: 'Oak (subclass)' },
+        plant: { uk: 'Рослина (абстрактний клас, предок)', en: 'Plant (abstract class, parent)' },
+        'b-deposit': { uk: 'Депозитний рахунок (клас-нащадок)', en: 'Deposit account (subclass)' },
+        'b-blockable': { uk: 'Можна заблокувати (інтерфейс)', en: 'Blockable (interface)' },
+        'b-product': { uk: 'Банківський продукт (абстрактний клас, предок)', en: 'Bank product (abstract class, parent)' },
+        'b-account': { uk: 'Рахунок (абстрактний клас)', en: 'Account (abstract class)' },
+        'b-entry': { uk: 'Операція по рахунку (композиція)', en: 'Account entry (composition)' },
+        'b-card': { uk: 'Картка (агрегація)', en: 'Card (aggregation)' },
+        'b-customer': { uk: 'Клієнт (асоціація)', en: 'Customer (association)' },
+        'b-controller': { uk: 'Контролер платежів (залежність)', en: 'Payment controller (dependency)' },
+        interface: { uk: 'Фотосинтезуючий (інтерфейс)', en: 'Photosynthetic (interface)' },
         tree: { uk: 'Дерево (абстрактний клас)', en: 'Tree (abstract class)' },
         bark: { uk: 'Кора (композиція)', en: 'Bark (composition)' },
         nest: { uk: 'Гніздо (агрегація)', en: 'Nest (aggregation)' },
         mushroom: { uk: 'Гриб (асоціація)', en: 'Mushroom (association)' },
         sun: { uk: 'Сонце (залежність)', en: 'Sun (dependency)' },
-        inheritance: { uk: 'Наслідування', en: 'Inheritance' },
+        inheritance: { uk: 'Успадкування', en: 'Inheritance' },
+        realization: { uk: 'Реалізація', en: 'Realization' },
         composition: { uk: 'Композиція', en: 'Composition' },
         aggregation: { uk: 'Агрегація', en: 'Aggregation' },
         association: { uk: 'Асоціація', en: 'Association' },
         dependency: { uk: 'Залежність', en: 'Dependency' },
-        'inheritance-mobile': { uk: 'Наслідування (телефон)', en: 'Inheritance (mobile)' },
+        'inheritance-mobile': { uk: 'Успадкування (телефон)', en: 'Inheritance (mobile)' },
+        'realization-mobile': { uk: 'Реалізація (телефон)', en: 'Realization (mobile)' },
         'composition-mobile': { uk: 'Композиція (телефон)', en: 'Composition (mobile)' },
         'aggregation-mobile': { uk: 'Агрегація (телефон)', en: 'Aggregation (mobile)' },
         'association-mobile': { uk: 'Асоціація (телефон)', en: 'Association (mobile)' },
         'dependency-mobile': { uk: 'Залежність (телефон)', en: 'Dependency (mobile)' }
       };
 
+      var HOLLOW_TRI = '<svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><polygon points="14,4 3,24 25,24" fill="var(--bg-page)" stroke="var(--line-color)" stroke-width="2.4" stroke-linejoin="round"/></svg>';
+      var HOLLOW_TRI_DASH = '<svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><polygon points="14,2 4,15 24,15" fill="var(--bg-page)" stroke="var(--line-color)" stroke-width="2.4" stroke-linejoin="round"/><line x1="14" y1="15" x2="14" y2="27" stroke="var(--line-color)" stroke-width="2.4" stroke-dasharray="3,2.5"/></svg>';
+      var DASH_ARROW = '<svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><line x1="2" y1="26" x2="22" y2="6" stroke="var(--line-color)" stroke-width="2.6" stroke-dasharray="4,3"/><path d="M13,5 L24,4 L23,15" fill="none" stroke="var(--line-color)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
       var data = {
         tree: {
           sym: '🌳',
-          img: 'tree.png',
+          img: 'tree.webp',
           symHTML: null,
           uk: {
-            title: 'Дерево (клас)',
-            ex: 'Спільні риси будь-якого дерева; дуб показує один конкретний вид.',
-            def: 'Узагальнення: коріння, гілки, фотосинтез тощо.',
+            title: 'Дерево (абстрактний клас)',
+            ex: 'Описує спільне для всіх дерев: коріння, гілки, фотосинтез. Екземплярів не має, конкретні види успадковують його.',
+            def: 'Абстрактний клас: узагальнення «будь-яке дерево».',
             alt: 'Абстрактне дерево на схемі'
           },
           en: {
-            title: 'Tree (class)',
-            ex: 'Shared traits of any tree; oak is one concrete kind.',
-            def: 'Generalization — roots, branches, photosynthesis, and so on.',
+            title: 'Tree (abstract class)',
+            ex: 'Holds what all trees share: roots, branches, photosynthesis. Never instantiated itself; concrete kinds inherit it.',
+            def: 'Abstract class: the generalization “any tree”.',
             alt: 'Abstract tree in the diagram'
           }
         },
         oak: {
           sym: '🌰',
-          img: 'oak.jpg',
+          img: 'oak.webp',
           symHTML: null,
           uk: {
-            title: 'Дуб (обʼєкт)',
-            ex: 'Живий екземпляр: у цьому прикладі від нього йдуть майже всі стрілки.',
-            def: 'Конкретний обʼєкт у центрі схеми.',
-            alt: 'Дуб як конкретний обʼєкт'
+            title: 'Дуб (клас-нащадок)',
+            ex: 'Усе, що є в «Дереві», є і в «Дубі», плюс своє: жолуді. Конкретний дуб біля школи був би обʼєктом цього класу.',
+            def: 'Підклас: різновид дерева.',
+            alt: 'Дуб як клас-нащадок'
           },
           en: {
-            title: 'Oak (object)',
-            ex: 'A living instance — in this example, most links involve it.',
-            def: 'Concrete object at the center.',
-            alt: 'Oak as a concrete object'
+            title: 'Oak (subclass)',
+            ex: 'Everything in Tree is in Oak, plus its own: acorns. A specific oak near the school would be an object of this class.',
+            def: 'Subclass: a kind of tree.',
+            alt: 'Oak as a subclass'
+          }
+        },
+        interface: {
+          sym: '📜',
+          img: null,
+          symHTML: null,
+          uk: {
+            title: 'Фотосинтезуючий (інтерфейс)',
+            ex: 'Дерево реалізує його. Водорості теж могли б, не маючи з деревом спільного предка.',
+            def: 'Інтерфейс: контракт «що вміє», без «як саме».',
+            alt: ''
+          },
+          en: {
+            title: 'Photosynthetic (interface)',
+            ex: 'Tree realizes it. Algae could too, without sharing an ancestor with trees.',
+            def: 'Interface: a contract of “what it can do”, not “how”.',
+            alt: ''
           }
         },
         inheritance: {
-          symHTML: '<div class="sym-arrow" style="border-left:10px solid transparent; border-right:10px solid transparent; border-bottom:18px solid var(--line-color);"></div>',
-          img: 'oak.jpg',
+          symHTML: HOLLOW_TRI,
+          img: 'oak.webp',
           uk: {
-            title: 'Наслідування',
-            ex: 'Дубові коріння й листя зручно тримати в спільному описі «дерево».',
-            def: '«Це є різновид того» (IS-A): нащадок бере базові властивості від предка.',
-            alt: 'Приклад наслідування'
+            title: 'Успадкування',
+            ex: 'Спільне для всіх дерев (коріння, листя, фотосинтез) описано в «Дереві»; «Дуб» додає своє: жолуді.',
+            def: '«Це є різновид того» (IS-A). Суцільна лінія з порожнім трикутником біля предка. PlantUML: Дуб --|> Дерево',
+            alt: 'Приклад успадкування'
           },
           en: {
             title: 'Inheritance',
-            ex: 'Oak “is a” tree — shared structure lives in the parent.',
-            def: '“This is a kind of that” (IS-A): the child inherits the parent’s base behavior.',
+            ex: 'What all trees share (roots, leaves, photosynthesis) lives in Tree; Oak adds its own: acorns.',
+            def: '“This is a kind of that” (IS-A). Solid line with a hollow triangle at the parent. PlantUML: Oak --|> Tree',
             alt: 'Inheritance example'
+          }
+        },
+        realization: {
+          symHTML: HOLLOW_TRI_DASH,
+          img: 'tree.webp',
+          uk: {
+            title: 'Реалізація',
+            ex: '«Дерево» обіцяє вміти фотосинтезувати. Як саме, кожен вид вирішує сам.',
+            def: 'Клас виконує контракт інтерфейсу. Пунктир із порожнім трикутником біля інтерфейсу. PlantUML: Дерево ..|> Фотосинтезуючий',
+            alt: 'Приклад реалізації'
+          },
+          en: {
+            title: 'Realization',
+            ex: 'Tree promises it can photosynthesize. How exactly is up to each kind.',
+            def: 'A class fulfils an interface contract. Dashed line with a hollow triangle at the interface. PlantUML: Tree ..|> Photosynthetic',
+            alt: 'Realization example'
           }
         },
         composition: {
           symHTML: '<div class="sym-diamond-f" style="width:18px; height:18px;"></div>',
-          img: 'bark.jpg',
+          img: 'bark.webp',
           uk: {
             title: 'Композиція',
-            ex: 'Кора без стовбура не існує як окреме дерево.',
-            def: 'Повний ромб (PART-OF): частина зникає разом із цілим.',
+            ex: 'Знищили дерево: його кора припинила існування разом із ним. Окремо вона не живе і іншому дереву не належить.',
+            def: 'Зафарбований ромб біля цілого: частина належить лише одному цілому і живе стільки ж, скільки воно. PlantUML: Дерево *-- Кора',
             alt: 'Приклад композиції'
           },
           en: {
             title: 'Composition',
-            ex: 'Bark can’t be a standalone tree without the trunk.',
-            def: 'Filled diamond (PART-OF): the part dies with the whole.',
+            ex: 'Destroy the tree and its bark ceases to exist with it. It neither lives alone nor belongs to another tree.',
+            def: 'Filled diamond at the whole: the part belongs to exactly one whole and shares its lifetime. PlantUML: Tree *-- Bark',
             alt: 'Composition example'
           }
         },
         aggregation: {
           symHTML: '<div class="sym-diamond-e" style="width:18px; height:18px; border-width:3px;"></div>',
-          img: 'nest.jpg',
+          img: 'nest.webp',
           uk: {
             title: 'Агрегація',
-            ex: 'Гніздо можна перенести — воно лишається гніздом без цього дерева.',
-            def: 'Порожній ромб (HAS-A): ціле «має» частину, але вона жива сама.',
+            ex: 'Зрубали дерево: гніздо лишилось гніздом і може опинитись на іншому дереві.',
+            def: 'Порожній ромб біля цілого: частина може існувати окремо і переживати ціле. У UML 2 визначена слабко: у сумніві малюйте асоціацію. PlantUML: Дерево o-- Гніздо',
             alt: 'Приклад агрегації'
           },
           en: {
             title: 'Aggregation',
-            ex: 'Move the nest — it’s still a nest, just elsewhere.',
-            def: 'Hollow diamond (HAS-A): the whole “has” a part that can live on its own.',
+            ex: 'Cut the tree down: the nest is still a nest and may end up on another tree.',
+            def: 'Hollow diamond at the whole: the part can exist apart and outlive the whole. Loosely defined in UML 2: when in doubt draw an association. PlantUML: Tree o-- Nest',
             alt: 'Aggregation example'
           }
         },
         association: {
           symHTML: '<div style="font-size:24px; font-weight:bold; color:var(--line-color);">/</div>',
-          img: 'mushroom.jpg',
+          img: 'mushroom.webp',
           uk: {
             title: 'Асоціація',
-            ex: 'Дерево й гриб — різні істоти, але звʼязані через ґрунт чи місце.',
-            def: 'Звичайна лінія між рівноправними обʼєктами без «власності».',
+            ex: 'Мікориза: дерево і гриб «знають» одне одного і обмінюються через ґрунт. Одне дерево має багато грибів, і навпаки (* до *).',
+            def: 'Суцільна лінія: обʼєкти зберігають посилання один на одного. Може мати напрям, ролі й кратність. PlantUML: Дерево "*" -- "*" Гриб',
             alt: 'Приклад асоціації'
           },
           en: {
             title: 'Association',
-            ex: 'Tree and mushroom — different things, linked by place or soil.',
-            def: 'A simple peer-to-peer link, no ownership implied.',
+            ex: 'Mycorrhiza: tree and mushroom “know” each other and exchange through the soil. One tree, many mushrooms, and vice versa (* to *).',
+            def: 'Solid line: objects keep references to each other. May have direction, roles and multiplicity. PlantUML: Tree "*" -- "*" Mushroom',
             alt: 'Association example'
           }
         },
         dependency: {
-          symHTML: '<svg width="28" height="28" viewBox="0 0 28 28"><line x1="0" y1="28" x2="28" y2="0" stroke="var(--line-color)" stroke-width="3" stroke-dasharray="5,3"/></svg>',
-          img: 'sun.jpg',
+          symHTML: DASH_ARROW,
+          img: 'sun.webp',
           uk: {
             title: 'Залежність',
-            ex: 'Для фотосинтезу потрібне світло — короткий звʼязок, без «власності» сонцем.',
-            def: 'Пунктир (USES): один обʼєкт тимчасово потребує іншого для дії.',
+            ex: 'Фотосинтезу потрібне світло. Без сонця процес не йде, але сонце не «належить» дереву.',
+            def: 'Пунктирна стрілка до того, від кого залежать: тимчасове використання (параметр, виклик) без збереження посилання. PlantUML: Дерево ..> Сонце',
             alt: 'Приклад залежності'
           },
           en: {
             title: 'Dependency',
-            ex: 'Photosynthesis needs light — brief use, no “owning” the sun.',
-            def: 'Dashed arrow (USES): one object briefly needs another to act.',
+            ex: 'Photosynthesis needs light. No sun, no process, yet the tree does not own the sun.',
+            def: 'Dashed arrow toward what is depended on: temporary use (a parameter, a call) without keeping a reference. PlantUML: Tree ..> Sun',
             alt: 'Dependency example'
           }
         }
       };
+
+      data.plant = {
+        icon: 'potted_plant', img: null, symHTML: null,
+        uk: { title: 'Рослина (абстрактний клас)', ex: 'Дуб є деревом, дерево є рослиною. Кожен рівень додає своє, а успадковує все, що вище.', def: 'Предок «Дерева»: ланцюг успадкування можна тягнути вгору.', alt: '' },
+        en: { title: 'Plant (abstract class)', ex: 'An oak is a tree, a tree is a plant. Each level adds its own and inherits everything above.', def: 'Parent of Tree: the inheritance chain goes further up.', alt: '' }
+      };
+
+      var bankData = {
+        'b-account': { icon: 'account_balance', img: null,
+          uk: { title: 'Рахунок (абстрактний клас)', ex: 'Спільне для поточного, депозитного, карткового рахунків: номер, валюта, баланс, зарахувати, списати.', def: 'Центр схеми: абстрактний клас, екземплярів не має.', alt: '' },
+          en: { title: 'Account (abstract class)', ex: 'Shared by current, deposit and card accounts: number, currency, balance, credit, debit.', def: 'Center of the diagram: abstract class, never instantiated.', alt: '' } },
+        'b-deposit': { icon: 'savings', img: null,
+          uk: { title: 'Депозитний рахунок (клас-нащадок)', ex: 'Має все, що має «Рахунок», плюс своє: ставку і нарахування відсотків.', def: 'Різновид рахунку.', alt: '' },
+          en: { title: 'Deposit account (subclass)', ex: 'Has everything Account has plus its own: a rate and interest accrual.', def: 'A kind of account.', alt: '' } },
+        'b-product': { icon: 'category', img: null,
+          uk: { title: 'Банківський продукт (абстрактний клас)', ex: 'Рахунок, кредит, картка: усе це продукти з відкриттям, закриттям і тарифом.', def: 'Предок «Рахунку».', alt: '' },
+          en: { title: 'Bank product (abstract class)', ex: 'Account, loan, card: all products with opening, closing and a tariff.', def: 'Parent of Account.', alt: '' } },
+        'b-blockable': { icon: 'lock', img: null,
+          uk: { title: 'Можна заблокувати (інтерфейс)', ex: 'Його реалізують рахунок, картка, депозит. Фінмоніторинг працює з будь-чим «Можна заблокувати».', def: 'Інтерфейс: обіцянка поведінки без реалізації.', alt: '' },
+          en: { title: 'Blockable (interface)', ex: 'Realized by account, card, deposit. Financial monitoring works with anything Blockable.', def: 'Interface: a promise of behavior without implementation.', alt: '' } },
+        'b-entry': { icon: 'receipt_long', img: null,
+          uk: { title: 'Операція по рахунку', ex: 'Операція ніколи не належить двом рахункам. Закрили рахунок: операції архівуються разом із ним.', def: 'Частина, що живе лише всередині свого рахунку (композиція).', alt: '' },
+          en: { title: 'Account entry', ex: 'An entry never belongs to two accounts. Close the account and its entries are archived with it.', def: 'A part that lives only inside its account (composition).', alt: '' } },
+        'b-card': { icon: 'credit_card', img: null,
+          uk: { title: 'Картка', ex: 'Картку можна перевʼязати до іншого рахунку або перевипустити. Закриття рахунку не знищує її.', def: 'Привʼязана до рахунку, але живе своїм життям (агрегація).', alt: '' },
+          en: { title: 'Card', ex: 'A card can be re-linked to another account or reissued. Closing the account does not destroy it.', def: 'Linked to an account, yet has a life of its own (aggregation).', alt: '' } },
+        'b-customer': { icon: 'person', img: null,
+          uk: { title: 'Клієнт', ex: 'Клієнт має 1..* рахунків, рахунок належить 1 клієнту. Обидва зберігають посилання один на одного.', def: 'Самостійний клас, повʼязаний з рахунком (асоціація).', alt: '' },
+          en: { title: 'Customer', ex: 'A customer has 1..* accounts, an account belongs to 1 customer. Both keep references.', def: 'An independent class linked to the account (association).', alt: '' } },
+        'b-controller': { icon: 'hub', img: null,
+          uk: { title: 'Контролер платежів', ex: 'У «обробити(платіж)» дістає рахунок, викликає списати() і забуває про нього.', def: 'Використовує рахунок на час однієї дії (залежність).', alt: '' },
+          en: { title: 'Payment controller', ex: 'In handle(payment) it fetches the account, calls debit() and forgets it.', def: 'Uses an account for the duration of one action (dependency).', alt: '' } },
+        inheritance: { symHTML: HOLLOW_TRI, img: null, icon: 'savings',
+          uk: { title: 'Успадкування', ex: 'Спільне для всіх рахунків у «Рахунку»; «Депозитний рахунок» додає ставку і відсотки. Рахунок у свою чергу є банківським продуктом.', def: '«Це є різновид того» (IS-A). Трикутник біля предка. PlantUML: Deposit --|> Account', alt: '' },
+          en: { title: 'Inheritance', ex: 'What all accounts share lives in Account; Deposit account adds a rate and interest. Account in turn is a bank product.', def: '“This is a kind of that” (IS-A). Triangle at the parent. PlantUML: Deposit --|> Account', alt: '' } },
+        realization: { symHTML: HOLLOW_TRI_DASH, img: null, icon: 'lock',
+          uk: { title: 'Реалізація', ex: '«Рахунок» виконує контракт «Можна заблокувати». Нащадки теж, і фінмоніторинг працює через контракт, не знаючи реалізації.', def: 'Клас виконує контракт інтерфейсу. Пунктир із порожнім трикутником біля інтерфейсу. PlantUML: Account ..|> Blockable', alt: '' },
+          en: { title: 'Realization', ex: 'Account fulfils the Blockable contract. Subclasses do too, and monitoring works through the contract without knowing the implementation.', def: 'A class fulfils an interface contract. Dashed line, hollow triangle at the interface. PlantUML: Account ..|> Blockable', alt: '' } },
+        composition: { symHTML: '<div class="sym-diamond-f" style="width:18px; height:18px;"></div>', img: null, icon: 'receipt_long',
+          uk: { title: 'Композиція', ex: 'Закрили рахунок: операції архівуються разом із ним. Операція ніколи не належить двом рахункам.', def: 'Зафарбований ромб біля цілого. У БД: FK NOT NULL + ON DELETE CASCADE. PlantUML: Account "1" *-- "*" Entry', alt: '' },
+          en: { title: 'Composition', ex: 'Close the account and its entries are archived with it. An entry never belongs to two accounts.', def: 'Filled diamond at the whole. In a DB: FK NOT NULL + ON DELETE CASCADE. PlantUML: Account "1" *-- "*" Entry', alt: '' } },
+        aggregation: { symHTML: '<div class="sym-diamond-e" style="width:18px; height:18px; border-width:3px;"></div>', img: null, icon: 'credit_card',
+          uk: { title: 'Агрегація', ex: 'Картку перевʼязали до іншого рахунку або перевипустили: вона лишилась карткою.', def: 'Порожній ромб біля цілого. У БД: FK NULL + ON DELETE SET NULL. PlantUML: Account "0..1" o-- "0..*" Card', alt: '' },
+          en: { title: 'Aggregation', ex: 'Re-link the card to another account or reissue it: it is still a card.', def: 'Hollow diamond at the whole. In a DB: FK NULL + ON DELETE SET NULL. PlantUML: Account "0..1" o-- "0..*" Card', alt: '' } },
+        association: { symHTML: '<div style="font-size:24px; font-weight:bold; color:var(--line-color);">/</div>', img: null, icon: 'person',
+          uk: { title: 'Асоціація', ex: 'Клієнт має 1..* рахунків, рахунок належить 1 клієнту. Обидва зберігають посилання один на одного.', def: 'Суцільна лінія з кратністю. У БД: FK customer_id у таблиці рахунків. PlantUML: Customer "1" -- "1..*" Account', alt: '' },
+          en: { title: 'Association', ex: 'A customer has 1..* accounts, an account belongs to 1 customer. Both keep references.', def: 'Solid line with multiplicity. In a DB: FK customer_id in the accounts table. PlantUML: Customer "1" -- "1..*" Account', alt: '' } },
+        dependency: { symHTML: DASH_ARROW, img: null, icon: 'hub',
+          uk: { title: 'Залежність', ex: 'Контролер платежів у обробити(платіж) отримує рахунок, викликає списати() і не зберігає його.', def: 'Пунктирна стрілка від залежного (контролер) до постачальника (рахунок). PlantUML: Controller ..> Account', alt: '' },
+          en: { title: 'Dependency', ex: 'In handle(payment) the controller gets an account, calls debit() and keeps no reference.', def: 'Dashed arrow from the dependent (controller) to the supplier (account). PlantUML: Controller ..> Account', alt: '' } }
+      };
+
+      function currentDomain() {
+        return document.documentElement.getAttribute('data-domain') === 'bank' ? 'bank' : 'forest';
+      }
 
       function currentLang() {
         return document.documentElement.getAttribute('data-lang') === 'en' ? 'en' : 'uk';
@@ -1475,6 +2515,7 @@
         if (item[L]) {
           return {
             sym: item.sym,
+            icon: item.icon,
             symHTML: item.symHTML,
             img: item.img,
             title: item[L].title,
@@ -1488,8 +2529,8 @@
 
       function applyImgAlts() {
         var L = currentLang();
-        document.querySelectorAll('img[data-alt-uk]').forEach(function (img) {
-          var v = L === 'en' ? img.getAttribute('data-alt-en') : img.getAttribute('data-alt-uk');
+        document.querySelectorAll('img[data-alt-ua]').forEach(function (img) {
+          var v = L === 'en' ? img.getAttribute('data-alt-en') : img.getAttribute('data-alt-ua');
           img.setAttribute('alt', v || '');
         });
       }
@@ -1524,6 +2565,8 @@
       var mdHelpAnchor = document.getElementById('md-help-anchor');
       var mdHelpChip = document.getElementById('md-help-chip');
       var toggleLangBtn = document.getElementById('toggle-lang');
+      var toggleDomainBtn = document.getElementById('toggle-domain');
+      var domainChipIcon = document.getElementById('domain-chip-icon');
       var toggleThemeBtn = document.getElementById('toggle-theme');
       var toggleLangLabel = document.getElementById('toggle-lang-label');
       var themeChipIcon = document.getElementById('theme-chip-icon');
@@ -1553,6 +2596,13 @@
         if (mdHelpChip) {
           mdHelpChip.setAttribute('aria-label', isEn ? 'Diagram help' : 'Довідка про діаграму');
         }
+        var isBank = currentDomain() === 'bank';
+        if (domainChipIcon) domainChipIcon.textContent = isBank ? 'account_balance' : 'forest';
+        if (toggleDomainBtn) {
+          toggleDomainBtn.setAttribute('aria-label', isEn
+            ? (isBank ? 'Example: bank. Switch to forest' : 'Example: forest. Switch to bank')
+            : (isBank ? 'Приклад: банк. Перемкнути на ліс' : 'Приклад: ліс. Перемкнути на банк'));
+        }
         var oc = document.getElementById('overlayClose');
         if (oc) oc.setAttribute('aria-label', isEn ? 'Close' : 'Закрити');
         if (scrollTopBtn) scrollTopBtn.setAttribute('aria-label', isEn ? 'Scroll to top' : 'Вгору');
@@ -1564,12 +2614,21 @@
         applyImgAlts();
         applyInteractAria();
         refreshOpenOverlay();
+        if (typeof renderDynamicSections === 'function') renderDynamicSections();
       }
 
       function setTheme(mode) {
         if (mode !== 'light' && mode !== 'dark') mode = 'dark';
         document.documentElement.setAttribute('data-theme', mode);
         try { localStorage.setItem(THEME_KEY, mode); } catch (e) {}
+        syncChrome();
+      }
+
+      function setDomain(d) {
+        if (d !== 'forest' && d !== 'bank') d = 'forest';
+        document.documentElement.setAttribute('data-domain', d);
+        try { localStorage.setItem(DOMAIN_KEY, d); } catch (e) {}
+        if (pinnedAnchor) unpinDesktop();
         syncChrome();
       }
 
@@ -1751,24 +2810,34 @@
       }
 
       function openOverlay(key) {
-        var item = pickLocStrings(data[key]);
+        var raw = (currentDomain() === 'bank' && bankData[key]) ? bankData[key] : data[key];
+        var item = pickLocStrings(raw);
         if (!item) return;
 
         var symEl = document.getElementById('ovSym');
-        if (item.sym) {
-          symEl.textContent = '';
-          symEl.innerHTML = '';
+        if (item.symHTML) {
+          symEl.innerHTML = item.symHTML;
+        } else if (item.icon) {
+          symEl.innerHTML = '<span class="material-symbols-rounded" style="font-size:30px;color:var(--tree-dark)">' + item.icon + '</span>';
+        } else if (item.sym) {
           symEl.textContent = item.sym;
         } else {
-          symEl.innerHTML = item.symHTML;
+          symEl.innerHTML = '';
         }
 
         document.getElementById('ovTitle').textContent = item.title;
         document.getElementById('ovEx').textContent = item.ex;
         document.getElementById('ovDef').textContent = item.def;
         var img = document.getElementById('ovImg');
-        img.src = item.img;
-        img.alt = item.alt;
+        if (item.img) {
+          img.src = item.img;
+          img.alt = item.alt;
+          img.hidden = false;
+        } else {
+          img.removeAttribute('src');
+          img.alt = '';
+          img.hidden = true;
+        }
 
         overlay.setAttribute('data-open-key', key);
         overlay.classList.add('is-open');
@@ -1795,10 +2864,13 @@
       function initState() {
         var t = null;
         var l = null;
+        var d = null;
         try { t = localStorage.getItem(THEME_KEY); } catch (e) {}
         try { l = localStorage.getItem(LANG_KEY); } catch (e) {}
+        try { d = localStorage.getItem(DOMAIN_KEY); } catch (e) {}
         setTheme(t === 'light' || t === 'dark' ? t : 'dark');
         setLang(l === 'en' || l === 'uk' ? l : 'uk');
+        setDomain(d === 'bank' ? 'bank' : 'forest');
       }
 
       function updateScrollTop() {
@@ -1817,43 +2889,51 @@
         }
       }
 
-      diagram.addEventListener('click', function (e) {
+      function activateFromEvent(e) {
         var btnInteract = e.target.closest('[data-interact]');
 
         if (mqMobile()) {
-          if (!btnInteract) return;
-          e.preventDefault();
+          if (!btnInteract) return false;
           handleInteraction(btnInteract.getAttribute('data-interact'));
-          return;
+          return true;
         }
 
         var pinHost = e.target.closest('.entity, .sym');
-        if (!pinHost || !pinHost.querySelector('.desktop-hint')) return;
-
+        if (!pinHost || !pinHost.querySelector('.desktop-hint')) return false;
         var hintEl = pinHost.querySelector('.desktop-hint');
-        e.preventDefault();
-        e.stopPropagation();
 
         if (pinnedAnchor === pinHost) {
           unpinDesktop();
-          return;
+          return true;
         }
-
         pinDesktop(pinHost, hintEl);
+        return true;
+      }
+
+      diagram.addEventListener('click', function (e) {
+        if (activateFromEvent(e)) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
       });
 
       diagram.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter' && e.key !== ' ') return;
-        var btnInteract = e.target.closest('[data-interact]');
-        if (!btnInteract) return;
+        if (!e.target.closest('[data-interact]')) return;
         e.preventDefault();
-        if (mqMobile()) handleInteraction(btnInteract.getAttribute('data-interact'));
+        activateFromEvent(e);
       });
 
       toggleThemeBtn.addEventListener('click', function () {
         var cur = document.documentElement.getAttribute('data-theme');
         setTheme(cur === 'dark' ? 'light' : 'dark');
       });
+
+      if (toggleDomainBtn) {
+        toggleDomainBtn.addEventListener('click', function () {
+          setDomain(currentDomain() === 'bank' ? 'forest' : 'bank');
+        });
+      }
 
       toggleLangBtn.addEventListener('click', function () {
         var cur = document.documentElement.getAttribute('data-lang');
@@ -1921,6 +3001,229 @@
 
       window.addEventListener('scroll', onViewportChange, true);
       window.addEventListener('resize', onViewportChange);
+
+
+      /* ===================== Reference sections: wizard, quiz, copy ===================== */
+
+      var REL_NAME = {
+        inheritance: { uk: 'Успадкування', en: 'Inheritance', puml: 'A --|> B' },
+        realization: { uk: 'Реалізація', en: 'Realization', puml: 'A ..|> B' },
+        composition: { uk: 'Композиція', en: 'Composition', puml: 'B *-- A' },
+        aggregation: { uk: 'Агрегація', en: 'Aggregation', puml: 'B o-- A' },
+        association: { uk: 'Асоціація', en: 'Association', puml: 'A "1" -- "*" B' },
+        dependency: { uk: 'Залежність', en: 'Dependency', puml: 'A ..> B' },
+        none: { uk: 'Звʼязку немає', en: 'No relationship', puml: '' }
+      };
+
+      var WIZ = {
+        q1: {
+          uk: { q: 'A є різновидом B?', hint: 'Дуб є деревом. Картковий платіж є платежем.' },
+          en: { q: 'Is A a kind of B?', hint: 'An oak is a tree. A card payment is a payment.' },
+          yes: 'q1b', no: 'q2'
+        },
+        q1b: {
+          uk: { q: 'B лише описує контракт (що вміє), без власної реалізації?', hint: 'Інтерфейс «Можна скасувати», «Фотосинтезуючий». Якщо B має свої поля і поведінку, це клас.' },
+          en: { q: 'Is B only a contract (what it can do) with no implementation of its own?', hint: 'Interface Cancellable, Photosynthetic. If B has its own fields and behavior, it is a class.' },
+          yes: 'r:realization', no: 'r:inheritance'
+        },
+        q2: {
+          uk: { q: 'A є частиною B?', hint: 'Кора є частиною дерева. Рядок є частиною замовлення.' },
+          en: { q: 'Is A a part of B?', hint: 'Bark is part of a tree. A line is part of an order.' },
+          yes: 'q2b', no: 'q3'
+        },
+        q2b: {
+          uk: { q: 'Знищили B: A зникає разом із ним і належить лише цьому B?', hint: 'Видалили замовлення: рядки зникли. Гніздо ж переживе дерево.' },
+          en: { q: 'Destroy B: does A vanish with it and belong to this B only?', hint: 'Delete the order: its lines vanish. A nest, though, outlives the tree.' },
+          yes: 'r:composition', no: 'r:aggregation'
+        },
+        q3: {
+          uk: { q: 'A довго зберігає посилання на B (поле, атрибут, FK)?', hint: 'Замовлення зберігає клієнта. Дерево «знає» свої гриби через ґрунт.' },
+          en: { q: 'Does A keep a lasting reference to B (field, attribute, FK)?', hint: 'An order stores its customer. The tree “knows” its mushrooms through the soil.' },
+          yes: 'r:association', no: 'q4'
+        },
+        q4: {
+          uk: { q: 'A потребує B лише на час дії: параметр, локальна змінна, виклик?', hint: 'Сервіс звітів викликає PDF-експортер і забуває про нього. Дерево користується сонцем для фотосинтезу.' },
+          en: { q: 'Does A need B only during an action: a parameter, a local variable, a call?', hint: 'The report service calls the PDF exporter and forgets it. The tree uses the sun for photosynthesis.' },
+          yes: 'r:dependency', no: 'r:none'
+        }
+      };
+
+      var WIZ_RESULT = {
+        inheritance: { uk: 'Суцільна лінія від A до B, порожній трикутник біля B (предка).', en: 'Solid line from A to B, hollow triangle at B (the parent).' },
+        realization: { uk: 'Пунктир від A до B, порожній трикутник біля інтерфейсу B.', en: 'Dashed line from A to B, hollow triangle at interface B.' },
+        composition: { uk: 'Зафарбований ромб біля цілого B. Кратність біля B дорівнює 1.', en: 'Filled diamond at whole B. Multiplicity at B is 1.' },
+        aggregation: { uk: 'Порожній ромб біля цілого B. У сумніві малюйте звичайну асоціацію.', en: 'Hollow diamond at whole B. When in doubt draw a plain association.' },
+        association: { uk: 'Суцільна лінія. Додайте кратність на обох кінцях і, за потреби, стрілку навігації.', en: 'Solid line. Add multiplicity on both ends and, if needed, a navigability arrow.' },
+        dependency: { uk: 'Пунктирна стрілка від A до B. Зміна B може зламати A.', en: 'Dashed arrow from A to B. A change in B may break A.' },
+        none: { uk: 'На діаграмі класів такий звʼязок не малюють. Можливо, A і B повʼязані через третій клас.', en: 'No line on the class diagram. A and B may be linked through a third class.' }
+      };
+
+      var wizardEl = document.getElementById('wizard');
+      var wizState = { node: 'q1', trail: [] };
+
+      function renderWizard() {
+        if (!wizardEl) return;
+        var L = currentLang();
+        var html = '';
+        if (wizState.node.indexOf('r:') === 0) {
+          var key = wizState.node.slice(2);
+          var name = REL_NAME[key][L];
+          html += '<div class="wz-result"><h3>' + name + '</h3><p>' + WIZ_RESULT[key][L] + '</p>';
+          if (REL_NAME[key].puml) html += '<p><code>' + REL_NAME[key].puml.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</code></p>';
+          html += '</div>';
+          if (wizState.trail.length) {
+            html += '<p class="wz-trail">' + (L === 'en' ? 'Path: ' : 'Шлях: ') + wizState.trail.map(function (t) {
+              return WIZ[t.node][L].q + ' → ' + (t.answer === 'yes' ? (L === 'en' ? 'yes' : 'так') : (L === 'en' ? 'no' : 'ні'));
+            }).join(' · ') + '</p>';
+          }
+          html += '<div class="wz-actions"><button type="button" class="btn btn-primary" data-wz="restart">' + (L === 'en' ? 'Start over' : 'Спочатку') + '</button></div>';
+        } else {
+          var node = WIZ[wizState.node];
+          html += '<div class="wz-step">' + (L === 'en' ? 'Question ' : 'Питання ') + (wizState.trail.length + 1) + '</div>';
+          html += '<p class="wz-q">' + node[L].q + '</p>';
+          html += '<p class="wz-hint">' + node[L].hint + '</p>';
+          html += '<div class="wz-actions">' +
+            '<button type="button" class="btn btn-primary" data-wz="yes">' + (L === 'en' ? 'Yes' : 'Так') + '</button>' +
+            '<button type="button" class="btn" data-wz="no">' + (L === 'en' ? 'No' : 'Ні') + '</button>' +
+            (wizState.trail.length ? '<button type="button" class="btn" data-wz="back">' + (L === 'en' ? 'Back' : 'Назад') + '</button>' : '') +
+            '</div>';
+        }
+        wizardEl.innerHTML = html;
+      }
+
+      if (wizardEl) {
+        wizardEl.addEventListener('click', function (e) {
+          var b = e.target.closest('[data-wz]');
+          if (!b) return;
+          var a = b.getAttribute('data-wz');
+          if (a === 'restart') { wizState = { node: 'q1', trail: [] }; }
+          else if (a === 'back') { var last = wizState.trail.pop(); if (last) wizState.node = last.node; }
+          else { wizState.trail.push({ node: wizState.node, answer: a }); wizState.node = WIZ[wizState.node][a]; }
+          renderWizard();
+          var first = wizardEl.querySelector('button');
+          if (first) first.focus();
+        });
+      }
+
+      var QUIZ = [
+        { a: 'composition',
+          uk: { q: 'Видалили замовлення, і всі його рядки зникли з бази. Рядок ніколи не належить двом замовленням.', x: 'Частина не живе без цілого і належить лише йому: композиція. У БД це FK NOT NULL з ON DELETE CASCADE.' },
+          en: { q: 'An order was deleted and all its lines vanished from the database. A line never belongs to two orders.', x: 'The part cannot live without the whole and belongs to it alone: composition. In a DB: FK NOT NULL with ON DELETE CASCADE.' } },
+        { a: 'aggregation',
+          uk: { q: 'Гравець входить до команди, але після розформування команди лишається гравцем і може перейти в іншу.', x: 'Частина переживає ціле і може бути в іншому цілому: агрегація. Багато команд тут малюють просто асоціацію, і це теж правильно.' },
+          en: { q: 'A player belongs to a team, but after the team is disbanded he is still a player and can join another.', x: 'The part outlives the whole and can sit in another whole: aggregation. Many teams draw a plain association here, which is also fine.' } },
+        { a: 'inheritance',
+          uk: { q: 'Депозитний рахунок має все, що має будь-який рахунок, плюс відсоткову ставку.', x: '«Є різновидом» плюс спільні властивості від предка: успадкування. Трикутник біля «Рахунку».' },
+          en: { q: 'A deposit account has everything any account has, plus an interest rate.', x: '“Is a kind of” plus shared properties from the parent: inheritance. Triangle at Account.' } },
+        { a: 'realization',
+          uk: { q: 'Клас «Платіж» зобовʼязується мати метод «скасувати», як того вимагає контракт «Можна скасувати». Сам контракт коду не містить.', x: 'Контракт без реалізації, який клас виконує: реалізація. Пунктир із порожнім трикутником біля інтерфейсу.' },
+          en: { q: 'Class Payment commits to having a cancel() method as required by the Cancellable contract. The contract itself holds no code.', x: 'A contract without implementation that the class fulfils: realization. Dashed line with a hollow triangle at the interface.' } },
+        { a: 'association',
+          uk: { q: 'Клієнт зберігає список своїх замовлень, а замовлення зберігає посилання на клієнта. Жодне не є частиною іншого.', x: 'Довготривалі посилання без відношення частина-ціле: асоціація з кратністю 1 — *.' },
+          en: { q: 'A customer keeps a list of their orders, and an order keeps a reference to the customer. Neither is part of the other.', x: 'Lasting references without part-whole: association with multiplicity 1 — *.' } },
+        { a: 'dependency',
+          uk: { q: 'Сервіс звітів в одному методі створює PDF-експортер, викликає його і не зберігає посилання.', x: 'Тимчасове використання без поля: залежність. Пунктирна стрілка від сервісу до експортера.' },
+          en: { q: 'In one method the report service creates a PDF exporter, calls it and keeps no reference.', x: 'Temporary use without a field: dependency. Dashed arrow from the service to the exporter.' } },
+        { a: 'association',
+          uk: { q: 'Викладач читає кілька курсів, і кожен курс можуть читати кілька викладачів.', x: 'Багато до багатьох без володіння: асоціація * — *. У БД це проміжна таблиця.' },
+          en: { q: 'A teacher teaches several courses, and each course can be taught by several teachers.', x: 'Many-to-many without ownership: association * — *. In a DB: a join table.' } },
+        { a: 'composition',
+          uk: { q: 'Закрили банківський рахунок: усі операції по ньому архівуються разом із ним і без рахунку не мають сенсу.', x: 'Операція існує лише в межах свого рахунку: композиція. Кратність біля рахунку дорівнює 1.' },
+          en: { q: 'A bank account was closed: all its entries are archived with it and make no sense without the account.', x: 'An entry exists only within its account: composition. Multiplicity at the account is 1.' } }
+      ];
+      var QUIZ_ORDER = ['inheritance', 'realization', 'composition', 'aggregation', 'association', 'dependency'];
+      var quizEl = document.getElementById('quiz');
+      var quizScoreEl = document.getElementById('quiz-score');
+      var quizAnswers = {};
+
+      function renderQuiz() {
+        if (!quizEl) return;
+        var L = currentLang();
+        var html = '';
+        QUIZ.forEach(function (item, i) {
+          var given = quizAnswers[i];
+          html += '<div class="quiz-card' + (given ? ' answered' : '') + '" data-qi="' + i + '">';
+          html += '<div class="q-num">' + (L === 'en' ? 'Situation ' : 'Ситуація ') + (i + 1) + ' / ' + QUIZ.length + '</div>';
+          html += '<p class="q-text">' + item[L].q + '</p><div class="q-opts">';
+          QUIZ_ORDER.forEach(function (k) {
+            var cls = 'q-opt';
+            if (given) {
+              if (k === item.a) cls += ' is-correct';
+              else if (k === given) cls += ' is-wrong';
+            }
+            html += '<button type="button" class="' + cls + '" data-qa="' + k + '"' + (given ? ' disabled' : '') + '>' + REL_NAME[k][L] + '</button>';
+          });
+          html += '</div><p class="q-expl">' + (given ? ((given === item.a) ? (L === 'en' ? '✔ Correct. ' : '✔ Правильно. ') : (L === 'en' ? '✘ Not quite. ' : '✘ Не зовсім. ')) : '') + item[L].x + '</p></div>';
+        });
+        quizEl.innerHTML = html;
+        var answered = Object.keys(quizAnswers).length;
+        var correct = 0;
+        Object.keys(quizAnswers).forEach(function (i) { if (quizAnswers[i] === QUIZ[i].a) correct++; });
+        if (quizScoreEl) {
+          quizScoreEl.innerHTML = answered
+            ? ('<span>' + (L === 'en' ? 'Score: ' : 'Результат: ') + correct + ' / ' + answered + (answered < QUIZ.length ? (L === 'en' ? ' answered' : ' відповідей') : '') + '</span>' +
+               '<button type="button" class="btn" id="quiz-reset">' + (L === 'en' ? 'Reset' : 'Скинути') + '</button>')
+            : '';
+        }
+      }
+
+      if (quizEl) {
+        quizEl.addEventListener('click', function (e) {
+          var b = e.target.closest('[data-qa]');
+          if (!b || b.disabled) return;
+          var card = b.closest('[data-qi]');
+          var i = card.getAttribute('data-qi');
+          quizAnswers[i] = b.getAttribute('data-qa');
+          renderQuiz();
+          var next = quizEl.querySelector('[data-qi="' + (parseInt(i, 10) + 1) + '"] .q-opt');
+          var expl = quizEl.querySelector('[data-qi="' + i + '"] .q-expl');
+          if (expl) expl.setAttribute('tabindex', '-1');
+          if (expl) expl.focus({ preventScroll: true });
+          void next;
+        });
+      }
+      if (quizScoreEl) {
+        quizScoreEl.addEventListener('click', function (e) {
+          if (!e.target.closest('#quiz-reset')) return;
+          quizAnswers = {};
+          renderQuiz();
+          quizEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+
+      function renderDynamicSections() {
+        renderWizard();
+        renderQuiz();
+      }
+
+      document.querySelectorAll('[data-copy]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var src = document.getElementById(btn.getAttribute('data-copy'));
+          if (!src) return;
+          var text = src.textContent;
+          var L = currentLang();
+          var done = function () {
+            var old = btn.innerHTML;
+            btn.textContent = L === 'en' ? 'Copied' : 'Скопійовано';
+            setTimeout(function () { btn.innerHTML = old; }, 1600);
+          };
+          var fallback = function () {
+            var r = document.createRange();
+            r.selectNodeContents(src);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(r);
+            try { document.execCommand('copy'); done(); } catch (err) {}
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, fallback);
+          } else {
+            fallback();
+          }
+        });
+      });
+
+      renderDynamicSections();
 
       initState();
       updateScrollTop();
