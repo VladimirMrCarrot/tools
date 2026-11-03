@@ -1248,9 +1248,9 @@
       scroll-margin-top: 62px;
     }
     .ref + .ref { border-top: 1px solid var(--border-subtle); }
-    /* phones: the cheat sheet lives inside the relationship cards (tap a symbol) */
-    @media (max-width: 900px) {
-      #cheatsheet { display: none; }
+    /* phones only (640px and below): the cheat sheet lives inside the relationship cards (tap a symbol) */
+    @media (max-width: 640px) {
+      #cheatsheet, .hide-on-phone { display: none !important; }
     }
     .decide-steps {
       margin: 18px 0 0;
@@ -1322,7 +1322,7 @@
     /* cheat sheet cards */
     .rel-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
       gap: 14px;
     }
     .rel-card {
@@ -1964,7 +1964,7 @@
 
   <nav class="section-nav" id="section-nav" aria-label="Розділи сторінки">
     <a href="#top" data-section="top"><span class="material-symbols-rounded" aria-hidden="true">account_tree</span><span data-ua>Діаграма</span><span data-en>Diagram</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
-    <a href="#cheatsheet" data-section="cheatsheet" class="hide-on-mobile"><span class="material-symbols-rounded" aria-hidden="true">menu_book</span><span data-ua>Довідник</span><span data-en>Cheat sheet</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
+    <a href="#cheatsheet" data-section="cheatsheet" class="hide-on-phone"><span class="material-symbols-rounded" aria-hidden="true">menu_book</span><span data-ua>Довідник</span><span data-en>Cheat sheet</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
     <a href="#multiplicity" data-section="multiplicity"><span class="material-symbols-rounded" aria-hidden="true">numbers</span><span data-ua>Кратність</span><span data-en>Multiplicity</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
     <a href="#plantuml" data-section="plantuml"><span class="material-symbols-rounded" aria-hidden="true">code</span>PlantUML<span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
     <a href="#database" data-section="database"><span class="material-symbols-rounded" aria-hidden="true">database</span><span data-ua>У базі даних</span><span data-en>In a database</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
@@ -3299,7 +3299,7 @@ CREATE TABLE tree_mushroom (
         var cur = 'top';
         navSections.forEach(function (sec, i) {
           if (!sec) return;
-          if (mqMobile() && sec.id === 'cheatsheet') return;
+          if (sec.id === 'cheatsheet' && window.matchMedia('(max-width: 640px)').matches) return;
           var r = sec.getBoundingClientRect();
           if (r.top <= line) cur = navLinks[i].getAttribute('data-section');
         });
