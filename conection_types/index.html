@@ -1354,7 +1354,7 @@
     /* cheat sheet cards */
     .rel-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, max(300px, calc((100% - 14px) / 2))), 1fr)); /* at most 2 per row */
       gap: 14px;
     }
     .rel-card {
