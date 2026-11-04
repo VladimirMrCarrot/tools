@@ -216,9 +216,11 @@
       color: color-mix(in srgb, var(--accent) 85%, var(--text));
     }
 
-    .md-chip:hover {
-      background: color-mix(in srgb, var(--bg-elevated) 82%, var(--accent));
-      color: var(--text);
+    @media (hover: hover) {
+      .md-chip:hover {
+        background: color-mix(in srgb, var(--bg-elevated) 82%, var(--accent));
+        color: var(--text);
+      }
     }
 
     .md-chip:focus-visible {
@@ -335,9 +337,11 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.25);
     }
 
-    .toggle-chip:hover {
-      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
-      color: var(--accent);
+    @media (hover: hover) {
+      .toggle-chip:hover {
+        border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+        color: var(--accent);
+      }
     }
 
     .toggle-chip:focus-visible {
@@ -1095,7 +1099,9 @@
       transition: color 160ms ease, border-color 160ms ease;
     }
 
-    .overlay-close:hover { color: var(--accent); border-color: var(--accent); }
+    @media (hover: hover) {
+      .overlay-close:hover { color: var(--accent); border-color: var(--accent); }
+    }
     .overlay-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     .ov-header {
@@ -1173,20 +1179,20 @@
 
     .scroll-top-btn {
       position: fixed;
-      right: 18px;
-      bottom: 18px;
+      right: max(18px, env(safe-area-inset-right, 0px));
+      bottom: calc(18px + env(safe-area-inset-bottom, 0px));
       width: 44px;
       height: 44px;
       border: 1px solid var(--border-subtle);
       border-radius: 50%;
       background: var(--bg-elevated);
       color: var(--text);
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: 0 2px 10px rgba(0,0,0,0.18);
       cursor: pointer;
-      z-index: 150;
+      z-index: 1600;
       transition: opacity 180ms ease, transform 180ms ease, color 180ms ease;
       opacity: 0;
       transform: translateY(8px);
@@ -1199,7 +1205,9 @@
       pointer-events: auto;
     }
 
-    .scroll-top-btn:hover { color: var(--accent); }
+    @media (hover: hover) {
+      .scroll-top-btn:hover { color: var(--accent); }
+    }
     .scroll-top-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     @media (max-width: 768px) {
@@ -1258,7 +1266,9 @@
       text-decoration: none;
       transition: border-color 160ms ease, color 160ms ease;
     }
-    .section-nav a:hover { border-color: color-mix(in srgb, var(--accent) 45%, transparent); color: var(--accent); }
+    @media (hover: hover) {
+      .section-nav a:hover { border-color: color-mix(in srgb, var(--accent) 45%, transparent); color: var(--accent); }
+    }
     .section-nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .section-nav .material-symbols-rounded { font-size: 18px; }
 
@@ -1417,10 +1427,14 @@
       cursor: pointer;
       transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
     }
-    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    @media (hover: hover) {
+      .btn:hover { border-color: var(--accent); color: var(--accent); }
+    }
     .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .btn-primary { background: var(--accent); color: #1a1917; border-color: transparent; }
-    .btn-primary:hover { background: var(--accent-hover); color: #1a1917; }
+    @media (hover: hover) {
+      .btn-primary:hover { background: var(--accent-hover); color: #1a1917; }
+    }
 
     /* tables */
     .tbl-wrap { border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--bg-elevated); min-width: 0; }
@@ -1511,6 +1525,105 @@
     [data-theme="dark"] .diag-preview.is-mmd .mmd-status { color: var(--text-soft); }
     .diag-preview .open-full { display: inline-block; margin-top: 8px; font-size: 0.85rem; color: #6b6a67; }
 
+    /* preview: tap to open, pinch / drag / wheel to zoom and pan */
+    .diag-preview img, .diag-preview .mmd-out { cursor: zoom-in; }
+    .diag-preview .zoom-hint { display: block; margin-top: 6px; font-size: 0.8rem; color: #6b6a67; }
+    [data-theme="dark"] .diag-preview.is-mmd .zoom-hint { color: var(--text-soft); }
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483100;
+      background: rgba(10, 10, 10, 0.92);
+      display: none;
+      touch-action: none;
+      overscroll-behavior: contain;
+    }
+    .lightbox.is-open { display: block; }
+    .lightbox .lb-stage { position: absolute; inset: 0; overflow: hidden; cursor: grab; touch-action: none; }
+    .lightbox .lb-stage.is-dragging { cursor: grabbing; }
+    .lightbox .lb-content {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform-origin: 0 0;
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 12px;
+      will-change: transform;
+    }
+    .lightbox .lb-content.is-dark { background: #1c1b19; }
+    .lightbox .lb-content img, .lightbox .lb-content svg { display: block; max-width: none !important; height: auto; }
+    .lightbox .lb-bar {
+      position: absolute;
+      top: calc(12px + env(safe-area-inset-top, 0px));
+      right: 12px;
+      display: flex;
+      gap: 8px;
+      z-index: 2;
+    }
+    .lightbox .lb-bar button {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(28,27,25,0.9);
+      color: #f1f1ef;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .lightbox .lb-bar button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .lightbox .lb-tip {
+      position: absolute;
+      left: 50%;
+      bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+      transform: translateX(-50%);
+      color: #cfcdc8;
+      font-size: 0.8rem;
+      background: rgba(28,27,25,0.8);
+      padding: 6px 12px;
+      border-radius: 999px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* long-press copy + toast */
+    .copy-toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+      transform: translate(-50%, 12px);
+      z-index: 2147483200;
+      background: var(--text);
+      color: var(--bg-page);
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 9px 16px;
+      border-radius: 999px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+    .copy-toast .material-symbols-rounded { font-size: 18px; }
+    .copy-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+    @media (max-width: 900px) {
+      .copy-toast { bottom: calc(16px + var(--mobile-dock-clearance)); }
+    }
+    .is-pressing { outline: 2px solid var(--accent); outline-offset: 2px; transition: outline-color 120ms ease; }
+    .copy-flash { animation: copyFlash 700ms ease; }
+    @keyframes copyFlash {
+      0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent); }
+      100% { box-shadow: 0 0 0 12px transparent; }
+    }
+    @media (hover: none) {
+      /* touch: a long press copies the whole block instead of starting a text selection */
+      .ref pre, .ref td.mono, .rel-card dd code { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    }
+
     /* code block with copy */
     .code-block { position: relative; display: flex; flex-direction: column; min-width: 0; }
     .code-block .copy-btn {
@@ -1548,7 +1661,9 @@
       cursor: pointer;
       transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
     }
-    .quiz-card .q-opt:hover { border-color: var(--accent); }
+    @media (hover: hover) {
+      .quiz-card .q-opt:hover { border-color: var(--accent); }
+    }
     .quiz-card .q-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .quiz-card .q-opt[disabled] { cursor: default; opacity: 0.6; }
     .quiz-card .q-opt.is-correct { background: color-mix(in srgb, #2e7d32 22%, var(--bg-page)); border-color: #2e7d32; opacity: 1; }
@@ -2425,13 +2540,15 @@ Controller ..> Account : залежність &lt;&lt;use&gt;&gt;
       <div class="diag-preview pane-preview" data-dl="puml">
         <img data-dom="forest" src="puml-forest.svg" width="768" height="361" loading="lazy" alt="" data-alt-ua="Рендер PlantUML: схема лісу" data-alt-en="PlantUML render: forest diagram">
         <img data-dom="bank" src="puml-bank.svg" width="734" height="378" loading="lazy" alt="" data-alt-ua="Рендер PlantUML: схема рахунку" data-alt-en="PlantUML render: account diagram">
+        <span class="zoom-hint"><span data-ua>Натисніть на схему, щоб збільшити</span><span data-en>Tap the diagram to zoom</span></span>
         <div>
           <a class="open-full" data-dom="forest" href="puml-forest.svg" target="_blank" rel="noopener"><span data-ua>Відкрити SVG окремо</span><span data-en>Open the SVG</span></a>
           <a class="open-full" data-dom="bank" href="puml-bank.svg" target="_blank" rel="noopener"><span data-ua>Відкрити SVG окремо</span><span data-en>Open the SVG</span></a>
         </div>
       </div>
       <div class="diag-preview pane-preview is-mmd" data-dl="mmd">
-        <div class="mmd-out" id="mmd-out"></div>
+        <div class="mmd-out" id="mmd-out" role="button" tabindex="0" aria-label="Збільшити схему"></div>
+        <span class="zoom-hint"><span data-ua>Натисніть на схему, щоб збільшити</span><span data-en>Tap the diagram to zoom</span></span>
         <p class="mmd-status" id="mmd-status" aria-live="polite"></p>
       </div>
       </div>
@@ -2540,6 +2657,18 @@ create table tree_mushroom (
   <button type="button" class="scroll-top-btn" id="scroll-top-btn" aria-label="Вгору">
     <span class="material-symbols-rounded" aria-hidden="true">keyboard_arrow_up</span>
   </button>
+
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Схема" aria-hidden="true">
+    <div class="lb-stage" id="lb-stage"><div class="lb-content" id="lb-content"></div></div>
+    <div class="lb-bar">
+      <button type="button" id="lb-out" aria-label="Зменшити"><span class="material-symbols-rounded" aria-hidden="true">remove</span></button>
+      <button type="button" id="lb-in" aria-label="Збільшити"><span class="material-symbols-rounded" aria-hidden="true">add</span></button>
+      <button type="button" id="lb-fit" aria-label="Вписати"><span class="material-symbols-rounded" aria-hidden="true">fit_screen</span></button>
+      <button type="button" id="lb-close" aria-label="Закрити"><span class="material-symbols-rounded" aria-hidden="true">close</span></button>
+    </div>
+    <div class="lb-tip"><span data-ua>Два пальці: масштаб · один: рухати · подвійний тап: ×2</span><span data-en>Two fingers: zoom · one: pan · double tap: ×2</span></div>
+  </div>
+  <div id="copy-toast" class="copy-toast" role="status" aria-live="polite"><span class="material-symbols-rounded" aria-hidden="true">content_copy</span><span id="copy-toast-text"></span></div>
 
   <div id="pin-focus-veil" class="pin-focus-veil" aria-hidden="true" hidden></div>
   <div id="sticky-tooltip" class="sticky-tooltip-root" role="tooltip" aria-hidden="true" hidden></div>
@@ -2987,6 +3116,12 @@ create table tree_mushroom (
             ? (isBank ? 'Example: bank. Switch to forest' : 'Example: forest. Switch to bank')
             : (isBank ? 'Приклад: банк. Перемкнути на ліс' : 'Приклад: ліс. Перемкнути на банк'));
         }
+        [['lb-out', 'Zoom out', 'Зменшити'], ['lb-in', 'Zoom in', 'Збільшити'], ['lb-fit', 'Fit', 'Вписати'], ['lb-close', 'Close', 'Закрити']].forEach(function (b) {
+          var el = document.getElementById(b[0]);
+          if (el) el.setAttribute('aria-label', isEn ? b[1] : b[2]);
+        });
+        var mo = document.getElementById('mmd-out');
+        if (mo) mo.setAttribute('aria-label', isEn ? 'Zoom the diagram' : 'Збільшити схему');
         var oc = document.getElementById('overlayClose');
         if (oc) oc.setAttribute('aria-label', isEn ? 'Close' : 'Закрити');
         if (scrollTopBtn) scrollTopBtn.setAttribute('aria-label', isEn ? 'Scroll to top' : 'Вгору');
@@ -3157,8 +3292,10 @@ create table tree_mushroom (
             ttLeft = Math.max(db.left + dInset, Math.min(ttLeft, db.right - tw - dInset));
             ttTop = Math.max(db.top + dInset, Math.min(ttTop, db.bottom - th - dInset));
 
-            stickyTooltip.style.left = Math.round(ttLeft) + 'px';
-            stickyTooltip.style.top = Math.round(ttTop) + 'px';
+            /* pin in page coordinates: the card stays where it opened, scrolling does not move it */
+            stickyTooltip.style.position = 'absolute';
+            stickyTooltip.style.left = Math.round(ttLeft + window.scrollX) + 'px';
+            stickyTooltip.style.top = Math.round(ttTop + window.scrollY) + 'px';
             stickyTooltip.style.removeProperty('visibility');
             stickyTooltip.classList.add('visible');
           });
@@ -3305,20 +3442,16 @@ create table tree_mushroom (
       }
 
       function updateScrollTop() {
-        if (window.innerWidth > 768) {
-          scrollTopBtn.classList.remove('visible');
-          return;
-        }
         var y = overlayIsOpen() ? overlay.scrollTop : window.scrollY;
         scrollTopBtn.classList.toggle('visible', y > 200);
       }
 
-      function onViewportChange() {
+      function onViewportChange(e) {
         updateScrollTop();
-        if (pinnedAnchor) {
-          if (mqMobile()) unpinDesktop();
-          else layoutStickyNearAnchor();
-        }
+        if (!pinnedAnchor) return;
+        if (mqMobile()) { unpinDesktop(); return; }
+        /* scrolling keeps the pinned card in place; only a resize re-lays it out */
+        if (e && e.type === 'resize') layoutStickyNearAnchor();
       }
 
       function activateFromEvent(e) {
@@ -3734,32 +3867,269 @@ create table tree_mushroom (
         if (typeof renderMermaidPreview === 'function') renderMermaidPreview();
       }
 
+      /* ===================== Copy: shared helper, buttons, long press ===================== */
+
+      var toastEl = document.getElementById('copy-toast');
+      var toastText = document.getElementById('copy-toast-text');
+      var toastTimer = null;
+
+      function showToast(msg) {
+        if (!toastEl) return;
+        toastText.textContent = msg;
+        toastEl.classList.add('is-on');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { toastEl.classList.remove('is-on'); }, 1600);
+      }
+
+      function copyText(text, srcEl, onDone) {
+        var done = function () {
+          if (onDone) onDone();
+          showToast(currentLang() === 'en' ? 'Copied' : 'Скопійовано');
+          if (navigator.vibrate) { try { navigator.vibrate(18); } catch (e) {} }
+        };
+        var fallback = function () {
+          try {
+            var r = document.createRange();
+            r.selectNodeContents(srcEl);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(r);
+            document.execCommand('copy');
+            sel.removeAllRanges();
+            done();
+          } catch (err) {}
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, fallback);
+        } else {
+          fallback();
+        }
+      }
+
       document.querySelectorAll('[data-copy]').forEach(function (btn) {
         btn.addEventListener('click', function () {
           var src = document.getElementById(btn.getAttribute('data-copy'));
           if (!src) return;
-          var text = src.textContent;
           var L = currentLang();
-          var done = function () {
+          copyText(src.textContent, src, function () {
             var old = btn.innerHTML;
             btn.textContent = L === 'en' ? 'Copied' : 'Скопійовано';
             setTimeout(function () { btn.innerHTML = old; }, 1600);
-          };
-          var fallback = function () {
-            var r = document.createRange();
-            r.selectNodeContents(src);
-            var sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(r);
-            try { document.execCommand('copy'); done(); } catch (err) {}
-          };
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(done, fallback);
-          } else {
-            fallback();
-          }
+          });
         });
       });
+
+      /* long press (~0.5 s) on a code block, a PlantUML line or a notation cell copies it */
+      var LP_SEL = '.ref pre, .ov-more pre, .ref td.mono, .rel-card dd code';
+      var lp = null;
+
+      function lpTarget(el) {
+        var t = el.closest(LP_SEL);
+        if (!t || t.closest('.lightbox')) return null;
+        return t;
+      }
+
+      function lpCancel() {
+        if (!lp) return;
+        clearTimeout(lp.timer);
+        lp.el.classList.remove('is-pressing');
+        lp = null;
+      }
+
+      /* browsers allow clipboard writes only on release (pointerup / touchend), so: hold 0.5 s -> block lights up -> release copies */
+      function lpCopy() {
+        if (!lp || !lp.ready) return false;
+        var el = lp.el;
+        lp = null;
+        el.classList.remove('is-pressing');
+        var code = el.tagName === 'PRE' ? (el.querySelector('code') || el) : el;
+        copyText(code.textContent, code);
+        el.classList.remove('copy-flash');
+        void el.offsetWidth;
+        el.classList.add('copy-flash');
+        return true;
+      }
+
+      document.addEventListener('pointerdown', function (e) {
+        if (e.pointerType === 'mouse') return;
+        var t = lpTarget(e.target);
+        if (!t) return;
+        lpCancel();
+        lp = { el: t, x: e.clientX, y: e.clientY, ready: false };
+        lp.timer = setTimeout(function () {
+          if (!lp) return;
+          lp.ready = true;
+          lp.el.classList.add('is-pressing');
+          if (navigator.vibrate) { try { navigator.vibrate(10); } catch (err) {} }
+        }, 500);
+      }, { passive: true });
+
+      document.addEventListener('pointermove', function (e) {
+        if (lp && (Math.abs(e.clientX - lp.x) > 10 || Math.abs(e.clientY - lp.y) > 10)) lpCancel();
+      }, { passive: true });
+      document.addEventListener('pointerup', function () { if (!lpCopy()) lpCancel(); }, { passive: true });
+      document.addEventListener('touchend', function () { lpCopy(); }, { passive: true });
+      document.addEventListener('pointercancel', lpCancel, { passive: true });
+      document.addEventListener('contextmenu', function (e) { if (lpTarget(e.target) && e.pointerType !== 'mouse' && window.matchMedia('(hover: none)').matches) e.preventDefault(); });
+
+      /* ===================== Diagram preview lightbox: pinch, drag, wheel, double tap ===================== */
+
+      var lb = document.getElementById('lightbox');
+      var lbStage = document.getElementById('lb-stage');
+      var lbContent = document.getElementById('lb-content');
+      var lbState = { s: 1, x: 0, y: 0, fit: 1 };
+      var lbPointers = {};
+      var lbPinch = null;
+      var lbLastTap = 0;
+      var lbReturnFocus = null;
+
+      function lbApply() {
+        lbContent.style.transform = 'translate(' + lbState.x + 'px,' + lbState.y + 'px) scale(' + lbState.s + ')';
+      }
+
+      function lbFit() {
+        var sw = lbStage.clientWidth, sh = lbStage.clientHeight;
+        var cw = lbContent.offsetWidth, ch = lbContent.offsetHeight;
+        var s = Math.min((sw - 24) / cw, (sh - 120) / ch);
+        if (!isFinite(s) || s <= 0) s = 1;
+        lbState.fit = s;
+        lbState.s = s;
+        lbState.x = (sw - cw * s) / 2;
+        lbState.y = (sh - ch * s) / 2;
+        lbApply();
+      }
+
+      function lbZoomAt(factor, cx, cy) {
+        var ns = Math.min(Math.max(lbState.s * factor, lbState.fit * 0.5), lbState.fit * 8);
+        var k = ns / lbState.s;
+        lbState.x = cx - (cx - lbState.x) * k;
+        lbState.y = cy - (cy - lbState.y) * k;
+        lbState.s = ns;
+        lbApply();
+      }
+
+      function lbOpen(node, dark) {
+        lbContent.innerHTML = '';
+        lbContent.appendChild(node);
+        lbContent.classList.toggle('is-dark', !!dark);
+        lbReturnFocus = document.activeElement;
+        lb.classList.add('is-open');
+        lb.setAttribute('aria-hidden', 'false');
+        document.documentElement.style.overflow = 'hidden';
+        var go = function () { lbFit(); document.getElementById('lb-close').focus({ preventScroll: true }); };
+        if (node.tagName === 'IMG' && !node.complete) node.addEventListener('load', go, { once: true });
+        else requestAnimationFrame(go);
+      }
+
+      function lbClose() {
+        lb.classList.remove('is-open');
+        lb.setAttribute('aria-hidden', 'true');
+        lbContent.innerHTML = '';
+        lbPointers = {};
+        lbPinch = null;
+        if (!overlayIsOpen()) document.documentElement.style.overflow = '';
+        if (lbReturnFocus && lbReturnFocus.focus) lbReturnFocus.focus({ preventScroll: true });
+      }
+
+      function openPreviewZoom(target) {
+        if (target.tagName === 'IMG') {
+          var img = new Image();
+          img.src = target.currentSrc || target.src;
+          img.alt = target.alt;
+          img.width = target.naturalWidth || target.width;
+          lbOpen(img, false);
+          return;
+        }
+        var svg = target.querySelector('svg');
+        if (!svg) return;
+        var clone = svg.cloneNode(true);
+        var vb = svg.viewBox && svg.viewBox.baseVal;
+        var w = vb && vb.width ? vb.width : svg.getBoundingClientRect().width;
+        clone.removeAttribute('style');
+        clone.setAttribute('width', Math.round(w));
+        if (vb && vb.height) clone.setAttribute('height', Math.round(vb.height));
+        lbOpen(clone, document.documentElement.getAttribute('data-theme') === 'dark');
+      }
+
+      var zoomSec = document.getElementById('plantuml');
+      if (zoomSec) {
+        zoomSec.addEventListener('click', function (e) {
+          var img = e.target.closest('.diag-preview img');
+          var mmd = e.target.closest('#mmd-out');
+          if (img) { openPreviewZoom(img); return; }
+          if (mmd && mmd.querySelector('svg')) openPreviewZoom(mmd);
+        });
+        zoomSec.addEventListener('keydown', function (e) {
+          if ((e.key === 'Enter' || e.key === ' ') && e.target.id === 'mmd-out' && e.target.querySelector('svg')) {
+            e.preventDefault();
+            openPreviewZoom(e.target);
+          }
+        });
+      }
+
+      lbStage.addEventListener('pointerdown', function (e) {
+        lbStage.setPointerCapture(e.pointerId);
+        lbPointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+        var ids = Object.keys(lbPointers);
+        if (ids.length === 2) {
+          var a = lbPointers[ids[0]], b = lbPointers[ids[1]];
+          lbPinch = { d: Math.hypot(a.x - b.x, a.y - b.y), s: lbState.s };
+        } else if (ids.length === 1) {
+          var now = Date.now();
+          if (now - lbLastTap < 300) {
+            if (lbState.s > lbState.fit * 1.05) lbFit(); else lbZoomAt(2, e.clientX, e.clientY);
+            lbLastTap = 0;
+          } else {
+            lbLastTap = now;
+          }
+          lbStage.classList.add('is-dragging');
+        }
+      });
+
+      lbStage.addEventListener('pointermove', function (e) {
+        var p = lbPointers[e.pointerId];
+        if (!p) return;
+        var ids = Object.keys(lbPointers);
+        if (ids.length === 2 && lbPinch) {
+          lbPointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+          var a = lbPointers[ids[0]], b = lbPointers[ids[1]];
+          var d = Math.hypot(a.x - b.x, a.y - b.y);
+          var cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
+          lbZoomAt((lbPinch.s * d / lbPinch.d) / lbState.s, cx, cy);
+          return;
+        }
+        lbState.x += e.clientX - p.x;
+        lbState.y += e.clientY - p.y;
+        lbPointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+        lbApply();
+      });
+
+      ['pointerup', 'pointercancel'].forEach(function (ev) {
+        lbStage.addEventListener(ev, function (e) {
+          delete lbPointers[e.pointerId];
+          if (Object.keys(lbPointers).length < 2) lbPinch = null;
+          if (!Object.keys(lbPointers).length) lbStage.classList.remove('is-dragging');
+        });
+      });
+
+      lbStage.addEventListener('wheel', function (e) {
+        e.preventDefault();
+        lbZoomAt(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX, e.clientY);
+      }, { passive: false });
+
+      document.getElementById('lb-in').addEventListener('click', function () { lbZoomAt(1.4, lbStage.clientWidth / 2, lbStage.clientHeight / 2); });
+      document.getElementById('lb-out').addEventListener('click', function () { lbZoomAt(1 / 1.4, lbStage.clientWidth / 2, lbStage.clientHeight / 2); });
+      document.getElementById('lb-fit').addEventListener('click', lbFit);
+      document.getElementById('lb-close').addEventListener('click', lbClose);
+      document.addEventListener('keydown', function (e) {
+        if (!lb.classList.contains('is-open')) return;
+        if (e.key === 'Escape') { e.stopImmediatePropagation(); lbClose(); }
+        else if (e.key === '+' || e.key === '=') lbZoomAt(1.25, lbStage.clientWidth / 2, lbStage.clientHeight / 2);
+        else if (e.key === '-') lbZoomAt(0.8, lbStage.clientWidth / 2, lbStage.clientHeight / 2);
+        else if (e.key === '0') lbFit();
+      }, true);
+      window.addEventListener('resize', function () { if (lb.classList.contains('is-open')) lbFit(); });
+
 
       /* ===================== Syntax highlighting: small tokenizer, no external library ===================== */
 

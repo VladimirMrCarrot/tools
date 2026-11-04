@@ -19,3 +19,5 @@ Images are WebP, 900 px wide (`cwebp -q 82 -resize 900 0`); the bank and the pla
 Regression checklist for future changes: `REGRESSION.md` (quick console check plus a manual pass at 1400 / 905 / 890 / 640 / 390 px).
 
 Syntax highlighting (SQL, PlantUML, Mermaid) is a small built-in tokenizer, no library. The page sets a Content-Security-Policy meta tag: scripts only from itself and cdnjs, styles and fonts only from Google Fonts, no outgoing requests.
+
+Interactions: a pinned desktop hint stays in place while the page scrolls; a scroll-to-top button on every width; tap a diagram preview to open it full screen with pinch, drag, double-tap and wheel zoom; on touch screens hold a code block or a notation cell for half a second and release to copy it. The best self-check round is kept in localStorage (`uml-tree-quiz-best`), together with theme, language and example.
