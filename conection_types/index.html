@@ -1245,13 +1245,51 @@
     }
     .section-nav .nav-caret { display: none; font-size: 18px; margin-left: -2px; }
     @media (max-width: 900px) {
-      .section-nav { gap: 6px; padding: 8px 12px; }
-      /* stuck and collapsed: only the current section stays, tap it to unfold the rest */
-      .section-nav.is-stuck:not(.is-open) a:not(.is-active) { display: none; }
-      .section-nav.is-stuck a.is-active .nav-caret { display: inline-block; }
-      .section-nav.is-stuck.is-open a.is-active .nav-caret { transform: rotate(180deg); }
+      /* phones: the full bar stays in the page flow and never changes height (no scroll jumps);
+         the compact fixed bar below takes over once it scrolls away */
+      .section-nav { position: static; gap: 6px; padding: 8px 12px; }
     }
-    .section-nav a {
+    .nav-mini {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1500;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: calc(8px + env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px));
+      background: color-mix(in srgb, var(--bg-page) 92%, var(--bg-elevated));
+      border-bottom: 1px solid var(--border-subtle);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+    }
+    @media (max-width: 900px) {
+      .nav-mini.is-on { display: flex; }
+    }
+    .nav-mini .nav-mini-btn {
+      appearance: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: var(--switch-h);
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid color-mix(in srgb, var(--accent) 70%, transparent);
+      background: color-mix(in srgb, var(--bg-elevated) 80%, var(--accent));
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .nav-mini .nav-mini-btn .material-symbols-rounded { font-size: 18px; }
+    .nav-mini .nav-mini-btn .nav-caret { display: inline-block; transition: transform 160ms ease; }
+    .nav-mini.is-open .nav-mini-btn .nav-caret { transform: rotate(180deg); }
+    .nav-mini .nav-mini-list { display: none; flex-wrap: wrap; justify-content: center; gap: 6px; }
+    .nav-mini.is-open .nav-mini-list { display: flex; }
+    .nav-mini .nav-mini-list .nav-caret { display: none; }
+    .section-nav a, .nav-mini-list a {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -2148,6 +2186,11 @@
     </div>
 
   </main>
+
+  <div class="nav-mini" id="nav-mini">
+    <button type="button" class="nav-mini-btn" id="nav-mini-btn" aria-expanded="false" aria-controls="nav-mini-list"></button>
+    <nav class="nav-mini-list" id="nav-mini-list" aria-label="Розділи сторінки"></nav>
+  </div>
 
   <nav class="section-nav" id="section-nav" aria-label="Розділи сторінки">
     <a href="#top" data-section="top"><span class="material-symbols-rounded" aria-hidden="true">account_tree</span><span data-ua>Діаграма</span><span data-en>Diagram</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
@@ -3590,24 +3633,48 @@ create table tree_mushroom (
       var navActive = null;
       var navTicking = false;
 
+      var navMini = document.getElementById('nav-mini');
+      var navMiniBtn = document.getElementById('nav-mini-btn');
+      var navMiniList = document.getElementById('nav-mini-list');
+      if (navMiniList) navLinks.forEach(function (a) { navMiniList.appendChild(a.cloneNode(true)); });
+      var navMiniLinks = navMiniList ? Array.prototype.slice.call(navMiniList.querySelectorAll('a[data-section]')) : [];
+
+      function navMiniSetOpen(open) {
+        if (!navMini) return;
+        navMini.classList.toggle('is-open', open);
+        navMiniBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+
       function navSetActive(id) {
         if (id === navActive) return;
         navActive = id;
-        navLinks.forEach(function (a) {
+        navLinks.concat(navMiniLinks).forEach(function (a) {
           var on = a.getAttribute('data-section') === id;
           a.classList.toggle('is-active', on);
           if (on) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current');
         });
+        var src = navLinks.filter(function (a) { return a.getAttribute('data-section') === id; })[0];
+        if (navMiniBtn && src) {
+          var c = src.cloneNode(true);
+          var caret = c.querySelector('.nav-caret');
+          navMiniBtn.innerHTML = '';
+          Array.prototype.slice.call(c.childNodes).forEach(function (n) { if (n !== caret) navMiniBtn.appendChild(n); });
+          if (caret) navMiniBtn.appendChild(caret);
+        }
       }
 
       function navUpdate() {
         navTicking = false;
         if (!sectionNav) return;
-        var stuck = sectionNav.getBoundingClientRect().top <= 0 && window.scrollY > 10;
+        var navRect = sectionNav.getBoundingClientRect();
+        var stuck = navRect.top <= 0 && window.scrollY > 10;
         sectionNav.classList.toggle('is-stuck', stuck);
-        if (!stuck) sectionNav.classList.remove('is-open');
-        var navH = sectionNav.offsetHeight;
-        var line = navH + 40;
+        var miniOn = mqMobile() && navRect.bottom <= 0;
+        if (navMini) {
+          navMini.classList.toggle('is-on', miniOn);
+          if (!miniOn) navMiniSetOpen(false);
+        }
+        var line = (mqMobile() ? (navMini ? navMini.offsetHeight || 52 : 52) : sectionNav.offsetHeight) + 40;
         var cur = 'top';
         navSections.forEach(function (sec, i) {
           if (!sec) return;
@@ -3625,25 +3692,23 @@ create table tree_mushroom (
       }
 
       if (sectionNav) {
-        sectionNav.addEventListener('click', function (e) {
+        var onNavLink = function (e) {
           var a = e.target.closest('a[data-section]');
           if (!a) return;
-          if (mqMobile() && sectionNav.classList.contains('is-stuck')) {
-            if (!sectionNav.classList.contains('is-open')) {
-              e.preventDefault();
-              sectionNav.classList.add('is-open');
-              return;
-            }
-            sectionNav.classList.remove('is-open');
-          }
+          navMiniSetOpen(false);
           if (a.getAttribute('data-section') === 'top') {
             e.preventDefault();
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }
-        });
-        document.addEventListener('click', function (e) {
-          if (sectionNav.classList.contains('is-open') && !sectionNav.contains(e.target)) sectionNav.classList.remove('is-open');
-        });
+        };
+        sectionNav.addEventListener('click', onNavLink);
+        if (navMini) {
+          navMiniList.addEventListener('click', onNavLink);
+          navMiniBtn.addEventListener('click', function () { navMiniSetOpen(!navMini.classList.contains('is-open')); });
+          document.addEventListener('click', function (e) {
+            if (navMini.classList.contains('is-open') && !navMini.contains(e.target)) navMiniSetOpen(false);
+          });
+        }
         window.addEventListener('scroll', navSchedule, { passive: true });
         window.addEventListener('resize', navSchedule);
         navUpdate();
@@ -3652,6 +3717,7 @@ create table tree_mushroom (
       function navLocalize() {
         if (!sectionNav) return;
         sectionNav.setAttribute('aria-label', currentLang() === 'en' ? 'Page sections' : 'Розділи сторінки');
+        if (navMiniList) navMiniList.setAttribute('aria-label', currentLang() === 'en' ? 'Page sections' : 'Розділи сторінки');
       }
 
       /* ===================== Self-check: pool of 18, a fresh round each time ===================== */
