@@ -3175,9 +3175,31 @@ create table tree_mushroom (
         if (diagramEl) diagramEl.setAttribute('aria-label', isEn ? DIAGRAM_ARIA.en : DIAGRAM_ARIA.uk);
         applyImgAlts();
         applyInteractAria();
+        fitTitle();
         refreshOpenOverlay();
         if (typeof renderDynamicSections === 'function') renderDynamicSections();
       }
+
+      /* phones and tablets: the one-line title grows to fill the header row (13 to 28 px, the desktop size) */
+      var titleEl = document.querySelector('.page-header h1');
+      function fitTitle() {
+        if (!titleEl) return;
+        if (!mqMobile()) { titleEl.style.fontSize = ''; return; }
+        var base = 20;
+        titleEl.style.whiteSpace = 'nowrap';
+        titleEl.style.fontSize = base + 'px';
+        var rg = document.createRange();
+        rg.selectNodeContents(titleEl);
+        var natural = rg.getBoundingClientRect().width;
+        var avail = titleEl.clientWidth;
+        if (!natural || !avail) return;
+        var fit = Math.floor(base * avail / natural * 0.98 * 10) / 10;
+        /* too narrow even at 13 px: let it wrap to a second line instead of cutting it */
+        if (fit < 13) { titleEl.style.whiteSpace = 'normal'; titleEl.style.fontSize = '15px'; return; }
+        titleEl.style.fontSize = Math.min(28, fit) + 'px';
+      }
+      window.addEventListener('resize', fitTitle);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitTitle);
 
       function setTheme(mode) {
         if (mode !== 'light' && mode !== 'dark') mode = 'dark';
