@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
   <title>UML типи звʼязків — екосистема дерева | tools</title>
   <meta name="description" content="Інтерактивна схема типів звʼязків UML на прикладі лісу: успадкування, реалізація, композиція, агрегація, асоціація, залежність. Довідник, кратність, PlantUML, відображення в БД і самоперевірка.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,6 +35,12 @@
       --diagram-surface: #fff;
       --diagram-shadow: rgba(0,0,0,0.1);
       --switch-h: 32px;
+      --syn-kw: #a5651a;
+      --syn-type: #00796b;
+      --syn-str: #2e7d32;
+      --syn-com: #8a8986;
+      --syn-num: #ad1457;
+      --syn-op: #1565c0;
     }
 
     :root[data-theme="dark"] {
@@ -57,6 +65,12 @@
       --diagram-surface: #232220;
       --diagram-shadow: rgba(0,0,0,0.55);
       --switch-h: 32px;
+      --syn-kw: #F2B666;
+      --syn-type: #6fc3b2;
+      --syn-str: #a5d6a7;
+      --syn-com: #8d8b86;
+      --syn-num: #f48fb1;
+      --syn-op: #90caf9;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -1098,6 +1112,8 @@
       border: 1px solid var(--border-subtle);
     }
 
+    .ov-sym-icon[hidden] { display: none; }
+
     .ov-img {
       width: 100%;
       max-height: min(260px, 40vh);
@@ -1253,15 +1269,14 @@
       #cheatsheet, .hide-on-phone { display: none !important; }
     }
     .decide-steps {
-      margin: 18px 0 0;
+      margin: 0;
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
       border-radius: 14px;
       padding: 12px 16px;
       max-width: 80ch;
     }
-    .decide-steps summary { cursor: pointer; font-weight: 500; }
-    .decide-steps ol { margin: 10px 0 2px; padding-left: 22px; font-size: 0.92rem; }
+    .decide-steps ol { margin: 4px 0 2px; padding-left: 22px; font-size: 0.92rem; }
     .decide-steps li { margin: 0 0 8px; }
     .decide-steps li b { font-weight: 600; }
     .ref h2 {
@@ -1434,6 +1449,61 @@
     .two-col { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-items: start; }
     .two-col > * { min-width: 0; max-width: 100%; }
 
+    /* syntax highlighting (own tokenizer, no external library) */
+    .syn-kw { color: var(--syn-kw); font-weight: 700; }
+    .syn-type { color: var(--syn-type); }
+    .syn-str { color: var(--syn-str); }
+    .syn-com { color: var(--syn-com); font-style: italic; }
+    .syn-num { color: var(--syn-num); }
+    .syn-op { color: var(--syn-op); font-weight: 700; }
+
+    /* diagram source: language + code/preview switches */
+    .diag-toolbar { display: flex; flex-wrap: wrap; gap: 10px 16px; margin: 0 0 12px; }
+    .seg {
+      display: inline-flex;
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      background: var(--bg-elevated);
+      padding: 3px;
+      gap: 2px;
+    }
+    .seg button {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: var(--text-soft);
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .seg button .material-symbols-rounded { font-size: 18px; }
+    .seg button[aria-pressed="true"] { background: color-mix(in srgb, var(--bg-elevated) 70%, var(--accent)); color: var(--text); }
+    .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    #plantuml[data-dl="puml"] .diag-panes [data-dl="mmd"],
+    #plantuml[data-dl="mmd"] .diag-panes [data-dl="puml"],
+    #plantuml[data-view="code"] .pane-preview,
+    #plantuml[data-view="preview"] .pane-code { display: none !important; }
+    .diag-preview {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 14px;
+      overflow-x: auto;
+      text-align: center;
+    }
+    .diag-preview img { max-width: 100%; height: auto; display: inline-block; }
+    .diag-preview .mmd-out svg { max-width: 100%; height: auto; }
+    [data-theme="dark"] .diag-preview.is-mmd { background: var(--bg-elevated); }
+    .diag-preview .mmd-status { margin: 8px 0 0; font-size: 0.85rem; color: #6b6a67; }
+    [data-theme="dark"] .diag-preview.is-mmd .mmd-status { color: var(--text-soft); }
+    .diag-preview .open-full { display: inline-block; margin-top: 8px; font-size: 0.85rem; color: #6b6a67; }
+
     /* code block with copy */
     .code-block { position: relative; display: flex; flex-direction: column; min-width: 0; }
     .code-block .copy-btn {
@@ -1591,10 +1661,6 @@
           <p class="help-block">
             <span data-ua><strong>Нижче:</strong> довідник шести звʼязків, кратність, PlantUML, відображення в БД і самоперевірка. Панель розділів лишається вгорі під час прокрутки.</span>
             <span data-en><strong>Below:</strong> cheat sheet of six relationships, multiplicity, PlantUML, database mapping and a self-check quiz. The section bar stays at the top while you scroll.</span>
-          </p>
-          <p class="help-block">
-            <span data-ua><strong>Попередня версія:</strong> <a href="v1/" style="color:var(--accent)">v1</a> (перша схема без довідника), для порівняння.</span>
-            <span data-en><strong>Previous version:</strong> <a href="v1/" style="color:var(--accent)">v1</a> (the first diagram without the reference), for comparison.</span>
           </p>
         </div>
       </div>
@@ -1887,8 +1953,8 @@
           <div class="hint-def" data-en><b>Composition</b><br>Filled diamond at the whole: the part belongs to exactly one whole and shares its lifetime.</div>
           <div class="hint-ex" data-dom="forest" data-ua><b>Приклад:</b> знищили дерево: його кора припинила існування разом із ним. Кратність біля цілого завжди 1.</div>
           <div class="hint-ex" data-dom="forest" data-en><b>Example:</b> destroy the tree and its bark ceases to exist with it. Multiplicity at the whole is always 1.</div>
-          <div class="hint-ex" data-dom="bank" data-ua><b>Приклад:</b> закрили рахунок: операції по ньому архівуються разом із ним. Операція ніколи не належить двом рахункам. У БД: FK NOT NULL + ON DELETE CASCADE.</div>
-          <div class="hint-ex" data-dom="bank" data-en><b>Example:</b> close the account and its entries are archived with it. An entry never belongs to two accounts. In a DB: FK NOT NULL + ON DELETE CASCADE.</div>
+          <div class="hint-ex" data-dom="bank" data-ua><b>Приклад:</b> закрили рахунок: операції по ньому архівуються разом із ним. Операція ніколи не належить двом рахункам. У БД: FK not null + on delete cascade.</div>
+          <div class="hint-ex" data-dom="bank" data-en><b>Example:</b> close the account and its entries are archived with it. An entry never belongs to two accounts. In a DB: FK not null + on delete cascade.</div>
         </div>
       </button>
 
@@ -1899,8 +1965,8 @@
           <div class="hint-def" data-en><b>Aggregation</b><br>Hollow diamond at the whole: the part can exist apart from the whole and outlive it.</div>
           <div class="hint-ex" data-dom="forest" data-ua><b>Приклад:</b> гніздо зняли: воно лишилося гніздом. У UML 2 агрегація визначена слабко, тож у сумніві малюйте асоціацію.</div>
           <div class="hint-ex" data-dom="forest" data-en><b>Example:</b> take the nest down and it is still a nest. UML 2 defines aggregation loosely, so when in doubt draw an association.</div>
-          <div class="hint-ex" data-dom="bank" data-ua><b>Приклад:</b> картку перевʼязали до іншого рахунку або перевипустили: вона лишилась карткою. У БД: FK NULL + ON DELETE SET NULL.</div>
-          <div class="hint-ex" data-dom="bank" data-en><b>Example:</b> re-link the card to another account or reissue it: it is still a card. In a DB: FK NULL + ON DELETE SET NULL.</div>
+          <div class="hint-ex" data-dom="bank" data-ua><b>Приклад:</b> картку перевʼязали до іншого рахунку або перевипустили: вона лишилась карткою. У БД: FK null + on delete set null.</div>
+          <div class="hint-ex" data-dom="bank" data-en><b>Example:</b> re-link the card to another account or reissue it: it is still a card. In a DB: FK null + on delete set null.</div>
         </div>
       </button>
 
@@ -1965,8 +2031,9 @@
   <nav class="section-nav" id="section-nav" aria-label="Розділи сторінки">
     <a href="#top" data-section="top"><span class="material-symbols-rounded" aria-hidden="true">account_tree</span><span data-ua>Діаграма</span><span data-en>Diagram</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
     <a href="#cheatsheet" data-section="cheatsheet" class="hide-on-phone"><span class="material-symbols-rounded" aria-hidden="true">menu_book</span><span data-ua>Довідник</span><span data-en>Cheat sheet</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
+    <a href="#decide" data-section="decide"><span class="material-symbols-rounded" aria-hidden="true">alt_route</span><span data-ua>Як обрати</span><span data-en>How to choose</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
     <a href="#multiplicity" data-section="multiplicity"><span class="material-symbols-rounded" aria-hidden="true">numbers</span><span data-ua>Кратність</span><span data-en>Multiplicity</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
-    <a href="#plantuml" data-section="plantuml"><span class="material-symbols-rounded" aria-hidden="true">code</span>PlantUML<span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
+    <a href="#plantuml" data-section="plantuml"><span class="material-symbols-rounded" aria-hidden="true">code</span>PlantUML / Mermaid<span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
     <a href="#database" data-section="database"><span class="material-symbols-rounded" aria-hidden="true">database</span><span data-ua>У базі даних</span><span data-en>In a database</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
     <a href="#selfcheck" data-section="selfcheck"><span class="material-symbols-rounded" aria-hidden="true">quiz</span><span data-ua>Самоперевірка</span><span data-en>Self-check</span><span class="material-symbols-rounded nav-caret" aria-hidden="true">expand_more</span></a>
   </nav>
@@ -2132,15 +2199,19 @@
 
     </div>
 
-    <details class="decide-steps">
-      <summary><span data-ua>Не знаєте, який звʼязок? Чотири питання по черзі</span><span data-en>Not sure which one? Four questions in order</span></summary>
+  </section>
+
+  <!-- ===================== HOW TO CHOOSE (all widths) ===================== -->
+  <section class="ref" id="decide">
+    <h2><span data-ua>Не знаєте, який звʼязок? Чотири питання по черзі</span><span data-en>Not sure which one? Four questions in order</span></h2>
+    <div class="decide-steps">
       <ol>
         <li><span data-ua><b>A є різновидом B?</b> Так: успадкування. Якщо B лише контракт без власної реалізації (інтерфейс): реалізація.</span><span data-en><b>Is A a kind of B?</b> Yes: inheritance. If B is only a contract with no implementation of its own (an interface): realization.</span></li>
         <li><span data-ua><b>A є частиною B?</b> Так, і без B частина зникає та належить лише йому: композиція. Так, але частина живе сама і може бути в іншому цілому: агрегація.</span><span data-en><b>Is A a part of B?</b> Yes, and the part vanishes without B and belongs to it alone: composition. Yes, but the part lives on its own and may sit in another whole: aggregation.</span></li>
         <li><span data-ua><b>A довго зберігає посилання на B</b> (поле, атрибут, FK)? Так: асоціація, додайте кратність.</span><span data-en><b>Does A keep a lasting reference to B</b> (field, attribute, FK)? Yes: association, add multiplicity.</span></li>
         <li><span data-ua><b>A потребує B лише на час дії</b> (параметр, локальна змінна, виклик)? Так: залежність. Ні: на діаграмі класів звʼязку немає.</span><span data-en><b>Does A need B only during an action</b> (parameter, local variable, call)? Yes: dependency. No: no line on the class diagram.</span></li>
       </ol>
-    </details>
+    </div>
 
     <p class="note">
       <span data-ua><strong>Клас чи обʼєкт?</strong> Усі шість звʼязків малюють між <em>класами</em> (діаграма класів). «Дуб» тут клас, а конкретний дуб у парку це обʼєкт, його звʼязок із класом називають instance-of і на діаграмі класів не показують.</span>
@@ -2189,18 +2260,27 @@
   </section>
 
   <!-- ===================== PLANTUML ===================== -->
-  <section class="ref" id="plantuml">
-    <h2><span data-ua>Та сама схема в PlantUML</span><span data-en>The same diagram in PlantUML</span></h2>
+  <section class="ref" id="plantuml" data-dl="puml" data-view="code">
+    <h2><span data-ua>Та сама схема в PlantUML і Mermaid</span><span data-en>The same diagram in PlantUML and Mermaid</span></h2>
     <p class="lead">
-      <span data-ua>Усі шість звʼязків в одному файлі, для поточного прикладу (перемикач «Ліс / Банк» у шапці). Скопіюйте і вставте в будь-який рендерер PlantUML (Confluence-макрос, VS Code, plantuml.com).</span>
-      <span data-en>All six relationships in one file, for the current example (Forest / Bank toggle in the header). Copy it into any PlantUML renderer (Confluence macro, VS Code, plantuml.com).</span>
+      <span data-ua>Усі шість звʼязків в одному файлі, для поточного прикладу (перемикач «Ліс / Банк» у шапці). Оберіть мову, подивіться превʼю і скопіюйте код у свій рендерер: Confluence-макрос, VS Code, plantuml.com, mermaid.live, GitHub Markdown.</span>
+      <span data-en>All six relationships in one file, for the current example (Forest / Bank toggle in the header). Pick a language, check the preview and copy the code into your renderer: Confluence macro, VS Code, plantuml.com, mermaid.live, GitHub Markdown.</span>
     </p>
+    <div class="diag-toolbar">
+      <div class="seg" role="group" aria-label="Мова схеми">
+        <button type="button" data-set-dl="puml" aria-pressed="true">PlantUML</button>
+        <button type="button" data-set-dl="mmd" aria-pressed="false">Mermaid</button>
+      </div>
+      <div class="seg" role="group" aria-label="Код або превʼю">
+        <button type="button" data-set-view="code" aria-pressed="true"><span class="material-symbols-rounded" aria-hidden="true">code</span><span data-ua>Код</span><span data-en>Code</span></button>
+        <button type="button" data-set-view="preview" aria-pressed="false"><span class="material-symbols-rounded" aria-hidden="true">visibility</span><span data-ua>Превʼю</span><span data-en>Preview</span></button>
+      </div>
+    </div>
     <div class="two-col">
-      <div class="code-block">
-        <button type="button" class="btn copy-btn" data-copy="puml-src" data-dom="forest"><span data-ua>Копіювати</span><span data-en>Copy</span></button>
-        <button type="button" class="btn copy-btn" data-copy="puml-src-bank" data-dom="bank"><span data-ua>Копіювати</span><span data-en>Copy</span></button>
-<div data-dom="forest">
-<pre><code id="puml-src">@startuml
+      <div class="diag-panes">
+      <div class="code-block pane-code" data-dl="puml" data-dom="forest">
+        <button type="button" class="btn copy-btn" data-copy="puml-src"><span data-ua>Копіювати</span><span data-en>Copy</span></button>
+<pre><code id="puml-src" data-syntax="puml">@startuml
 skinparam classAttributeIconSize 0
 hide empty members
 
@@ -2230,9 +2310,10 @@ Tree "0..1" o-- "0..*" Nest : агрегація
 Tree "*" -- "*" Mushroom : асоціація
 Tree ..> Sun : залежність &lt;&lt;use&gt;&gt;
 @enduml</code></pre>
-</div>
-<div data-dom="bank">
-<pre><code id="puml-src-bank">@startuml
+      </div>
+      <div class="code-block pane-code" data-dl="puml" data-dom="bank">
+        <button type="button" class="btn copy-btn" data-copy="puml-src-bank"><span data-ua>Копіювати</span><span data-en>Copy</span></button>
+<pre><code id="puml-src-bank" data-syntax="puml">@startuml
 skinparam classAttributeIconSize 0
 hide empty members
 
@@ -2266,19 +2347,99 @@ Account "0..1" o-- "0..*" Card : агрегація
 Customer "1" -- "1..*" Account : асоціація
 Controller ..> Account : залежність &lt;&lt;use&gt;&gt;
 @enduml</code></pre>
-</div>
+      </div>
+      <div class="code-block pane-code" data-dl="mmd" data-dom="forest">
+        <button type="button" class="btn copy-btn" data-copy="mmd-src"><span data-ua>Копіювати</span><span data-en>Copy</span></button>
+<pre><code id="mmd-src" data-syntax="mmd">classDiagram
+  class Photo["Фотосинтезуючий"] {
+    &lt;&lt;interface&gt;&gt;
+    +фотосинтезувати()
+  }
+  class Plant["Рослина"] {
+    &lt;&lt;abstract&gt;&gt;
+    +рости()
+  }
+  class Tree["Дерево"] {
+    &lt;&lt;abstract&gt;&gt;
+    +фотосинтезувати()
+    +скидатиЛистя()
+  }
+  class Oak["Дуб"] {
+    +родитиЖолуді()
+  }
+  class Bark["Кора"]
+  class Nest["Гніздо"]
+  class Mushroom["Гриб"]
+  class Sun["Сонце"]
+
+  Plant &lt;|-- Tree : успадкування
+  Tree &lt;|-- Oak : успадкування
+  Photo &lt;|.. Tree : реалізація
+  Tree "1" *-- "1" Bark : композиція
+  Tree "0..1" o-- "0..*" Nest : агрегація
+  Tree "*" -- "*" Mushroom : асоціація
+  Tree ..&gt; Sun : залежність «use»</code></pre>
+      </div>
+      <div class="code-block pane-code" data-dl="mmd" data-dom="bank">
+        <button type="button" class="btn copy-btn" data-copy="mmd-src-bank"><span data-ua>Копіювати</span><span data-en>Copy</span></button>
+<pre><code id="mmd-src-bank" data-syntax="mmd">classDiagram
+  class Blockable["Можна заблокувати"] {
+    &lt;&lt;interface&gt;&gt;
+    +заблокувати()
+    +розблокувати()
+  }
+  class Product["Банківський продукт"] {
+    &lt;&lt;abstract&gt;&gt;
+    +відкрити()
+    +закрити()
+  }
+  class Account["Рахунок"] {
+    &lt;&lt;abstract&gt;&gt;
+    +зарахувати(сума)
+    +списати(сума)
+  }
+  class Deposit["Депозитний рахунок"] {
+    +нарахуватиВідсотки()
+  }
+  class Entry["Операція по рахунку"]
+  class Card["Картка"]
+  class Customer["Клієнт"]
+  class Controller["Контролер платежів"] {
+    +обробити(платіж)
+  }
+
+  Product &lt;|-- Account : успадкування
+  Account &lt;|-- Deposit : успадкування
+  Blockable &lt;|.. Account : реалізація
+  Account "1" *-- "*" Entry : композиція
+  Account "0..1" o-- "0..*" Card : агрегація
+  Customer "1" -- "1..*" Account : асоціація
+  Controller ..&gt; Account : залежність «use»</code></pre>
+      </div>
+      <div class="diag-preview pane-preview" data-dl="puml">
+        <img data-dom="forest" src="puml-forest.svg" width="768" height="361" loading="lazy" alt="" data-alt-ua="Рендер PlantUML: схема лісу" data-alt-en="PlantUML render: forest diagram">
+        <img data-dom="bank" src="puml-bank.svg" width="734" height="378" loading="lazy" alt="" data-alt-ua="Рендер PlantUML: схема рахунку" data-alt-en="PlantUML render: account diagram">
+        <div>
+          <a class="open-full" data-dom="forest" href="puml-forest.svg" target="_blank" rel="noopener"><span data-ua>Відкрити SVG окремо</span><span data-en>Open the SVG</span></a>
+          <a class="open-full" data-dom="bank" href="puml-bank.svg" target="_blank" rel="noopener"><span data-ua>Відкрити SVG окремо</span><span data-en>Open the SVG</span></a>
+        </div>
+      </div>
+      <div class="diag-preview pane-preview is-mmd" data-dl="mmd">
+        <div class="mmd-out" id="mmd-out"></div>
+        <p class="mmd-status" id="mmd-status" aria-live="polite"></p>
+      </div>
       </div>
       <div class="tbl-wrap">
         <table class="ref-table">
-          <thead><tr><th><span data-ua>Звʼязок</span><span data-en>Relationship</span></th><th>PlantUML</th><th><span data-ua>Запамʼятати</span><span data-en>Mnemonic</span></th></tr></thead>
+          <thead><tr><th><span data-ua>Звʼязок</span><span data-en>Relationship</span></th><th>PlantUML</th><th>Mermaid</th><th><span data-ua>Запамʼятати</span><span data-en>Mnemonic</span></th></tr></thead>
           <tbody>
-            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Успадкування</span><span data-en>Inheritance</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A --|&gt; B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>трикутник <code>|&gt;</code> дивиться на предка</span><span data-en>triangle <code>|&gt;</code> points at the parent</span></td></tr>
-            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Реалізація</span><span data-en>Realization</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A ..|&gt; B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>те саме, але крапки</span><span data-en>same, but dotted</span></td></tr>
-            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Композиція</span><span data-en>Composition</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A *-- B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua><code>*</code> зафарбований ромб біля цілого A</span><span data-en><code>*</code> filled diamond at whole A</span></td></tr>
-            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Агрегація</span><span data-en>Aggregation</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A o-- B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua><code>o</code> порожній ромб біля цілого A</span><span data-en><code>o</code> hollow diamond at whole A</span></td></tr>
-            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Асоціація</span><span data-en>Association</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A "1" -- "*" B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>кратність у лапках біля кінців</span><span data-en>multiplicity in quotes at the ends</span></td></tr>
-            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Напрямлена асоціація</span><span data-en>Directed association</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A --&gt; B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>A знає B</span><span data-en>A knows B</span></td></tr>
-            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Залежність</span><span data-en>Dependency</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A ..&gt; B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>крапки і проста стрілка</span><span data-en>dots and a plain arrow</span></td></tr>
+            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Успадкування</span><span data-en>Inheritance</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A --|&gt; B</td><td data-l-ua="Mermaid" data-l-en="Mermaid" class="mono">B &lt;|-- A</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>трикутник <code>|&gt;</code> дивиться на предка (у Mermaid предок зліва)</span><span data-en>triangle <code>|&gt;</code> points at the parent (in Mermaid the parent is on the left)</span></td></tr>
+            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Реалізація</span><span data-en>Realization</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A ..|&gt; B</td><td data-l-ua="Mermaid" data-l-en="Mermaid" class="mono">B &lt;|.. A</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>те саме, але крапки</span><span data-en>same, but dotted</span></td></tr>
+            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Композиція</span><span data-en>Composition</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A *-- B</td><td data-l-ua="Mermaid" data-l-en="Mermaid" class="mono">A *-- B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua><code>*</code> зафарбований ромб біля цілого A</span><span data-en><code>*</code> filled diamond at whole A</span></td></tr>
+            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Агрегація</span><span data-en>Aggregation</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A o-- B</td><td data-l-ua="Mermaid" data-l-en="Mermaid" class="mono">A o-- B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua><code>o</code> порожній ромб біля цілого A</span><span data-en><code>o</code> hollow diamond at whole A</span></td></tr>
+            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Асоціація</span><span data-en>Association</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A "1" -- "*" B</td><td data-l-ua="Mermaid" data-l-en="Mermaid" class="mono">A "1" -- "*" B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>кратність у лапках біля кінців</span><span data-en>multiplicity in quotes at the ends</span></td></tr>
+            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Напрямлена асоціація</span><span data-en>Directed association</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A --&gt; B</td><td data-l-ua="Mermaid" data-l-en="Mermaid" class="mono">A --&gt; B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>A знає B</span><span data-en>A knows B</span></td></tr>
+            <tr><td data-l-ua="Звʼязок" data-l-en="Relationship"><span data-ua>Залежність</span><span data-en>Dependency</span></td><td data-l-ua="PlantUML" data-l-en="PlantUML" class="mono">A ..&gt; B</td><td data-l-ua="Mermaid" data-l-en="Mermaid" class="mono">A ..&gt; B</td><td data-l-ua="Запамʼятати" data-l-en="Mnemonic"><span data-ua>крапки і проста стрілка</span><span data-en>dots and a plain arrow</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -2298,10 +2459,10 @@ Controller ..> Account : залежність &lt;&lt;use&gt;&gt;
           <thead><tr><th>UML</th><th><span data-ua>У схемі БД</span><span data-en>In the DB schema</span></th></tr></thead>
           <tbody>
             <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Асоціація 1 — *</span><span data-en>Association 1 — *</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>FK на боці «багато»: <code>orders.customer_id</code></span><span data-en>FK on the “many” side: <code>orders.customer_id</code></span></td></tr>
-            <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Асоціація 1 — 0..1</span><span data-en>Association 1 — 0..1</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>FK з <code>UNIQUE</code> на боці 0..1 або спільний PK</span><span data-en>FK with <code>UNIQUE</code> on the 0..1 side, or a shared PK</span></td></tr>
+            <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Асоціація 1 — 0..1</span><span data-en>Association 1 — 0..1</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>FK з <code>unique</code> на боці 0..1 або спільний PK</span><span data-en>FK with <code>unique</code> on the 0..1 side, or a shared PK</span></td></tr>
             <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Асоціація * — *</span><span data-en>Association * — *</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>проміжна таблиця з двома FK і складеним PK</span><span data-en>a join table with two FKs and a composite PK</span></td></tr>
-            <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Композиція</span><span data-en>Composition</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>FK <code>NOT NULL</code> + <code>ON DELETE CASCADE</code>: частина зникає з цілим</span><span data-en>FK <code>NOT NULL</code> + <code>ON DELETE CASCADE</code>: the part goes with the whole</span></td></tr>
-            <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Агрегація</span><span data-en>Aggregation</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>FK <code>NULL</code> + <code>ON DELETE SET NULL</code>: частина лишається</span><span data-en>FK <code>NULL</code> + <code>ON DELETE SET NULL</code>: the part stays</span></td></tr>
+            <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Композиція</span><span data-en>Composition</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>FK <code>not null</code> + <code>on delete cascade</code>: частина зникає з цілим</span><span data-en>FK <code>not null</code> + <code>on delete cascade</code>: the part goes with the whole</span></td></tr>
+            <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Агрегація</span><span data-en>Aggregation</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>FK <code>null</code> + <code>on delete set null</code>: частина лишається</span><span data-en>FK <code>null</code> + <code>on delete set null</code>: the part stays</span></td></tr>
             <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Успадкування</span><span data-en>Inheritance</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>одна таблиця з колонкою-дискримінатором, або таблиця на підклас з FK на батьківську, або таблиця на кожен конкретний клас</span><span data-en>single table with a discriminator column, or a table per subclass with an FK to the parent, or a table per concrete class</span></td></tr>
             <tr><td data-l-ua="UML" data-l-en="UML"><span data-ua>Реалізація, залежність</span><span data-en>Realization, dependency</span></td><td data-l-ua="У схемі БД" data-l-en="In the DB schema"><span data-ua>у схемі даних не відображаються: це про код і контракти</span><span data-en>not reflected in the data schema: these are about code and contracts</span></td></tr>
           </tbody>
@@ -2309,29 +2470,28 @@ Controller ..> Account : залежність &lt;&lt;use&gt;&gt;
       </div>
       <div class="code-block">
         <button type="button" class="btn copy-btn" data-copy="sql-src"><span data-ua>Копіювати</span><span data-en>Copy</span></button>
-<pre><code id="sql-src">-- Композиція: рядок не живе без замовлення
-CREATE TABLE order_line (
-  id       BIGINT PRIMARY KEY,
-  order_id BIGINT NOT NULL
-    REFERENCES orders(id) ON DELETE CASCADE,
-  qty      INT NOT NULL
-);
+<pre><code id="sql-src" data-syntax="sql">-- Композиція: рядок не живе без замовлення
+create table order_line (
+    id        bigint not null primary key
+  , order_id  bigint not null references orders (id) on delete cascade
+  , qty       int    not null
+)
+;
 
 -- Агрегація: гніздо переживе дерево
-CREATE TABLE nest (
-  id      BIGINT PRIMARY KEY,
-  tree_id BIGINT NULL
-    REFERENCES tree(id) ON DELETE SET NULL
-);
+create table nest (
+    id        bigint not null primary key
+  , tree_id   bigint null     references tree (id)   on delete set null
+)
+;
 
 -- Асоціація * — *: проміжна таблиця
-CREATE TABLE tree_mushroom (
-  tree_id     BIGINT NOT NULL
-    REFERENCES tree(id),
-  mushroom_id BIGINT NOT NULL
-    REFERENCES mushroom(id),
-  PRIMARY KEY (tree_id, mushroom_id)
-);</code></pre>
+create table tree_mushroom (
+    tree_id      bigint not null references tree (id)
+  , mushroom_id  bigint not null references mushroom (id)
+  , primary key (tree_id, mushroom_id)
+)
+;</code></pre>
       </div>
     </div>
   </section>
@@ -2630,11 +2790,11 @@ CREATE TABLE tree_mushroom (
           uk: { title: 'Реалізація', ex: '«Рахунок» виконує контракт «Можна заблокувати». Нащадки теж, і фінмоніторинг працює через контракт, не знаючи реалізації.', def: 'Клас виконує контракт інтерфейсу. Пунктир із порожнім трикутником біля інтерфейсу.', alt: '' },
           en: { title: 'Realization', ex: 'Account fulfils the Blockable contract. Subclasses do too, and monitoring works through the contract without knowing the implementation.', def: 'A class fulfils an interface contract. Dashed line, hollow triangle at the interface.', alt: '' } },
         composition: { symHTML: '<div class="sym-diamond-f" style="width:18px; height:18px;"></div>', img: 'entry.webp',
-          uk: { title: 'Композиція', ex: 'Закрили рахунок: операції архівуються разом із ним. Операція ніколи не належить двом рахункам.', def: 'Зафарбований ромб біля цілого. У БД: FK NOT NULL + ON DELETE CASCADE.', alt: '' },
-          en: { title: 'Composition', ex: 'Close the account and its entries are archived with it. An entry never belongs to two accounts.', def: 'Filled diamond at the whole. In a DB: FK NOT NULL + ON DELETE CASCADE.', alt: '' } },
+          uk: { title: 'Композиція', ex: 'Закрили рахунок: операції архівуються разом із ним. Операція ніколи не належить двом рахункам.', def: 'Зафарбований ромб біля цілого. У БД: FK not null + on delete cascade.', alt: '' },
+          en: { title: 'Composition', ex: 'Close the account and its entries are archived with it. An entry never belongs to two accounts.', def: 'Filled diamond at the whole. In a DB: FK not null + on delete cascade.', alt: '' } },
         aggregation: { symHTML: '<div class="sym-diamond-e" style="width:18px; height:18px; border-width:3px;"></div>', img: 'card.webp',
-          uk: { title: 'Агрегація', ex: 'Картку перевʼязали до іншого рахунку або перевипустили: вона лишилась карткою.', def: 'Порожній ромб біля цілого. У БД: FK NULL + ON DELETE SET NULL.', alt: '' },
-          en: { title: 'Aggregation', ex: 'Re-link the card to another account or reissue it: it is still a card.', def: 'Hollow diamond at the whole. In a DB: FK NULL + ON DELETE SET NULL.', alt: '' } },
+          uk: { title: 'Агрегація', ex: 'Картку перевʼязали до іншого рахунку або перевипустили: вона лишилась карткою.', def: 'Порожній ромб біля цілого. У БД: FK null + on delete set null.', alt: '' },
+          en: { title: 'Aggregation', ex: 'Re-link the card to another account or reissue it: it is still a card.', def: 'Hollow diamond at the whole. In a DB: FK null + on delete set null.', alt: '' } },
         association: { symHTML: '<div style="font-size:24px; font-weight:bold; color:var(--line-color);">/</div>', img: 'customer.webp',
           uk: { title: 'Асоціація', ex: 'Клієнт має 1..* рахунків, рахунок належить 1 клієнту. Обидва зберігають посилання один на одного.', def: 'Суцільна лінія з кратністю. У БД: FK customer_id у таблиці рахунків.', alt: '' },
           en: { title: 'Association', ex: 'A customer has 1..* accounts, an account belongs to 1 customer. Both keep references.', def: 'Solid line with multiplicity. In a DB: FK customer_id in the accounts table.', alt: '' } },
@@ -3042,6 +3202,7 @@ CREATE TABLE tree_mushroom (
         } else {
           symEl.innerHTML = '';
         }
+        symEl.hidden = !symEl.innerHTML;
 
         document.getElementById('ovTitle').textContent = item.title;
         document.getElementById('ovEx').textContent = item.ex;
@@ -3112,7 +3273,7 @@ CREATE TABLE tree_mushroom (
 
       function handleInteraction(key) {
         if (!mqMobile()) return;
-        var item = data[key];
+        var item = (currentDomain() === 'bank' && bankData[key]) ? bankData[key] : data[key];
         if (item) openOverlay(key);
       }
 
@@ -3364,8 +3525,8 @@ CREATE TABLE tree_mushroom (
           uk: { q: 'Модуль експорту приймає будь-що, що «вміє перетворитись у CSV». Звіт, виписка і список клієнтів кожен реалізують це перетворення самостійно.', x: 'Контракт «вміє перетворитись у CSV» без реалізації, класи його виконують: реалізація. Нащадок звіту теж буде «вміти CSV».' },
           en: { q: 'The export module accepts anything that “can turn itself into CSV”. Report, Statement and CustomerList each implement that conversion themselves.', x: 'A contract “can turn into CSV” with no implementation, classes fulfil it: realization. A subclass of Report will “do CSV” as well.' } },
         { a: 'composition',
-          uk: { q: 'Видалили замовлення, і всі його рядки зникли з бази. Рядок ніколи не належить двом замовленням.', x: 'Частина не живе без цілого і належить лише йому: композиція. У БД це FK NOT NULL з ON DELETE CASCADE.' },
-          en: { q: 'An order was deleted and all its lines vanished from the database. A line never belongs to two orders.', x: 'The part cannot live without the whole and belongs to it alone: composition. In a DB: FK NOT NULL with ON DELETE CASCADE.' } },
+          uk: { q: 'Видалили замовлення, і всі його рядки зникли з бази. Рядок ніколи не належить двом замовленням.', x: 'Частина не живе без цілого і належить лише йому: композиція. У БД це FK not null з on delete cascade.' },
+          en: { q: 'An order was deleted and all its lines vanished from the database. A line never belongs to two orders.', x: 'The part cannot live without the whole and belongs to it alone: composition. In a DB: FK not null with on delete cascade.' } },
         { a: 'composition',
           uk: { q: 'Закрили банківський рахунок: усі операції по ньому архівуються разом із ним і без рахунку не мають сенсу.', x: 'Операція існує лише в межах свого рахунку: композиція. Кратність біля рахунку дорівнює 1.' },
           en: { q: 'A bank account was closed: all its entries are archived with it and make no sense without the account.', x: 'An entry exists only within its account: composition. Multiplicity at the account is 1.' } },
@@ -3379,8 +3540,8 @@ CREATE TABLE tree_mushroom (
           uk: { q: 'Трек входить до плейлиста, але після видалення плейлиста лишається в бібліотеці і може бути в інших плейлистах.', x: 'Ціле зібране з частин, що живуть самі і можуть належати кільком цілим: агрегація. Порожній ромб біля «Плейлиста».' },
           en: { q: 'A track is in a playlist, but after the playlist is deleted it stays in the library and may be in other playlists.', x: 'A whole assembled from parts that live on their own and may belong to several wholes: aggregation. Hollow diamond at Playlist.' } },
         { a: 'aggregation',
-          uk: { q: 'Працівник входить до відділу. Відділ розформували: працівника перевели в інший, запис про нього не зник.', x: 'Частина переживає ціле: агрегація. У БД: FK department_id NULL + ON DELETE SET NULL.' },
-          en: { q: 'An employee belongs to a department. The department was dissolved: the employee was moved to another, their record did not vanish.', x: 'The part outlives the whole: aggregation. In a DB: FK department_id NULL + ON DELETE SET NULL.' } },
+          uk: { q: 'Працівник входить до відділу. Відділ розформували: працівника перевели в інший, запис про нього не зник.', x: 'Частина переживає ціле: агрегація. У БД: FK department_id NULL + on delete set null.' },
+          en: { q: 'An employee belongs to a department. The department was dissolved: the employee was moved to another, their record did not vanish.', x: 'The part outlives the whole: aggregation. In a DB: FK department_id NULL + on delete set null.' } },
         { a: 'association',
           uk: { q: 'Клієнт зберігає список своїх замовлень, а замовлення зберігає посилання на клієнта. Жодне не є частиною іншого.', x: 'Довготривалі посилання без відношення частина-ціле: асоціація з кратністю 1 — *.' },
           en: { q: 'A customer keeps a list of their orders, and an order keeps a reference to the customer. Neither is part of the other.', x: 'Lasting references without part-whole: association with multiplicity 1 — *.' } },
@@ -3388,8 +3549,8 @@ CREATE TABLE tree_mushroom (
           uk: { q: 'Викладач читає кілька курсів, і кожен курс можуть читати кілька викладачів.', x: 'Багато до багатьох без володіння: асоціація * — *. У БД це проміжна таблиця.' },
           en: { q: 'A teacher teaches several courses, and each course can be taught by several teachers.', x: 'Many-to-many without ownership: association * — *. In a DB: a join table.' } },
         { a: 'association',
-          uk: { q: 'Користувач має не більше одного профілю, профіль належить рівно одному користувачу. Профіль можна видалити, користувач лишиться.', x: 'Посилання в обидва боки без частина-ціле: асоціація 1 — 0..1. У БД: FK з UNIQUE на боці профілю.' },
-          en: { q: 'A user has at most one profile, a profile belongs to exactly one user. The profile can be deleted and the user remains.', x: 'References both ways without part-whole: association 1 — 0..1. In a DB: FK with UNIQUE on the profile side.' } },
+          uk: { q: 'Користувач має не більше одного профілю, профіль належить рівно одному користувачу. Профіль можна видалити, користувач лишиться.', x: 'Посилання в обидва боки без частина-ціле: асоціація 1 — 0..1. У БД: FK з unique на боці профілю.' },
+          en: { q: 'A user has at most one profile, a profile belongs to exactly one user. The profile can be deleted and the user remains.', x: 'References both ways without part-whole: association 1 — 0..1. In a DB: FK with unique on the profile side.' } },
         { a: 'dependency',
           uk: { q: 'Сервіс звітів в одному методі створює PDF-експортер, викликає його і не зберігає посилання.', x: 'Тимчасове використання без поля: залежність. Пунктирна стрілка від сервісу до експортера.' },
           en: { q: 'In one method the report service creates a PDF exporter, calls it and keeps no reference.', x: 'Temporary use without a field: dependency. Dashed arrow from the service to the exporter.' } },
@@ -3552,6 +3713,7 @@ CREATE TABLE tree_mushroom (
       function renderDynamicSections() {
         renderQuiz();
         navLocalize();
+        if (typeof renderMermaidPreview === 'function') renderMermaidPreview();
       }
 
       document.querySelectorAll('[data-copy]').forEach(function (btn) {
@@ -3580,6 +3742,142 @@ CREATE TABLE tree_mushroom (
           }
         });
       });
+
+      /* ===================== Syntax highlighting: small tokenizer, no external library ===================== */
+
+      var SYN_RULES = {
+        sql: [
+          [/--[^\n]*/y, 'com'],
+          [/'(?:[^']|'')*'/y, 'str'],
+          [/\b(?:create|table|primary|key|not|null|references|on|delete|cascade|set|unique|foreign|constraint|select|from|where|join|left|and|or|as|insert|into|values|update|alter|drop|index|default)\b/iy, 'kw'],
+          [/\b(?:bigint|int|smallint|tinyint|varchar|nvarchar|char|nchar|datetime2?|date|decimal|numeric|bit|money)\b/iy, 'type'],
+          [/\b\d+(?:\.\d+)?\b/y, 'num'],
+          [/[(),;]/y, 'op']
+        ],
+        puml: [
+          [/@(?:startuml|enduml)\b/y, 'kw'],
+          [/"[^"\n]*"/y, 'str'],
+          [/\b(?:skinparam|hide|empty|members|abstract|class|interface|enum|package|as)\b/y, 'kw'],
+          [/\b(?:classAttributeIconSize)\b/y, 'type'],
+          [/<<[^>\n]*>>|«[^»\n]*»/y, 'type'],
+          [/(?:--\|>|\.\.\|>|<\|--|<\|\.\.|\*--|--\*|o--|--o|\.\.>|<\.\.|-->|<--|--|\.\.)/y, 'op'],
+          [/\b\d+\b/y, 'num']
+        ],
+        mmd: [
+          [/%%[^\n]*/y, 'com'],
+          [/\b(?:classDiagram|class|direction)\b/y, 'kw'],
+          [/<<[^>\n]*>>|«[^»\n]*»/y, 'type'],
+          [/"[^"\n]*"/y, 'str'],
+          [/(?:<\|--|<\|\.\.|--\|>|\.\.\|>|\*--|o--|-->|\.\.>|--|\.\.)/y, 'op']
+        ]
+      };
+
+      function escHtml(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+      function highlight(text, rules) {
+        var out = '';
+        var plain = '';
+        var i = 0;
+        while (i < text.length) {
+          var hit = null;
+          for (var r = 0; r < rules.length; r++) {
+            rules[r][0].lastIndex = i;
+            var m = rules[r][0].exec(text);
+            if (m && m[0].length) { hit = [m[0], rules[r][1]]; break; }
+          }
+          if (hit) {
+            if (plain) { out += escHtml(plain); plain = ''; }
+            out += '<span class="syn-' + hit[1] + '">' + escHtml(hit[0]) + '</span>';
+            i += hit[0].length;
+          } else {
+            plain += text[i];
+            i++;
+          }
+        }
+        if (plain) out += escHtml(plain);
+        return out;
+      }
+
+      document.querySelectorAll('code[data-syntax]').forEach(function (el) {
+        var rules = SYN_RULES[el.getAttribute('data-syntax')];
+        if (rules) el.innerHTML = highlight(el.textContent, rules);
+      });
+
+      /* ===================== Diagram source: PlantUML / Mermaid, code / preview ===================== */
+
+      var diagSec = document.getElementById('plantuml');
+      var MMD_URL = 'https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js';
+      var MMD_SRI = 'sha384-WmdflGW9aGfoBdHc4rRyWzYuAjEmDwMdGdiPNacbwfGKxBW/SO6guzuQ76qjnSlr';
+      var mmdLoading = null;
+      var mmdSeq = 0;
+
+      function loadMermaid() {
+        if (window.mermaid) return Promise.resolve(window.mermaid);
+        if (mmdLoading) return mmdLoading;
+        mmdLoading = new Promise(function (resolve, reject) {
+          var sc = document.createElement('script');
+          sc.src = MMD_URL;
+          sc.integrity = MMD_SRI;
+          sc.crossOrigin = 'anonymous';
+          sc.referrerPolicy = 'no-referrer';
+          sc.onload = function () { window.mermaid ? resolve(window.mermaid) : reject(new Error('no mermaid')); };
+          sc.onerror = function () { mmdLoading = null; reject(new Error('load failed')); };
+          document.head.appendChild(sc);
+        });
+        return mmdLoading;
+      }
+
+      function renderMermaidPreview() {
+        if (!diagSec || diagSec.getAttribute('data-dl') !== 'mmd' || diagSec.getAttribute('data-view') !== 'preview') return;
+        var out = document.getElementById('mmd-out');
+        var status = document.getElementById('mmd-status');
+        var L = currentLang();
+        var key = currentDomain() + '|' + document.documentElement.getAttribute('data-theme');
+        if (out.getAttribute('data-key') === key && out.innerHTML) return;
+        status.textContent = L === 'en' ? 'Rendering…' : 'Рендер…';
+        var srcId = currentDomain() === 'bank' ? 'mmd-src-bank' : 'mmd-src';
+        var text = document.getElementById(srcId).textContent;
+        loadMermaid().then(function (m) {
+          m.initialize({
+            startOnLoad: false,
+            securityLevel: 'strict',
+            theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default',
+            fontFamily: 'Ubuntu, -apple-system, sans-serif'
+          });
+          mmdSeq += 1;
+          return m.render('mmd-svg-' + mmdSeq, text);
+        }).then(function (res) {
+          out.innerHTML = res.svg;
+          out.setAttribute('data-key', key);
+          status.textContent = '';
+        }).catch(function () {
+          out.innerHTML = '';
+          out.removeAttribute('data-key');
+          status.textContent = L === 'en'
+            ? 'Could not load Mermaid (no internet or the CDN is blocked). The code on the Code tab is still valid.'
+            : 'Не вдалось завантажити Mermaid (немає інтернету або CDN заблоковано). Код на вкладці «Код» робочий.';
+        });
+      }
+
+      function setDiag(attr, val) {
+        if (!diagSec) return;
+        diagSec.setAttribute(attr, val);
+        var sel = attr === 'data-dl' ? '[data-set-dl]' : '[data-set-view]';
+        diagSec.querySelectorAll(sel).forEach(function (b) {
+          var v = b.getAttribute(attr === 'data-dl' ? 'data-set-dl' : 'data-set-view');
+          b.setAttribute('aria-pressed', v === val ? 'true' : 'false');
+        });
+        renderMermaidPreview();
+      }
+
+      if (diagSec) {
+        diagSec.addEventListener('click', function (e) {
+          var b = e.target.closest('[data-set-dl], [data-set-view]');
+          if (!b) return;
+          if (b.hasAttribute('data-set-dl')) setDiag('data-dl', b.getAttribute('data-set-dl'));
+          else setDiag('data-view', b.getAttribute('data-set-view'));
+        });
+      }
 
       renderDynamicSections();
 
